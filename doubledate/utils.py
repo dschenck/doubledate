@@ -1,6 +1,5 @@
 import calendar
 import datetime
-import pandas as pd
 import dateutil.parser
 
 import doubledate.constants as constants
