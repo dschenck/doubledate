@@ -37,7 +37,7 @@ Using doubledate is also easy
 
 Documentation
 -------------------------------------
-Complete documentation for doubledate is available at http://read-the-docs/doubledate
+Complete documentation for doubledate is available at https://doubledate.readthedocs.io
 
 
 .. toctree::
