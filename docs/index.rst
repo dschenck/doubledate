@@ -45,4 +45,4 @@ Complete documentation for doubledate is available at https://doubledate.readthe
    :caption: Contents
 
    source/installation
-   source/API
+   source/API/index
