@@ -433,6 +433,69 @@ class Calendar:
         """
         return self.groupby(grouper)
 
+    def split(cdr, frequency, on=0):
+        """
+        Splits the calendar in subcalendars at the given frequency and on the given index, 
+        assuming that the passed index is the first date of each period. 
+
+        Arguments
+        ---------------
+        frequency : str
+            one of 'month', 'quarter', 'trimester', 'semester' or 'year
+        on : int
+            one of 0...27 or -1...-27
+
+        Returns
+        ---------------
+        subcalendars : Grouper
+            the subcalendars
+        """
+        if frequency == "month": 
+            if on >= 0: 
+                return self.groupby(lambda date: 
+                                utils.som(date) if self.daysfrom("month-start", asof=date) < on 
+                                else utils.som(date, 1))
+            else: 
+                return self.groupby(lambda date: 
+                                utils.eom(date, -1) if self.daysto("month-end", asof=date) >= abs(on)
+                                else utils.eom(date))
+        if frequency == "quarter":
+            if on >= 0: 
+                return self.groupby(lambda date: 
+                                utils.soq(date) if self.daysfrom("quarter-start", asof=date) < on 
+                                else utils.soq(date, 1))
+            else: 
+                return self.groupby(lambda date: 
+                                utils.eoq(date, -1) if self.daysto("quarter-end", asof=date) >= abs(on)
+                                else utils.eoq(date))
+        if frequency == "trimester":
+            if on >= 0: 
+                return self.groupby(lambda date: 
+                                utils.sot(date) if self.daysfrom("trimester-start", asof=date) < on 
+                                else utils.sot(date, 1))
+            else: 
+                return self.groupby(lambda date: 
+                                utils.eot(date, -1) if self.daysto("trimester-end", asof=date) >= abs(on)
+                                else utils.eot(date))
+        if frequency == "semester":
+            if on >= 0: 
+                return self.groupby(lambda date: 
+                                utils.sos(date) if self.daysfrom("semester-start", asof=date) < on 
+                                else utils.sos(date, 1))
+            else: 
+                return self.groupby(lambda date: 
+                                utils.eos(date, -1) if self.daysto("semester-end", asof=date) >= abs(on)
+                                else utils.eos(date))
+        if frequency == "year":
+            if on >= 0: 
+                return self.groupby(lambda date: 
+                                utils.soy(date) if self.daysfrom("year-start", asof=date) < on 
+                                else utils.soy(date, 1))
+            else: 
+                return self.groupby(lambda date: 
+                                utils.eoy(date, -1) if self.daysto("year-end", asof=date) >= abs(on)
+                                else utils.eoy(date))
+
     def fa(self, date, default=constants.RAISE):
         """
         Returns the first date after ("first-after", or "fa")
