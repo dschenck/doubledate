@@ -205,6 +205,42 @@ class TestUtils(unittest.TestCase):
             datetime.date(2019, 12, 31)
         )
 
+    def test_sot(self):
+        self.assertEqual(
+            utils.sot(datetime.date(2019,11,4)), 
+            datetime.date(2019,9,1)
+        )
+        self.assertEqual(
+            utils.sot(datetime.date(2019,11,4), 0), 
+            datetime.date(2019,9,1)
+        )
+        self.assertEqual(
+            utils.sot(datetime.date(2019,11,4), 1),
+            datetime.date(2020,1,1)
+        )
+        self.assertEqual(
+            utils.sot(datetime.date(2019,11,4), -1),
+            datetime.date(2019,5,1)
+        )
+
+    def test_eot(self):
+        self.assertEqual(
+            utils.eot(datetime.date(2019,11,4)), 
+            datetime.date(2019,12,31)
+        )
+        self.assertEqual(
+            utils.eot(datetime.date(2019,11,4), 0), 
+            datetime.date(2019,12,31)
+        )
+        self.assertEqual(
+            utils.eot(datetime.date(2019,11,4), 1),
+            datetime.date(2020,4,30)
+        )
+        self.assertEqual(
+            utils.eot(datetime.date(2019,11,4), -1),
+            datetime.date(2019,8,31)
+        )
+
     def test_sos(self):
         self.assertEqual(
             utils.sos(datetime.date(2019,11,4)), 

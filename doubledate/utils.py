@@ -152,6 +152,24 @@ def eoq(date, offset=0):
         year=((date.month - 1) + date.year * 12 + 3 * offset) // 12, 
         month=3*(((date.month - 1)//3 + offset) % 4 + 1),
         day=1))
+        
+def eot(date, offset=0):
+    """
+    Returns the end of the calendar trimester, i.e. one of 
+    30 April, 31 August or 31 December
+    """
+    return eom(date.replace(
+        year=((date.month - 1) + date.year * 12 + 4 * offset) // 12, 
+        month=4*(((date.month - 1)//4 + offset) % 3 + 1),
+        day=1
+    ))
+
+def sot(date, offset=0):
+    """
+    Returns the first date of the calendar trimester, i.e. one of
+    1 January, 1 May or 1 September
+    """ 
+    return (eot(date, offset) - datetime.timedelta(3 * 31 + 1)).replace(day=1)
 
 def eos(date, offset=0):
     """
@@ -207,6 +225,8 @@ def floor(date, frequency):
         return soy(date)
     if frequency == "H": 
         return sos(date)
+    if frequency == "T":
+        return sot(date)
     if frequency == "Q":
         return soq(date)
     if frequency == "M":
@@ -241,6 +261,8 @@ def ceil(date, frequency):
         return eoy(date)
     if frequency == "H": 
         return eos(date)
+    if frequency == "T":
+        return eot(date)
     if frequency == "Q":
         return eoq(date)
     if frequency == "M":
