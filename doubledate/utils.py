@@ -152,7 +152,7 @@ def eoq(date, offset=0):
         year=((date.month - 1) + date.year * 12 + 3 * offset) // 12, 
         month=3*(((date.month - 1)//3 + offset) % 4 + 1),
         day=1))
-        
+
 def eot(date, offset=0):
     """
     Returns the end of the calendar trimester, i.e. one of 
@@ -498,7 +498,7 @@ class dayof:
         Returns a dictionary mapping each date to its position
         """
         if not hasattr(self, "_mapping"):
-            self._mapping, count = {}, 0
+            self._mapping = {}
             for i, date in enumerate(self.dates):
                 if i == 0: 
                     end = ceil(date, self.frequency)
