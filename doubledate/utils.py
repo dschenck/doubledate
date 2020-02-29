@@ -213,7 +213,7 @@ def floor(date, frequency):
         return som(date)
     if frequency[0] == "W":
         if len(frequency) > 1: 
-            return sow(date, weekday=frequency[-3])
+            return sow(date, weekday=frequency[-3:])
         return sow(date)
     raise ValueError(f"Unrecognized frequency {frequency}")
 
@@ -247,7 +247,7 @@ def ceil(date, frequency):
         return eom(date)
     if frequency[0] == "W":
         if len(frequency) > 1: 
-            return eow(date, weekday=frequency[-3])
+            return eow(date, weekday=frequency[-3:])
         return eow(date)
     raise ValueError(f"Unrecognized frequency {frequency}")
 
