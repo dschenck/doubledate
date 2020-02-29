@@ -408,3 +408,89 @@ def offset(date, days=None, weekdays=None, weeks=None, months=None, years=None,
         if to == "EOY": 
             return eoy(date, 0)
         raise ValueError(f"to should be one of MON,...,SUN or one of EOM,EOQ,EOS,EOY; received {to}")
+
+class dayof:
+    FREQUENCIES = ["Y","H","T","Q","M","W",
+                   "W-MON","W-TUE","W-WED","W-THU","W-FRI","W-SAT","W-SUN"]
+    
+    def __new__(cls, dates, frequency, base=1):
+        if frequency not in dayof.FREQUENCIES:
+            raise ValueError(f"expected frequency to be one of {','.join(dayof.FREQUENCIES)}, \
+                             received {frequency}")
+        if isinstance(dates, (datetime.date, datetime.datetime)): 
+            return (dates - floor(dates, frequency)).days + base
+        return super().__new__(cls)
+        
+    def __init__(self, dates, frequency, base=1):
+        """
+        Returns an efficient iterator that yields the position of each date 
+        in a given frequency. 
+
+        Arguments
+        ------------
+        dates : datetime, iterable
+            either a date or an iterable of dates
+        frequency : str
+            one of Y, H, T, Q, M, W, W-MON,W-TUE,W-WED,W-THU,W-FRI,W-SAT,W-SUN
+        base : int, defaults to 1
+            whether the first date of the frequency should have value 0 or 1
+
+        Examples
+        ------------
+        >>> dayof(datetime.date(2020,2,29), "M")
+        29
+        >>> dayof(datetime.date(2020,2,29), "Q")
+        60
+        >>> dayof(datetime.date(2020,2,29), "W-THU") #Saturday
+        3
+
+        >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
+        >>> for date, position in zip(dates, dayof(dates, "M")):
+            print(position, date)
+        2020-01-02, 1
+        2020-01-03, 2
+        ...
+        2020-02-29,27
+        2020-03-02,1
+        ...
+        2020-03-30,27
+
+        >>> daysof(dates, "Q")[datetime.date(2020,3,30)]
+        81
+
+        Notes
+        ------------
+        If the first argument is a date, it simply returns the 1-based position
+        of the date in the given frequency (e.q. month, quarter).
+
+        The list of dates is assumed to be sorted chronologically (from oldest to 
+        most recent). 
+        """
+        self.dates = dates
+        self.frequency = frequency
+        self.base = base
+        
+    @property
+    def mapping(self):
+        """
+        Returns a dictionary mapping each date to its position
+        """
+        if not hasattr(self, "_mapping"):
+            self._mapping, count = {}, 0
+            for i, date in enumerate(self.dates):
+                if i == 0: 
+                    end = ceil(date, self.frequency)
+                    counter = self.base
+                elif date > end: 
+                    end = ceil(date, self.frequency)
+                    counter = self.base
+                else: 
+                    counter += 1
+                self._mapping[date] = counter
+        return self._mapping
+            
+    def __iter__(self):
+        return iter(self.mapping.values())
+    
+    def __getitem__(self, date):
+        return self.mapping[date]
