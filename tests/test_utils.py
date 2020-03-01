@@ -435,3 +435,89 @@ class TestUtils(unittest.TestCase):
                 pass
         except Exception as e: 
             self.fail(f"Failed to iterate over dayof ({e})")
+
+    def test_daysfrom(self):
+        self.assertEqual(
+            utils.daysfrom(datetime.date(2020,2,29),"MS"),
+            28
+        )
+        self.assertEqual(
+            utils.daysfrom(datetime.date(2020,2,29),"QS"),
+            59
+        )
+        self.assertEqual(
+            utils.daysfrom(datetime.date(2020,2,29),"YS"),
+            59
+        )
+
+        dates = load()
+
+        self.assertEqual(
+            utils.daysfrom(dates, "MS")[datetime.date(2014,11,17)],
+            0
+        )
+        self.assertEqual(
+            utils.daysfrom(dates, "MS")[datetime.date(2014,11,17)],
+            0
+        )
+        self.assertEqual(
+            utils.daysfrom(dates, "MS")[datetime.date(2014,12,1)],
+            0
+        )
+        self.assertEqual(
+            utils.daysfrom(dates, "MS")[datetime.date(2014,12,1)],
+            0
+        )
+        self.assertEqual(
+            utils.daysfrom(dates, "MS")[datetime.date(2016,7,29)],
+            19
+        )
+        self.assertEqual(
+            utils.daysfrom(dates, "YS")[datetime.date(2019,11,15)],
+            221
+        )
+
+        try:
+            for date, position in zip(dates, utils.daysfrom(dates, "QS")):
+                pass
+        except Exception as e: 
+            self.fail(f"Failed to iterate over dayof ({e})")
+
+    def test_daysto(self):
+        self.assertEqual(
+            utils.daysto(datetime.date(2020,2,29),"ME"),
+            0
+        )
+        self.assertEqual(
+            utils.daysto(datetime.date(2020,2,29),"QE"),
+            31
+        )
+        self.assertEqual(
+            utils.daysto(datetime.date(2020,2,29),"YE"),
+            306
+        )
+
+        dates = load()
+
+        self.assertEqual(
+            utils.daysto(dates, "ME")[datetime.date(2014,11,17)],
+            8
+        )
+        self.assertEqual(
+            utils.daysto(dates, "ME")[datetime.date(2014,12,1)],
+            21
+        )
+        self.assertEqual(
+            utils.daysto(dates, "ME")[datetime.date(2016,7,29)],
+            0
+        )
+        self.assertEqual(
+            utils.daysto(dates, "YE")[datetime.date(2019,11,15)],
+            0
+        )
+
+        try:
+            for date, position in zip(dates, utils.daysto(dates, "QE")):
+                pass
+        except Exception as e: 
+            self.fail(f"Failed to iterate over dayof ({e})")

@@ -8,6 +8,14 @@ SUN = "SUN"
 
 WEEKDAYS = [MON,TUE,WED,THU,FRI,SAT,SUN]
 
+Y = "Y"
+S = "H"
+H = "H"
+T = "T"
+Q = "Q"
+M = "M"
+W = "W"
+
 SOW = "WS"
 EOW = "WE"
 SOM = "MS"

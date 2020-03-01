@@ -516,3 +516,152 @@ class dayof:
     
     def __getitem__(self, date):
         return self.mapping[date]
+
+class daysfrom: 
+    FREQUENCIES = ["YS","HS","TS","QS","MS","WS"]
+    
+    def __new__(cls, dates, frequency):
+        if frequency not in daysfrom.FREQUENCIES:
+            raise ValueError(f"expected frequency to be one of {','.join(daysfrom.FREQUENCIES)}, \
+                             received {frequency}")
+        if isinstance(dates, (datetime.date, datetime.datetime)): 
+            return (dates - floor(dates, frequency[0])).days
+        return super().__new__(cls)
+
+    def __init__(self, dates, frequency): 
+        """
+        Returns an efficient iterator that yields the number of days since the  
+        start of a given frequency. 
+
+        Arguments
+        ------------
+        dates : datetime, iterable
+            either a date or an iterable of dates
+        frequency : str
+            one of YS, HS, TS, QS, MS, WS
+
+        Examples
+        ------------
+        >>> daysfrom(datetime.date(2020,2,29), "MS")
+        28
+        >>> daysfrom(datetime.date(2020,2,29), "QS")
+        59
+
+        >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
+        >>> for date, position in zip(dates, daysfrom(dates, "MS")):
+               print(position, date)
+        2020-01-02, 0
+        2020-01-03, 1
+        ...
+        2020-02-29,26
+        2020-03-02,0
+        ...
+        2020-03-30,26
+
+        Notes
+        ------------
+        If given a date (rather than a list of dates), the function returns the number of days to the 
+        end of the calendar frequency. 
+        
+        The list of dates is assumed to be sorted chronologically (from oldest to 
+        most recent), i.e. period changes are detected by comparing two adjacent dates
+        """
+        self.dates     = dates
+        self.frequency = frequency
+        
+    @property
+    def mapping(self):
+        if not hasattr(self, "_mapping"):
+            self._mapping = {}
+            for i, date in enumerate(self.dates):
+                if i == 0: 
+                    end = ceil(date, self.frequency[0])
+                    counter = 0
+                elif date > end: 
+                    end = ceil(date, self.frequency[0])
+                    counter = 0
+                else: 
+                    counter += 1
+                self._mapping[date] = counter
+        return self._mapping
+    
+    def __iter__(self):
+        return iter(self.mapping.values())
+    
+    def __getitem__(self, date):
+        return self.mapping[date]
+
+class daysto: 
+    FREQUENCIES = ["YE","HE","TE","QE","ME","WE"]
+    
+    def __new__(cls, dates, frequency):
+        if frequency not in daysto.FREQUENCIES:
+            raise ValueError(f"expected frequency to be one of {','.join(daysto.FREQUENCIES)}, \
+                             received {frequency}")
+        if isinstance(dates, (datetime.date, datetime.datetime)): 
+            return (ceil(dates, frequency[0])-dates).days
+        return super().__new__(cls)
+    
+    def __init__(self, dates, frequency): 
+        """
+        Returns an efficient iterator that yields the number of days to the  
+        end of a given frequency. 
+
+        Arguments
+        ------------
+        dates : datetime, iterable
+            either a date or an iterable of dates
+        frequency : str
+            one of YE, HE, TE, QE, ME, WE
+
+        Examples
+        ------------
+        >>> daysto(datetime.date(2020,2,29), "ME")
+        0
+        >>> daysto(datetime.date(2020,2,29), "QS")
+        31
+
+        >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
+        >>> for date, position in zip(dates, daysto(dates, "ME")):
+               print(position, date)
+        2020-01-02, 27
+        2020-01-03, 26
+        ...
+        2020-02-29,0
+        2020-03-02,26
+        ...
+        2020-03-30,0
+
+        Notes
+        ------------
+        If given a date (rather than a list of dates), the function returns the number of days to the 
+        end of the calendar frequency. 
+
+        The list of dates is assumed to be sorted chronologically (from oldest to 
+        most recent), i.e. period changes are detected by comparing two adjacent dates
+        """
+        self.dates     = dates
+        self.frequency = frequency
+        
+    @property
+    def mapping(self):
+        if not hasattr(self, "_mapping"):
+            self._mapping = {}
+            for i, date in enumerate(self.dates[::-1]):
+                if i == 0: 
+                    start = floor(date, self.frequency[0])
+                    counter = 0
+                elif date < start: 
+                    start = floor(date, self.frequency[0])
+                    counter = 0
+                else: 
+                    counter += 1
+                self._mapping[date] = counter
+            self._mapping = {key:value for key, value in reversed(list(self._mapping.items()))}
+        return self._mapping
+    
+    def __iter__(self):
+        return iter(self.mapping.values())
+    
+    def __getitem__(self, date):
+        return self.mapping[date]
