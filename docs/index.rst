@@ -46,3 +46,4 @@ Complete documentation for doubledate is available at https://doubledate.readthe
 
    source/installation
    source/API/index
+   source/changelog

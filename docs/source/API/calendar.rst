@@ -1,5 +1,8 @@
 Calendar
 =====================================
+
+Usage
+----------------------------------
 The calendar class allows to easily operate on a list of dates. It is built on top of a sortedset for efficiency. 
 ::
 
@@ -7,7 +10,7 @@ The calendar class allows to easily operate on a list of dates. It is built on t
     >>> import doubledate as dtwo
 
     #you can load up your own dates from a backend, API, file...
-    >>> calendar = Calendar([datetime.date(2019,1,1) + datetime.timedelta(i) for i in range(365)])
+    >>> calendar = dtwo.Calendar([datetime.date(2019,1,1) + datetime.timedelta(i) for i in range(365)])
 
     #isolate all the week-end days
     >>> weekends = calendar.weekends()
