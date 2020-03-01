@@ -4,7 +4,6 @@ import os
 import pandas as pd
 
 import doubledate.utils as utils
-import doubledate.internals as internals
 
 def load():
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "calendar.CSV"), "r") as f: 
@@ -294,11 +293,6 @@ class TestUtils(unittest.TestCase):
             utils.eoy(datetime.date(2019,11,4), -1),
             datetime.date(2018,12,31)
         )
-
-    def test_isdatelike(self):
-        self.assertTrue(internals.isdatelike(datetime.date.today()))
-        self.assertTrue(internals.isdatelike(datetime.datetime.now()))
-        self.assertTrue(internals.isdatelike(pd.Timestamp("2016-05-19")))
 
     def test_parse(self):
         self.assertTrue(

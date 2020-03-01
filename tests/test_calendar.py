@@ -4,7 +4,6 @@ import os
 import pandas as pd
 
 import doubledate.utils as utils
-import doubledate.internals as internals
 
 from doubledate import Calendar
 

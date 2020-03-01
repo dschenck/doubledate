@@ -24,11 +24,14 @@ def trimester(date, *, base=1):
 
     Examples
     ------------
-    >>> trimester(datetime.date(2020, 1, 10))
+    >>> trimester(datetime.date(2020, 5, 10))
+    2
+
+    >>> trimester(datetime.date(2020, 5, 10), base=0)
     1
 
-    >>> trimester(datetime.date(2020, 1, 10), base=0)
-    0
+    >>> trimester(datetime.date(2020, 9, 10))
+    3
     """
     return (date.month - 1)//4 + base
 
@@ -432,6 +435,55 @@ def offset(date, days=None, weekdays=None, weeks=None, months=None, years=None,
         raise ValueError(f"to should be one of MON,...,SUN or one of EOM,EOQ,EOS,EOY; received {to}")
 
 class dayof:
+    """
+    Returns an efficient iterator that yields the position of each date 
+    in a given frequency. 
+
+    Arguments
+    ------------
+    dates : datetime, iterable
+        either a date or an iterable of dates
+    frequency : str
+        one of Y, H, T, Q, M, W, W-MON,W-TUE,W-WED,W-THU,W-FRI,W-SAT,W-SUN
+    base : int, defaults to 1
+        whether the first date of the frequency should have value 0 or 1
+
+    Examples
+    ------------
+    :: 
+    
+        >>> dayof(datetime.date(2020,2,29), "M")
+        29
+        >>> dayof(datetime.date(2020,2,29), "Q")
+        60
+        >>> dayof(datetime.date(2020,2,29), "W-THU") #Saturday
+        3
+
+        >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
+        >>> for date, position in zip(dates, dayof(dates, "M")):
+        ...     print(date, position)
+        2020-01-02, 1
+        2020-01-03, 2
+        ...
+        2020-02-29,27
+        2020-03-02,1
+        ...
+        2020-03-30,27
+
+        >>> dayof(dates, "Q")[datetime.date(2020,3,30)]
+        81
+
+    Notes
+    ------------
+    .. warning::
+        If the first argument is a date, it simply returns the 1-based position
+        of the date in the given frequency (e.q. month, quarter).
+
+    .. note:: 
+        The list of dates is assumed to be sorted chronologically (from oldest to 
+        most recent). 
+    """
+
     FREQUENCIES = ["Y","H","T","Q","M","W",
                    "W-MON","W-TUE","W-WED","W-THU","W-FRI","W-SAT","W-SUN"]
     
@@ -444,50 +496,6 @@ class dayof:
         return super().__new__(cls)
         
     def __init__(self, dates, frequency, base=1):
-        """
-        Returns an efficient iterator that yields the position of each date 
-        in a given frequency. 
-
-        Arguments
-        ------------
-        dates : datetime, iterable
-            either a date or an iterable of dates
-        frequency : str
-            one of Y, H, T, Q, M, W, W-MON,W-TUE,W-WED,W-THU,W-FRI,W-SAT,W-SUN
-        base : int, defaults to 1
-            whether the first date of the frequency should have value 0 or 1
-
-        Examples
-        ------------
-        >>> dayof(datetime.date(2020,2,29), "M")
-        29
-        >>> dayof(datetime.date(2020,2,29), "Q")
-        60
-        >>> dayof(datetime.date(2020,2,29), "W-THU") #Saturday
-        3
-
-        >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
-        >>> for date, position in zip(dates, dayof(dates, "M")):
-            print(position, date)
-        2020-01-02, 1
-        2020-01-03, 2
-        ...
-        2020-02-29,27
-        2020-03-02,1
-        ...
-        2020-03-30,27
-
-        >>> daysof(dates, "Q")[datetime.date(2020,3,30)]
-        81
-
-        Notes
-        ------------
-        If the first argument is a date, it simply returns the 1-based position
-        of the date in the given frequency (e.q. month, quarter).
-
-        The list of dates is assumed to be sorted chronologically (from oldest to 
-        most recent). 
-        """
         self.dates = dates
         self.frequency = frequency
         self.base = base
@@ -518,6 +526,48 @@ class dayof:
         return self.mapping[date]
 
 class daysfrom: 
+    """
+    Returns an efficient iterator that yields the number of days since the  
+    start of a given frequency. 
+
+    Arguments
+    ------------
+    dates : datetime, iterable
+        either a date or an iterable of dates
+    frequency : str
+        one of YS, HS, TS, QS, MS, WS
+
+    Examples
+    ------------
+    ::
+    
+        >>> daysfrom(datetime.date(2020,2,29), "MS")
+        28
+        >>> daysfrom(datetime.date(2020,2,29), "QS")
+        59
+
+        >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
+        >>> for date, position in zip(dates, daysfrom(dates, "MS")):
+        ...     print(date, position)
+        2020-01-02, 0
+        2020-01-03, 1
+        ...
+        2020-02-29,26
+        2020-03-02,0
+        ...
+        2020-03-30,26
+
+    Notes
+    ------------
+    .. warning:: 
+        If given a date (rather than a list of dates), the function returns the number of days from the 
+        start of the calendar frequency. 
+
+    .. note:: 
+        The list of dates is assumed to be sorted chronologically (from oldest to 
+        most recent), i.e. period changes are detected by comparing two adjacent dates
+    """
+
     FREQUENCIES = ["YS","HS","TS","QS","MS","WS"]
     
     def __new__(cls, dates, frequency):
@@ -529,48 +579,14 @@ class daysfrom:
         return super().__new__(cls)
 
     def __init__(self, dates, frequency): 
-        """
-        Returns an efficient iterator that yields the number of days since the  
-        start of a given frequency. 
-
-        Arguments
-        ------------
-        dates : datetime, iterable
-            either a date or an iterable of dates
-        frequency : str
-            one of YS, HS, TS, QS, MS, WS
-
-        Examples
-        ------------
-        >>> daysfrom(datetime.date(2020,2,29), "MS")
-        28
-        >>> daysfrom(datetime.date(2020,2,29), "QS")
-        59
-
-        >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
-        >>> for date, position in zip(dates, daysfrom(dates, "MS")):
-               print(position, date)
-        2020-01-02, 0
-        2020-01-03, 1
-        ...
-        2020-02-29,26
-        2020-03-02,0
-        ...
-        2020-03-30,26
-
-        Notes
-        ------------
-        If given a date (rather than a list of dates), the function returns the number of days to the 
-        end of the calendar frequency. 
-        
-        The list of dates is assumed to be sorted chronologically (from oldest to 
-        most recent), i.e. period changes are detected by comparing two adjacent dates
-        """
         self.dates     = dates
         self.frequency = frequency
         
     @property
     def mapping(self):
+        """
+        Returns a dictionary mapping each date to its position
+        """
         if not hasattr(self, "_mapping"):
             self._mapping = {}
             for i, date in enumerate(self.dates):
@@ -592,6 +608,48 @@ class daysfrom:
         return self.mapping[date]
 
 class daysto: 
+    """
+    Returns an efficient iterator that yields the number of days to the  
+    end of a given frequency. 
+
+    Arguments
+    ------------
+    dates : datetime, iterable
+        either a date or an iterable of dates
+    frequency : str
+        one of YE, HE, TE, QE, ME, WE
+
+    Examples
+    ------------
+    ::
+    
+        >>> daysto(datetime.date(2020,2,29), "ME")
+        0
+        >>> daysto(datetime.date(2020,2,29), "QS")
+        31
+
+        >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
+        >>> for date, position in zip(dates, daysto(dates, "ME")):
+        ...     print(date, position)
+        2020-01-02, 27
+        2020-01-03, 26
+        ...
+        2020-02-29,0
+        2020-03-02,26
+        ...
+        2020-03-30,0
+
+    Notes
+    ------------
+    .. warning:: 
+        If given a date (rather than a list of dates), the function returns the number of days to the 
+        end of the calendar frequency. 
+
+    .. note:: 
+        The list of dates is assumed to be sorted chronologically (from oldest to 
+        most recent), i.e. period changes are detected by comparing two adjacent dates
+    """
+
     FREQUENCIES = ["YE","HE","TE","QE","ME","WE"]
     
     def __new__(cls, dates, frequency):
@@ -603,48 +661,14 @@ class daysto:
         return super().__new__(cls)
     
     def __init__(self, dates, frequency): 
-        """
-        Returns an efficient iterator that yields the number of days to the  
-        end of a given frequency. 
-
-        Arguments
-        ------------
-        dates : datetime, iterable
-            either a date or an iterable of dates
-        frequency : str
-            one of YE, HE, TE, QE, ME, WE
-
-        Examples
-        ------------
-        >>> daysto(datetime.date(2020,2,29), "ME")
-        0
-        >>> daysto(datetime.date(2020,2,29), "QS")
-        31
-
-        >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
-        >>> for date, position in zip(dates, daysto(dates, "ME")):
-               print(position, date)
-        2020-01-02, 27
-        2020-01-03, 26
-        ...
-        2020-02-29,0
-        2020-03-02,26
-        ...
-        2020-03-30,0
-
-        Notes
-        ------------
-        If given a date (rather than a list of dates), the function returns the number of days to the 
-        end of the calendar frequency. 
-
-        The list of dates is assumed to be sorted chronologically (from oldest to 
-        most recent), i.e. period changes are detected by comparing two adjacent dates
-        """
         self.dates     = dates
         self.frequency = frequency
         
     @property
     def mapping(self):
+        """
+        Returns a dictionary mapping each date to its position
+        """
         if not hasattr(self, "_mapping"):
             self._mapping = {}
             for i, date in enumerate(self.dates[::-1]):

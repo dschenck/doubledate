@@ -6,11 +6,10 @@ import collections
 import datetime
 
 import doubledate.utils as utils
-import doubledate.internals as internals
 import doubledate.constants as constants
 
 class Calendar:
-    def __init__(self, dates=None, key=None):
+    def __init__(self, dates=None):
         """
         Creates a calendar using the optional dates iterable
 
@@ -21,7 +20,7 @@ class Calendar:
         """
         if dates is None: 
             dates = []
-        if not all([internals.isdatelike(item) for item in dates]):
+        if not all([isinstance(item, (datetime.date, datetime.datetime)) for item in dates]):
             raise TypeError("Calendar expected an iterable of date objects")
         self.__dates__ = sortedcontainers.SortedSet([date for date in dates])
     
@@ -100,9 +99,9 @@ class Calendar:
         if isinstance(value, int):
             return self.__dates__.__getitem__(value)
         elif isinstance(value, slice):
-            if internals.isdatelike(value.start):
+            if isinstance(value.start, (datetime.date, datetime.datetime)):
                 value = slice(self.__dates__.bisect_left(value.start), value.stop)
-            if internals.isdatelike(value.stop):
+            if isinstance(value.stop, (datetime.date, datetime.datetime)):
                 value = slice(value.start, self.__dates__.bisect_right(value.stop))
             return Calendar(self.__dates__.__getitem__(value))
         raise KeyError("Invalid index or slice object")
@@ -111,7 +110,7 @@ class Calendar:
         """
         Alias for union
         """
-        if internals.isdatelike(other): 
+        if isinstance(other, (datetime.date, datetime.datetime)): 
             return Calendar(self).union(Calendar([other]))
         return Calendar(self).union(Calendar(other))
 
@@ -294,7 +293,7 @@ class Calendar:
             raise ValueError("expected an asof date, None given")
         if asof not in self: 
             raise ValueError(f"the given as-of date ({asof}) is not in the calendar")
-        if internals.isdatelike(start): 
+        if isinstance(start, (datetime.date, datetime.datetime)): 
             if start not in self: 
                 raise ValueError(f"the given starting date ({start}) is not in the calendar")
             return len(self[start:asof]) - 1
@@ -324,7 +323,7 @@ class Calendar:
             raise ValueError("expected an asof date, None given")
         if asof not in self: 
             raise ValueError(f"the given as-of date ({asof}) is not in the calendar")
-        if internals.isdatelike(to): 
+        if isinstance(to, (datetime.date, datetime.datetime)): 
             if to not in self: 
                 raise ValueError(f"the given target date ({to}) is not in the calendar")
             return len(self[asof:to]) - 1
@@ -616,7 +615,7 @@ class Calendar:
         if not callable(func): 
             raise ValueError("Expected func to be a callable function")
         mapped = [func(date) for date in self]
-        if all([internals.isdatelike(m) for m in mapped]): 
+        if all([isinstance(m, (datetime.date, datetime.datetime)) for m in mapped]): 
             return Calendar(mapped)
         return mapped
 
@@ -783,7 +782,7 @@ class Grouper:
         """
         if isinstance(value, int):
             return self.calendars[value]
-        if internals.isdatelike(value):
+        if isinstance(value, (datetime.date, datetime.datetime)):
             return self[self.index(value)]
         if isinstance(value, slice):
             return Calendar().union(*self.calendars[value])
@@ -792,7 +791,7 @@ class Grouper:
         """
         Returns the 0-based index of the calendar containing the date
         """
-        if internals.isdatelike(date):
+        if isinstance(date, (datetime.date, datetime.datetime)):
             for i, calendar in enumerate(self.calendars):
                 if date in calendar: 
                     return i
