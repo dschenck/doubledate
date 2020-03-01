@@ -100,7 +100,8 @@ def eow(date, offset=0, weekday="SUN"):
 
 def som(date, offset=0):
     """
-    Returns the start of the month some offset months from the date
+    Returns the first date of the month for the given date, then optionally 
+    offsets it by :code:`offset` months. 
 
     Example
     ------------
@@ -121,7 +122,8 @@ def som(date, offset=0):
 
 def eom(date, offset=0):
     """
-    Returns the end of month some given offset months away, emulating Excel's EOM function
+    Returns the last date of month for the given date, then optionally 
+    offsets it by :code:`offset` months, emulating Excel's EOM function
 
     Examples
     ------------
@@ -143,13 +145,32 @@ def soq(date, offset=0):
     """
     Returns the first date of the quarter, i.e. one of 
     1 January, 1 April, 1 July or 1 October
+
+    Examples
+    ------------
+    >>> today = datetime.date(2020, 1, 15)
+    >>> soq(today):
+    datetime.date(2020,1,1)
+
+    >>> soq(today, 1)
+    datetime.date(2020,4,1)
     """
     return (eoq(date, offset) - datetime.timedelta(2 * 31 + 1)).replace(day=1)
 
 def eoq(date, offset=0):
     """
     Returns the end of the calendar quarter, i.e. one of
-    31 March, 30 June, 30 September or 31 December
+    31 March, 30 June, 30 September or 31 December, then 
+    optionally offsets it by :code:`offset` quarters
+
+    Examples
+    ------------
+    >>> today = datetime.date(2020, 1, 15)
+    >>> eoq(today):
+    datetime.date(2020,3,31)
+
+    >>> soq(today, 1)
+    datetime.date(2020,6,30)
     """
     return eom(date.replace(
         year=((date.month - 1) + date.year * 12 + 3 * offset) // 12, 
@@ -159,7 +180,17 @@ def eoq(date, offset=0):
 def eot(date, offset=0):
     """
     Returns the end of the calendar trimester, i.e. one of 
-    30 April, 31 August or 31 December
+    30 April, 31 August or 31 December, then optionally offsets it 
+    by :code:`offset` quarters
+
+    Examples
+    ------------
+    >>> today = datetime.date(2020, 1, 15)
+    >>> eot(today):
+    datetime.date(2020,4,30)
+
+    >>> eot(today, 1)
+    datetime.date(2020,8,31)
     """
     return eom(date.replace(
         year=((date.month - 1) + date.year * 12 + 4 * offset) // 12, 
@@ -170,14 +201,16 @@ def eot(date, offset=0):
 def sot(date, offset=0):
     """
     Returns the first date of the calendar trimester, i.e. one of
-    1 January, 1 May or 1 September
+    1 January, 1 May or 1 September, then optionally offsets it 
+    by :code:`offset` quarters
     """ 
     return (eot(date, offset) - datetime.timedelta(3 * 31 + 1)).replace(day=1)
 
 def eos(date, offset=0):
     """
     Returns the end of the calendar semester, i.e. one of 
-    30 June or 31 December
+    30 June or 31 December, then optionally offsets it 
+    by :code:`offset` semesters
     """
     return eom(date.replace(
         year=((date.month - 1) + date.year * 12 + 6 * offset) // 12, 
@@ -188,7 +221,8 @@ def eos(date, offset=0):
 def sos(date, offset=0):
     """
     Returns the first date of the calendar semester, i.e. one of
-    1 January or 1 July
+    1 January or 1 July, then optionally offsets it 
+    by :code:`offset` semesters
     """ 
     return (eos(date, offset) - datetime.timedelta(5 * 31 + 1)).replace(day=1)
 
@@ -206,7 +240,8 @@ def eoy(date, offset=0):
 
 def floor(date, frequency):
     """
-    Returns the start of the frequency (e.g. quarter) for the date passed as first argument
+    Returns the first date of the frequency (e.g. quarter) 
+    for the date passed as first argument. 
 
     Arguments
     ------------
@@ -302,53 +337,103 @@ def parse(date, dayfirst=True, yearfirst=True, fuzzy=True):
             yearfirst=yearfirst, fuzzy=fuzzy).date()
 
 def offset(date, days=None, weekdays=None, weeks=None, months=None, years=None, 
-           to=None, handle=lambda eom, days: 0): 
+           to=None, handle=0): 
     """
     Returns the date offset either by a number of frequencies 
-    or else to the nearest frequency
+    or else to the nearest frequency. Only one of the :code:`days`, :code:`weekdays`,
+    :code:`weeks`, :code:`months`, :code:`years` or :code:`to` must be provided.
     
     Arguments
     ------------
     date : datetime-like
-        the date to offset
+        the reference date to offset
     days : int, optional
-        the number of days to offset the date by
-        shorthand notation for date + datetime.timedelta(days=days)
+        to offset the reference date by *n* calendar days
     weekdays : int, optional
-        the number of weekays to offset the date by; 
-        the given date to offset should be a weekday
+        to offset the reference date by *n* weekdays
     weeks : int, optional 
-        shorthand notation for days = 7 * weeks
+        to offset the reference date by *n* weeks
     months : int, optional 
-        the number of months to offset the date by
-        if the day does not exist in the target month, it will return 
-        the end-of-month date of the target month plus the number of days 
-        returned by the handle callback function, which by default is 0
+        to offset the reference date by *n* months. See notes below
+        on handling out-of-range dates (e.g. 31 Jan + 1m)
     years : int, optional
-        the number of years to offset the date by
-        if the day does not exist in the target month, it will return 
-        the end-of-month date of the target month plus the number of days 
-        returned by the handle callback function, which by default is 0
+        to offset the reference date by *n* months. See notes below 
+        if the reference date is 29 February
     to : str, optional
-        either the name of the nearest weekday to offset to
-        if the date is already the target weekday, it simply returns the date; 
-        otherwise it offsets forward to the nearest such weekday
-        or one of EOM, EOQ, EOS or EOY for, respectively, 
-        the end of the month, the end of the quarter, the end of the semester
-        or the end of the year
-        Note that EOW (end of week) can be reproduced by setting to="SUN" or
-        whichever weekday the end of the week refers to.  
+        to offset the reference date to a given period start or period end
     handle : int, function, optional
-        the number of days to add to the end-of-month of the target month in cases 
-        where the target month is too short for the offset date's day
-        can be either an integer or a callback (lambda) function which takes the 
-        end of the month and the number of days difference, and must return an integer
+        optional callback function (or integer) to customize the way out-of-range
+        dates are handled (e.g. 31 Jan + 1m). See note below
     
     Raises 
     ------------
     ValueError 
         on invalid arguments
         
+    Notes
+    ------------
+    When adding months or years, there may ambiguity as to what the function should
+    return when the "intended" target date is out-of-range. For example, 31 January + 1m 
+    should - in a perfect world - yield 31 February... which is out-of-range. 
+
+    By default, the function will handle these out-of-range cases by returning the last
+    calendar date in the target month (e.g. 28 February, or 29 February if the year is a
+    leap year). 
+    ::
+
+        >>> offset(datetime.date(2020, 1, 31), months=1)
+        datetime.date(2020, 2, 29)
+
+    You can can customize this behavior using the :code:`handle` argument, which can take 
+    either an integer or a callback function: 
+
+    - if given an integer (e.g. 1), the function adds that number of days to the end 
+      of target month (e.g. 28 February + 1 day is 1 March)
+
+    ::
+
+        >>> offset(datetime.date(2020, 1, 31), months=1, handle=0)
+        datetime.date(2020, 2, 29)
+
+        >>> offset(datetime.date(2020, 1, 31), months=1, handle=1)
+        datetime.date(2020, 3, 1)
+
+        >>> offset(datetime.date(2020, 1, 31), months=1, handle=2)
+        datetime.date(2020, 3, 2)
+
+        >>> offset(datetime.date(2020, 1, 31), months=1, handle=-1)
+        datetime.date(2020, 2, 28)
+
+        >>> offset(datetime.date(2020, 2, 29), years=1, handle=1)
+        datetime.date(2021, 3, 1)
+
+
+    - if given a callback function (e.g. lambda function), the function must accept the 
+      end of the month (e.g. 28 February) and the number of gap days between the "intended" 
+      target date (e.g. 31 February) and the most recent feasible date (29 February)
+      and return an integer (e.g. 1). The result of the callback function is then added to
+      end of the month. 
+
+    :: 
+
+        >>> offset(datetime.date(2020, 1, 31), months=1, handle=lambda eom, gap: 0)
+        datetime.date(2020, 2, 29)
+
+        >>> offset(datetime.date(2020, 1, 31), months=1, handle=lambda eom, gap: 1)
+        datetime.date(2020, 3, 1)
+
+        >>> offset(datetime.date(2020, 1, 31), months=1, handle=lambda eom, gap: 2)
+        datetime.date(2020, 3, 2)
+
+        >>> offset(datetime.date(2020, 1, 31), months=1, handle=lambda eom, gap: gap)
+        datetime.date(2020, 3, 2) #gap is 2 as 2020 is a leap year
+
+        >>> offset(datetime.date(2021, 1, 31), months=1, handle=lambda eom, gap: gap)
+        datetime.date(2020, 3, 3) #gap is 3 as 2021 is not a leap year
+
+        >>> offset(datetime.date(2020, 8, 31), months=1, handle=lambda eom, gap: gap)
+        datetime.date(2020, 10, 1) #gap is 1
+
     Examples
     ------------
     >>> today = datetime.date(2020, 1, 10)
@@ -373,17 +458,17 @@ def offset(date, days=None, weekdays=None, weeks=None, months=None, years=None,
     >>> offset(today, months=1)
     datetime.date(2020, 2, 10)
     
-    >>> monthend = datetime.date(2020, 1, 31)
-    >>> offset(monthend, months=1)
+    >>> jan31 = datetime.date(2020, 1, 31)
+    >>> offset(jan31, months=1)
     datetime.date(2020, 2, 29) #defaults to end of month
     
-    >>> offset(monthend, months=1, handle=1)
+    >>> offset(jan31, months=1, handle=1)
     datetime.date(2020, 3, 1)
     
-    >>> offset(monthend, months=1, handle=lambda eom, days: 1)
+    >>> offset(jan31, months=1, handle=lambda eom, days: 1)
     datetime.date(2020, 3, 1) #handle returns 1
     
-    >>> offset(monthend, months=1, handle=lambda eom, days: days)
+    >>> offset(jan31, months=1, handle=lambda eom, days: days)
     datetime.dte(2020, 3, 2) #handle returns the size of the gap
     """
     if sum(arg is not None for arg in [days, weekdays, weeks, months, years, to]) != 1: 
@@ -625,7 +710,7 @@ class daysto:
     
         >>> daysto(datetime.date(2020,2,29), "ME")
         0
-        >>> daysto(datetime.date(2020,2,29), "QS")
+        >>> daysto(datetime.date(2020,2,29), "QE")
         31
 
         >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]

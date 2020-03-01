@@ -18,6 +18,16 @@ doubledate comes with a 20+ utility functions allowing to easily compute the sta
     >>> dtwo.offset(datetime.date(2020, 3, 5), weekdays=3))
     datetime.date(2020, 3, 9) #3 weekdays after Thursday 5 March is Monday 9 March
 
+    >>> dtwo.dayof(datetime.date(2020,2,29), "Q")
+    60
+
+    >>> dtwo.daysto(datetime.date(2020,2,29), "QE")
+    31
+
+    >>> dtwo.isleap(datetime.date(2020,4,12))
+    True #accepts an integer or a date
+    
+
 The full list of utility functions can be found below. 
 
 API
