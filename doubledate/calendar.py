@@ -22,7 +22,8 @@ class Calendar:
             dates = []
         if not all([isinstance(item, (datetime.date, datetime.datetime)) for item in dates]):
             raise TypeError("Calendar expected an iterable of date objects")
-        self.__dates__ = sortedcontainers.SortedSet([date for date in dates])
+        self.__dates__    = sortedcontainers.SortedSet([date for date in dates])
+        self.__datemaps__ = {}
     
     @property
     def last(self):
@@ -124,6 +125,7 @@ class Calendar:
             the date to add to the calendar (in-place)
         """
         self.__dates__.add(date)
+        self.__datemaps__ = {}
 
     def __eq__(self, other):
         """
@@ -263,21 +265,10 @@ class Calendar:
         position : int 
             the index + 1 of the given date in the filtered frequency
         """
-        if date not in self: 
-            raise ValueError(f"the given date ({date}) is not in the calendar")
-        if frequency == None: 
-            return self.index(date) + base
-        if frequency.lower() in ["y", "year", "a"]:
-            return self.filter(year=date.year).index(date) + base
-        if frequency.lower() == "semester":
-            return self.filter(year=date.year, semester=utils.semester(date)).index(date) + base
-        if frequency.lower() == "quarter":
-            return self.filter(year=date.year, quarter=utils.quarter(date)).index(date) + base
-        if frequency.lower() in ["m", "month"]:
-            return self.filter(year=date.year, month=date.month).index(date) + base
-        if frequency.lower() in ["week", "w"]:
-            return self.filter(year=date.year, week=date.isocalendar()[1]).index(date) + base
-        raise ValueError("Invalid frequency")
+        if ("dayof", frequency, base) not in self.__datemaps__: 
+            mapping = utils.dayof(frequency, calendar=self, base=base)
+            self.__datemaps__[("dayof", frequency, base)] = mapping
+        return self.__datemaps__[("dayof", frequency, base)][date]
 
     def daysfrom(self, start=None, *, asof=None):
         """
@@ -289,25 +280,13 @@ class Calendar:
         days : int 
             the number of days prior to the date but in the same frequency
         """
-        if asof is None: 
-            raise ValueError("expected an asof date, None given")
-        if asof not in self: 
-            raise ValueError(f"the given as-of date ({asof}) is not in the calendar")
-        if isinstance(start, (datetime.date, datetime.datetime)): 
-            if start not in self: 
-                raise ValueError(f"the given starting date ({start}) is not in the calendar")
+        if isinstance(start, (datetime.date, datetime.datetime)):
             return len(self[start:asof]) - 1
-        if start.lower() in ["ys", "year-start", "year start"]: 
-            return self.dayof(asof, "year", base=0)
-        if start.lower() in ["ss", "semester-start", "semester start"]: 
-            return self.dayof(asof, "semester", base=0)
-        if start.lower() in ["qs", "quarter-start", "quarter start"]:
-            return self.dayof(asof, "quarter", base=0)
-        if start.lower() in ["ms", "month-start", "month start"]: 
-            return self.dayof(asof, "month", base=0)
-        if start.lower() in ["ws", "week-start", "week start"]: 
-            return self.dayof(asof, "week", base=0)
-        raise ValueError(f"start should be a date or one of 'year-start', 'semester-start', 'quarter-start', 'month-start', or 'week-start' or any of their abbreviations (ys,ss,qs,ms,ws); {start} given")
+
+        if ("daysfrom", start) not in self.__datemaps__: 
+            mapping = utils.daysfrom(start, calendar=self)
+            self.__datemaps__[("daysfrom", start)] = mapping
+        return self.__datemaps__[("daysfrom", start)][asof]
 
     def daysto(self, to=None, *, asof=None):
         """
@@ -319,25 +298,13 @@ class Calendar:
             number of days in the calendar until the end of the frequency;
             exlusive of the given date
         """
-        if asof is None: 
-            raise ValueError("expected an asof date, None given")
-        if asof not in self: 
-            raise ValueError(f"the given as-of date ({asof}) is not in the calendar")
-        if isinstance(to, (datetime.date, datetime.datetime)): 
-            if to not in self: 
-                raise ValueError(f"the given target date ({to}) is not in the calendar")
+        if isinstance(to, (datetime.date, datetime.datetime)):
             return len(self[asof:to]) - 1
-        if to.lower() in ["ye", "year-end", "year end"]:
-            return len(self.filter(lambda d: d.year == asof.year and d >= asof)) - 1
-        if to.lower() in ["se", "semester-end", "semester end"]: 
-            return len(self.filter(lambda d: d.year == asof.year and utils.semester(d) == utils.semester(asof) and d >= asof)) - 1
-        if to.lower() in ["qe", "quarter-end", "quarter end"]: 
-            return len(self.filter(lambda d: d.year == asof.year and utils.quarter(d) == utils.quarter(asof) and d >= asof)) - 1
-        if to.lower() in ["me", "month-end", "month end"]: 
-            return len(self.filter(lambda d: d.year == asof.year and d.month == asof.month and d >= asof)) - 1
-        if to.lower() in ["we", "week-end", "week end"]: 
-            return len(self.filter(lambda d: d.year == asof.year and d.isocalendar()[1] == asof.isocalendar()[1] and d >= asof)) - 1
-        raise ValueError(f"to should be a date or one of 'year-end', 'semester-end', 'quarter-end', 'month-end' or 'week-end' or any of their abbreviations (ye,se,qe,me,we), {to} given")
+             
+        if ("daysto", to) not in self.__datemaps__: 
+            mapping = utils.daysto(to, calendar=self)
+            self.__datemaps__[("daysto", to)] = mapping
+        return self.__datemaps__[("daysto", to)][asof]
     
     def daysbetween(self, this, that, bounds="both"): 
         """
