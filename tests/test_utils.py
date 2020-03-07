@@ -515,3 +515,10 @@ class TestUtils(unittest.TestCase):
                 pass
         except Exception as e: 
             self.fail(f"Failed to iterate over dayof ({e})")
+
+    def test_weekdayof(self):
+        assert utils.weekdayof("Y", datetime.date(2020,1,27)) == 4
+        
+        assert utils.weekdayof("Y", datetime.date(2020,6,17)) == 25
+
+        assert utils.weekdayof("M", datetime.date(2020,3,31)) == 5

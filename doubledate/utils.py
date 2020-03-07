@@ -763,3 +763,35 @@ def daysto(frequency, dates=None, *, calendar=None):
     
     return datemap(mapping)
     
+def weekdayof(frequency, date=None, *, base=1): 
+    """
+    Returns the number of weeks since the start of the frequency
+    assuming the week starts on the same weekday as the date given.
+
+    Arguments
+    -----------
+    frequency : str
+        one of Y, H, T, Q, M
+    date : datetime-like
+        the date 
+    base : int
+        whether to consider the first date as 0 or 1
+    
+    Examples
+    -------------
+    >>> weekdayof("Y", datetime.date(2020,1,27))
+    4 #4th Monday of the year
+
+    >>> weekdayof("Y", datetime.date(2020,6,17))
+    25 #25th Tuesday of the year
+
+    >>> weekdayof("M", datetime.date(2020,3,31))
+    5 #5th Tuesday of March
+    """
+    if frequency not in ["Y","H","T","Q","M"]: 
+        raise ValueError(f"expected frequency to be one of 'YHTQM', receive {frequency}")
+
+    freqstart = floor(date, frequency)
+    return int((sow(date, weekday=freqstart.weekday()) - 
+                eow(freqstart, weekday=freqstart.weekday())
+            ).days / 7) + base
