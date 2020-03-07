@@ -519,7 +519,37 @@ def offset(date, days=None, weekdays=None, weeks=None, months=None, years=None,
             return eoy(date, 0)
         raise ValueError(f"to should be one of MON,...,SUN or one of EOM,EOQ,EOS,EOY; received {to}")
 
-class dayof:
+class datemap: 
+    """
+    Container mapping dates to values
+    """
+    def __init__(self, mapping):
+        self._mapping = mapping
+        
+    def __repr__(self):
+        return repr(list(self._mapping.values()))
+    
+    def __str__(self):
+        return repr(self)
+    
+    def __len__(self):
+        return len(self._mapping)
+    
+    def __contains__(self, value):
+        return value in self._mapping
+    
+    def __iter__(self):
+        return iter(self._mapping.values())
+    
+    def __getitem__(self, value):
+        if isinstance(value, (datetime.date, datetime.datetime)):
+            try: 
+                return self._mapping[value]
+            except KeyError: 
+                raise KeyError(f"{value} not in datemap")
+        return [self[v] for v in value]
+
+def dayof(frequency, dates=None, *, calendar=None, base=1):
     """
     Returns an efficient iterator that yields the position of each date 
     in a given frequency. 
@@ -533,6 +563,11 @@ class dayof:
     base : int, defaults to 1
         whether the first date of the frequency should have value 0 or 1
 
+    Returns
+    ------------
+    mapping : datemap 
+        dictionary-like container mapping dates to position in frequency
+
     Examples
     ------------
     :: 
@@ -545,7 +580,7 @@ class dayof:
         3
 
         >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
-        >>> for date, position in zip(dates, dayof(dates, "M")):
+        >>> for date, position in zip(dates, dayof("M", calendar=dates)):
         ...     print(date, position)
         2020-01-02, 1
         2020-01-03, 2
@@ -555,72 +590,77 @@ class dayof:
         ...
         2020-03-30,27
 
-        >>> dayof(dates, "Q")[datetime.date(2020,3,30)]
+        >>> dayof("Q", calendar=dates)[datetime.date(2020,3,30)]
         81
 
     Notes
     ------------
-    .. warning::
-        If the first argument is a date, it simply returns the 1-based position
-        of the date in the given frequency (e.q. month, quarter).
-
-    .. note:: 
-        The list of dates is assumed to be sorted chronologically (from oldest to 
-        most recent). 
+    .. warning:: 
+        If given a calendar and no dates, the function returns a date-map, mapping each date
+        of the custom calendar to its position within the frequency. 
+        
+        If given a set of dates and no calendar, the function returns the number of days
+        from the generic start of the frequency. 
+        
+        If given a set of dates and a custom calendar, the function returns the number of days
+        since the start of the frequency using the custom calendar as the reference.  
     """
 
     FREQUENCIES = ["Y","H","T","Q","M","W",
                    "W-MON","W-TUE","W-WED","W-THU","W-FRI","W-SAT","W-SUN"]
     
-    def __new__(cls, dates, frequency, base=1):
-        if frequency not in dayof.FREQUENCIES:
-            raise ValueError(f"expected frequency to be one of {','.join(dayof.FREQUENCIES)}, \
-                             received {frequency}")
-        if isinstance(dates, (datetime.date, datetime.datetime)): 
-            return (dates - floor(dates, frequency)).days + base
-        return super().__new__(cls)
-        
-    def __init__(self, dates, frequency, base=1):
-        self.dates = dates
-        self.frequency = frequency
-        self.base = base
-        
-    @property
-    def mapping(self):
-        """
-        Returns a dictionary mapping each date to its position
-        """
-        if not hasattr(self, "_mapping"):
-            self._mapping = {}
-            for i, date in enumerate(self.dates):
-                if i == 0: 
-                    end = ceil(date, self.frequency)
-                    counter = self.base
-                elif date > end: 
-                    end = ceil(date, self.frequency)
-                    counter = self.base
-                else: 
-                    counter += 1
-                self._mapping[date] = counter
-        return self._mapping
-            
-    def __iter__(self):
-        return iter(self.mapping.values())
+    if frequency not in FREQUENCIES:
+        raise ValueError(f"expected frequency to be one of {','.join(FREQUENCIES)}, \
+                            received {frequency}")
     
-    def __getitem__(self, date):
-        return self.mapping[date]
+    mapping = {}
+    
+    if calendar is None: 
+        if isinstance(dates, (datetime.date, datetime.datetime)):
+            return (dates - floor(dates, frequency)).days + base
+        for i, date in enumerate(sorted(dates)):
+            if i == 0 or date > end: 
+                start, end = floor(date, frequency), ceil(date, frequency)
+            mapping[date] = (date - start).days + base
+        return datemap(mapping)[dates]
+    
+    for i, date in enumerate(sorted(calendar)): 
+        if i == 0 or date > end: 
+            end, counter = ceil(date, frequency), base
+        else: 
+            counter += 1
+        mapping[date] = counter
+    
+    if dates is not None:
+         return datemap(mapping)[dates]
+    
+    return datemap(mapping)
 
-class daysfrom: 
+def daysfrom(frequency, dates=None, *, calendar=None):
     """
     Returns an efficient iterator that yields the number of days since the  
     start of a given frequency. 
 
     Arguments
     ------------
-    dates : datetime, iterable
+    dates : datetime, iterable, optional
         either a date or an iterable of dates
+    calendar : iterable
+        iterable of dates to use as custom calendar
     frequency : str
         one of YS, HS, TS, QS, MS, WS
+
+    Notes
+    ------------
+    .. warning:: 
+        If given a calendar and no dates, the function returns a date-map, mapping each date
+        of the custom calendar to its position within the frequency. 
+        
+        If given a set of dates and no calendar, the function returns the number of days
+        from the generic start of the frequency. 
+        
+        If given a set of dates and a custom calendar, the function returns the number of days
+        since the start of the frequency using the custom calendar as the reference. 
 
     Examples
     ------------
@@ -641,58 +681,16 @@ class daysfrom:
         2020-03-02,0
         ...
         2020-03-30,26
-
-    Notes
-    ------------
-    .. warning:: 
-        If given a date (rather than a list of dates), the function returns the number of days from the 
-        start of the calendar frequency. 
-
-    .. note:: 
-        The list of dates is assumed to be sorted chronologically (from oldest to 
-        most recent), i.e. period changes are detected by comparing two adjacent dates
     """
+    FREQUENCIES = {"YS":"Y","HS":"H","TS":"T",
+                   "QS":"Q","MS":"M","WS":"W"}
 
-    FREQUENCIES = ["YS","HS","TS","QS","MS","WS"]
-    
-    def __new__(cls, dates, frequency):
-        if frequency not in daysfrom.FREQUENCIES:
-            raise ValueError(f"expected frequency to be one of {','.join(daysfrom.FREQUENCIES)}, \
-                             received {frequency}")
-        if isinstance(dates, (datetime.date, datetime.datetime)): 
-            return (dates - floor(dates, frequency[0])).days
-        return super().__new__(cls)
+    if frequency not in FREQUENCIES:
+        raise ValueError(f"expected frequency to be one of {','.join(FREQUENCIES)}, \
+                            received {frequency}")
+    return dayof(FREQUENCIES[frequency], dates, calendar=calendar, base=0)
 
-    def __init__(self, dates, frequency): 
-        self.dates     = dates
-        self.frequency = frequency
-        
-    @property
-    def mapping(self):
-        """
-        Returns a dictionary mapping each date to its position
-        """
-        if not hasattr(self, "_mapping"):
-            self._mapping = {}
-            for i, date in enumerate(self.dates):
-                if i == 0: 
-                    end = ceil(date, self.frequency[0])
-                    counter = 0
-                elif date > end: 
-                    end = ceil(date, self.frequency[0])
-                    counter = 0
-                else: 
-                    counter += 1
-                self._mapping[date] = counter
-        return self._mapping
-    
-    def __iter__(self):
-        return iter(self.mapping.values())
-    
-    def __getitem__(self, date):
-        return self.mapping[date]
-
-class daysto: 
+def daysto(frequency, dates=None, *, calendar=None): 
     """
     Returns an efficient iterator that yields the number of days to the  
     end of a given frequency. 
@@ -708,13 +706,13 @@ class daysto:
     ------------
     ::
     
-        >>> daysto(datetime.date(2020,2,29), "ME")
+        >>> daysto("ME",datetime.date(2020,2,29))
         0
-        >>> daysto(datetime.date(2020,2,29), "QE")
+        >>> daysto("QE",datetime.date(2020,2,29))
         31
 
         >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
-        >>> for date, position in zip(dates, daysto(dates, "ME")):
+        >>> for date, position in zip(dates, daysto("ME", calendar=dates)):
         ...     print(date, position)
         2020-01-02, 27
         2020-01-03, 26
@@ -735,42 +733,33 @@ class daysto:
         most recent), i.e. period changes are detected by comparing two adjacent dates
     """
 
-    FREQUENCIES = ["YE","HE","TE","QE","ME","WE"]
+    FREQUENCIES = {"YE":"Y","HE":"H","TE":"T",
+                   "QE":"Q","ME":"M","WE":"W"}
     
-    def __new__(cls, dates, frequency):
-        if frequency not in daysto.FREQUENCIES:
-            raise ValueError(f"expected frequency to be one of {','.join(daysto.FREQUENCIES)}, \
-                             received {frequency}")
-        if isinstance(dates, (datetime.date, datetime.datetime)): 
-            return (ceil(dates, frequency[0])-dates).days
-        return super().__new__(cls)
+    if frequency not in FREQUENCIES:
+        raise ValueError(f"expected frequency to be one of {','.join(FREQUENCIES)}, \
+                            received {frequency}")
+
+    mapping = {}
     
-    def __init__(self, dates, frequency): 
-        self.dates     = dates
-        self.frequency = frequency
-        
-    @property
-    def mapping(self):
-        """
-        Returns a dictionary mapping each date to its position
-        """
-        if not hasattr(self, "_mapping"):
-            self._mapping = {}
-            for i, date in enumerate(self.dates[::-1]):
-                if i == 0: 
-                    start = floor(date, self.frequency[0])
-                    counter = 0
-                elif date < start: 
-                    start = floor(date, self.frequency[0])
-                    counter = 0
-                else: 
-                    counter += 1
-                self._mapping[date] = counter
-            self._mapping = {key:value for key, value in reversed(list(self._mapping.items()))}
-        return self._mapping
+    if calendar is None: 
+        if isinstance(dates, (datetime.date, datetime.datetime)):
+            return (ceil(dates, FREQUENCIES[frequency])-dates).days
+        for i, date in enumerate(sorted(dates, reverse=True)):
+            if i == 0 or date < start: 
+                start, end = floor(date, FREQUENCIES[frequency]), ceil(date, FREQUENCIES[frequency])
+            mapping[date] = (end - date).days
+        return datemap(mapping)[dates]
     
-    def __iter__(self):
-        return iter(self.mapping.values())
+    for i, date in enumerate(sorted(calendar, reverse=True)): 
+        if i == 0 or date < start: 
+            start, counter = floor(date, FREQUENCIES[frequency]), 0
+        else: 
+            counter += 1
+        mapping[date] = counter
     
-    def __getitem__(self, date):
-        return self.mapping[date]
+    if dates is not None:
+         return datemap(mapping)[dates]
+    
+    return datemap(mapping)
+    

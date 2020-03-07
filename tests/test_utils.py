@@ -373,145 +373,145 @@ class TestUtils(unittest.TestCase):
 
     def test_dayof(self):
         self.assertEqual(
-            utils.dayof(datetime.date(2020,2,29),"M"),
+            utils.dayof("M", datetime.date(2020,2,29)),
             29
         )
         self.assertEqual(
-            utils.dayof(datetime.date(2020,2,29),"M",0),
+            utils.dayof("M", datetime.date(2020,2,29),base=0),
             28
         )
         self.assertEqual(
-            utils.dayof(datetime.date(2020,2,29),"Q"),
+            utils.dayof("Q", datetime.date(2020,2,29)),
             60
         )
         self.assertEqual(
-            utils.dayof(datetime.date(2020,2,29),"Q",0),
+            utils.dayof("Q", datetime.date(2020,2,29),base=0),
             59
         )
         self.assertEqual(
-            utils.dayof(datetime.date(2020,2,29),"Y"),
+            utils.dayof("Y", datetime.date(2020,2,29)),
             60
         )
         self.assertEqual(
-            utils.dayof(datetime.date(2020,2,29),"Y",0),
+            utils.dayof("Y", datetime.date(2020,2,29),base=0),
             59
         )
 
         dates = load()
 
         self.assertEqual(
-            utils.dayof(dates, "M", 0)[datetime.date(2014,11,17)],
+            utils.dayof("M", calendar=dates, base=0)[datetime.date(2014,11,17)],
             0
         )
         self.assertEqual(
-            utils.dayof(dates, "M", 1)[datetime.date(2014,11,17)],
+            utils.dayof("M", calendar=dates, base=1)[datetime.date(2014,11,17)],
             1
         )
         self.assertEqual(
-            utils.dayof(dates, "M", 0)[datetime.date(2014,12,1)],
+            utils.dayof("M", calendar=dates, base=0)[datetime.date(2014,12,1)],
             0
         )
         self.assertEqual(
-            utils.dayof(dates, "M", 1)[datetime.date(2014,12,1)],
+            utils.dayof("M", calendar=dates, base=1)[datetime.date(2014,12,1)],
             1
         )
         self.assertEqual(
-            utils.dayof(dates, "M", 1)[datetime.date(2016,7,29)],
+            utils.dayof("M", calendar=dates, base=1)[datetime.date(2016,7,29)],
             20
         )
         self.assertEqual(
-            utils.dayof(dates, "Y", 1)[datetime.date(2019,11,15)],
+            utils.dayof("Y", calendar=dates, base=1)[datetime.date(2019,11,15)],
             222
         )
 
         try:
-            for date, position in zip(dates, utils.dayof(dates, "Q")):
+            for date, position in zip(dates, utils.dayof("Q", calendar=dates)):
                 pass
         except Exception as e: 
             self.fail(f"Failed to iterate over dayof ({e})")
 
     def test_daysfrom(self):
         self.assertEqual(
-            utils.daysfrom(datetime.date(2020,2,29),"MS"),
+            utils.daysfrom("MS", datetime.date(2020,2,29)),
             28
         )
         self.assertEqual(
-            utils.daysfrom(datetime.date(2020,2,29),"QS"),
+            utils.daysfrom("QS", datetime.date(2020,2,29)),
             59
         )
         self.assertEqual(
-            utils.daysfrom(datetime.date(2020,2,29),"YS"),
+            utils.daysfrom("YS", datetime.date(2020,2,29)),
             59
         )
 
         dates = load()
 
         self.assertEqual(
-            utils.daysfrom(dates, "MS")[datetime.date(2014,11,17)],
+            utils.daysfrom("MS", calendar=dates)[datetime.date(2014,11,17)],
             0
         )
         self.assertEqual(
-            utils.daysfrom(dates, "MS")[datetime.date(2014,11,17)],
+            utils.daysfrom("MS", calendar=dates)[datetime.date(2014,11,17)],
             0
         )
         self.assertEqual(
-            utils.daysfrom(dates, "MS")[datetime.date(2014,12,1)],
+            utils.daysfrom("MS", calendar=dates)[datetime.date(2014,12,1)],
             0
         )
         self.assertEqual(
-            utils.daysfrom(dates, "MS")[datetime.date(2014,12,1)],
+            utils.daysfrom("MS", calendar=dates)[datetime.date(2014,12,1)],
             0
         )
         self.assertEqual(
-            utils.daysfrom(dates, "MS")[datetime.date(2016,7,29)],
+            utils.daysfrom("MS", calendar=dates)[datetime.date(2016,7,29)],
             19
         )
         self.assertEqual(
-            utils.daysfrom(dates, "YS")[datetime.date(2019,11,15)],
+            utils.daysfrom("YS", calendar=dates)[datetime.date(2019,11,15)],
             221
         )
 
         try:
-            for date, position in zip(dates, utils.daysfrom(dates, "QS")):
+            for date, position in zip(dates, utils.daysfrom("QS", calendar=dates)):
                 pass
         except Exception as e: 
             self.fail(f"Failed to iterate over dayof ({e})")
 
     def test_daysto(self):
         self.assertEqual(
-            utils.daysto(datetime.date(2020,2,29),"ME"),
+            utils.daysto("ME", datetime.date(2020,2,29)),
             0
         )
         self.assertEqual(
-            utils.daysto(datetime.date(2020,2,29),"QE"),
+            utils.daysto("QE", datetime.date(2020,2,29)),
             31
         )
         self.assertEqual(
-            utils.daysto(datetime.date(2020,2,29),"YE"),
+            utils.daysto("YE", datetime.date(2020,2,29)),
             306
         )
 
         dates = load()
 
         self.assertEqual(
-            utils.daysto(dates, "ME")[datetime.date(2014,11,17)],
+            utils.daysto("ME", calendar=dates)[datetime.date(2014,11,17)],
             8
         )
         self.assertEqual(
-            utils.daysto(dates, "ME")[datetime.date(2014,12,1)],
+            utils.daysto("ME", calendar=dates)[datetime.date(2014,12,1)],
             21
         )
         self.assertEqual(
-            utils.daysto(dates, "ME")[datetime.date(2016,7,29)],
+            utils.daysto("ME", calendar=dates)[datetime.date(2016,7,29)],
             0
         )
         self.assertEqual(
-            utils.daysto(dates, "YE")[datetime.date(2019,11,15)],
+            utils.daysto("YE", calendar=dates)[datetime.date(2019,11,15)],
             0
         )
 
         try:
-            for date, position in zip(dates, utils.daysto(dates, "QE")):
+            for date, position in zip(dates, utils.daysto("QE", calendar=dates)):
                 pass
         except Exception as e: 
             self.fail(f"Failed to iterate over dayof ({e})")
