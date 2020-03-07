@@ -601,7 +601,7 @@ class Calendar:
                     filtered.add(other.fa(date))
         return filtered
 
-    def map(self, func):
+    def apply(self, func):
         """
         Passes all the dates in the calendar to the function
         If all mapped values are date-like objects, function returns a new calendar
