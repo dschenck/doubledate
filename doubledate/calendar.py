@@ -62,13 +62,6 @@ class Calendar:
         """
         return len(self.__dates__)
 
-    @property
-    def length(self):
-        """
-        Returns the length of the calendar
-        """
-        return len(self)
-
     def __contains__(self, date):
         """
         Returns True if the date is in the calendar
@@ -114,18 +107,6 @@ class Calendar:
         if isinstance(other, (datetime.date, datetime.datetime)): 
             return Calendar(self).union(Calendar([other]))
         return Calendar(self).union(Calendar(other))
-
-    def add(self, date):
-        """
-        Adds a date to the calendar
-
-        Parameters
-        ------------
-        date : datetime-like
-            the date to add to the calendar (in-place)
-        """
-        self.__dates__.add(date)
-        self.__datemaps__ = {}
 
     def __eq__(self, other):
         """
@@ -249,11 +230,11 @@ class Calendar:
             starting = self.__dates__[0]
         if ending is None: 
             ending = self.__dates__[-1]
-        calendar = Calendar()
+        dates = []
         for i in range(1, (ending-starting).days):
             if starting + datetime.timedelta(i) not in self:
-                calendar.add(starting + datetime.timedelta(i))
-        return calendar
+                dates.append(starting + datetime.timedelta(i))
+        return Calendar(dates)
 
     def dayof(self, date, frequency=None, *, base=1):
         """
@@ -286,7 +267,9 @@ class Calendar:
         if ("daysfrom", start) not in self.__datemaps__: 
             mapping = utils.daysfrom(start, calendar=self)
             self.__datemaps__[("daysfrom", start)] = mapping
-        return self.__datemaps__[("daysfrom", start)][asof]
+        if asof is not None: 
+            return self.__datemaps__[("daysfrom", start)][asof]
+        return self.__datemaps__[("daysfrom", start)]
 
     def daysto(self, to=None, *, asof=None):
         """
@@ -304,7 +287,9 @@ class Calendar:
         if ("daysto", to) not in self.__datemaps__: 
             mapping = utils.daysto(to, calendar=self)
             self.__datemaps__[("daysto", to)] = mapping
-        return self.__datemaps__[("daysto", to)][asof]
+        if asof is not None: 
+            return self.__datemaps__[("daysto", to)][asof]
+        self.__datemaps__[("daysto", to)]
     
     def daysbetween(self, this, that, bounds="both"): 
         """
@@ -368,29 +353,29 @@ class Calendar:
         grouper : str | callable
             the criterion to group dates by
             string groupers include
-                - w, week :    groupby by week number
-                - m, month:    groupby by month
-                - q, quarter:  groupby by quarter
-                - s, semester: groupby semester
-                - y, year:     groupby year
+                - W: groupby by week number
+                - M: groupby by month
+                - Q: groupby by quarter
+                - S: groupby semester
+                - Y: groupby year
         """
         if isinstance(grouper, str):
-            if grouper.lower() in ["w", "week"]:
+            if grouper == "W":
                 return self.groupby(lambda date: (date.year, date.isocalendar()[1]))
-            elif grouper.lower() in ["m", "month"]:
+            elif grouper == "M":
                 return self.groupby(lambda date: (date.year, date.month))
-            elif grouper.lower() in ["q", "quarter"]:
+            elif grouper == "Q":
                 return self.groupby(lambda date: (date.year, utils.quarter(date)))
-            elif grouper.lower() in ["s", "semester"]:
+            elif grouper == "H":
                 return self.groupby(lambda date: (date.year, date.month > 6))
-            elif grouper.lower() in ["y", "year"]:
+            elif grouper == "Y":
                 return self.groupby(lambda date: date.year)
-            raise ValueError(f"grouper should be a callable or one of 'week', 'month', 'quarter', 'semester' or 'year'; {grouper} given")
+            raise ValueError(f"grouper should be a callable or one of W,M,Q,H or Y; {grouper} given")
         if callable(grouper):
-            calendars = collections.defaultdict(lambda: Calendar())
+            calendars = collections.defaultdict(lambda: [])
             for date in self: 
-                calendars[grouper(date)].add(date)
-            return Grouper(calendars.values())
+                calendars[grouper(date)].append(date)
+            return Grouper([Calendar(dates) for dates in calendars.values()])
         raise ValueError("Expected string or function")
 
     def resample(self, grouper): 
@@ -555,18 +540,18 @@ class Calendar:
         """
         if fallback not in ["drop", "previous", "ffill", "next", "bfill"]: 
             raise ValueError("fallback should be one of 'drop', 'previous' or 'next'")
-        filtered, other = Calendar(), Calendar(other)
+        filtered, other = [], Calendar(other)
         for date in self: 
             if date in other: 
-                filtered.add(date)
+                filtered.append(date)
             else: 
                 if fallback == "drop":
                     pass
                 elif fallback in ["last", "previous", "ffill"]:
-                    filtered.add(other.lb(date))
+                    filtered.append(other.lb(date))
                 elif fallback in ["next", "bfill", "following"]:
-                    filtered.add(other.fa(date))
-        return filtered
+                    filtered.append(other.fa(date))
+        return Calendar(filtered)
 
     def apply(self, func):
         """
@@ -585,42 +570,6 @@ class Calendar:
         if all([isinstance(m, (datetime.date, datetime.datetime)) for m in mapped]): 
             return Calendar(mapped)
         return mapped
-
-    def iter(self, *fields):
-        """
-        Returns a generator yielding the fields for each date
-        If no fields are passed, it yields (i, date)
-        Available fields are: 
-            - index (i) 
-            - date (d)
-            - previous (p) the previous date (or None)
-            - next (n) the next date (or None)
-            - DOW, DOM, DOQ, DOS, DOY day of frequency (weekend, month... year)
-            - DWE, DME, DQE, DSE, DYE days to end of frequency
-            - DWS, DMS, DQS, DSS, DYS days from frequency start
-        """
-        if len(fields) == 0: 
-            fields = ["index", "date"]
-        for i, date in enumerate(self):
-            values = []
-            for field in fields: 
-                if field in ["i", "index"]: 
-                    values.append(i)
-                elif field in [0, "d", "date", "today"]: 
-                    values.append(date)
-                elif field in [-1, "-1", "previous", "p"]: 
-                    values.append(self[i-1] if i != 0 else None)
-                elif field in [+1, "+1", "next", "n"]: 
-                    values.append(self[i+1] if i != (len(self)-1) else None)
-                elif field.upper() in ["DOW", "DOM", "DOQ", "DOS", "DOY"]: 
-                    values.append(self.dayof(date, field[-1]))
-                elif field.upper() in ["DWE", "DME", "DQE", "DSE", "DYE"]: 
-                    values.append(self.daysto(date, field[-2]))
-                elif field.upper() in ["DWS", "DMS", "DQS", "DSS", "DYS"]:
-                    values.append(self.daysfrom(date, fields[-2]))
-                else: 
-                    raise ValueError(f"unexpected field {field}")
-            yield tuple(values)
 
     def som(self, date):
         """

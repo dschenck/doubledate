@@ -363,47 +363,47 @@ class CalendarTests(unittest.TestCase):
 
         self.assertEqual(
             calendar.daysfrom("WS", asof=datetime.date(2019,10,31)),
-            calendar[datetime.date(2019,10,28):datetime.date(2019,10,30)].length
+            len(calendar[datetime.date(2019,10,28):datetime.date(2019,10,30)])
         )
         self.assertEqual(
             calendar.daysfrom("WS", asof=datetime.date(2019,10,31)),
-            calendar[datetime.date(2019,10,28):datetime.date(2019,10,30)].length
+            len(calendar[datetime.date(2019,10,28):datetime.date(2019,10,30)])
         )
 
         self.assertEqual(
             calendar.daysfrom("MS", asof=datetime.date(2019,10,31)),
-            calendar[datetime.date(2019,10,1):datetime.date(2019,10,30)].length
+            len(calendar[datetime.date(2019,10,1):datetime.date(2019,10,30)])
         )
         self.assertEqual(
             calendar.daysfrom("MS", asof=datetime.date(2019,10,31)),
-            calendar[datetime.date(2019,10,1):datetime.date(2019,10,30)].length
+            len(calendar[datetime.date(2019,10,1):datetime.date(2019,10,30)])
         )
 
         self.assertEqual(
             calendar.daysfrom("QS", asof=datetime.date(2019,10,31)),
-            calendar[datetime.date(2019,10,1):datetime.date(2019,10,30)].length
+            len(calendar[datetime.date(2019,10,1):datetime.date(2019,10,30)])
         )
         self.assertEqual(
             calendar.daysfrom("QS", asof=datetime.date(2019,10,31)),
-            calendar[datetime.date(2019,10,1):datetime.date(2019,10,30)].length
+            len(calendar[datetime.date(2019,10,1):datetime.date(2019,10,30)])
         )
 
         self.assertEqual(
             calendar.daysfrom("HS", asof=datetime.date(2019,10,31)),
-            calendar[datetime.date(2019,7,1):datetime.date(2019,10,30)].length
+            len(calendar[datetime.date(2019,7,1):datetime.date(2019,10,30)])
         )
         self.assertEqual(
             calendar.daysfrom("HS", asof=datetime.date(2019,10,31)),
-            calendar[datetime.date(2019,7,1):datetime.date(2019,10,30)].length
+            len(calendar[datetime.date(2019,7,1):datetime.date(2019,10,30)])
         )
 
         self.assertEqual(
             calendar.daysfrom("YS", asof=datetime.date(2019,10,31)),
-            calendar[datetime.date(2019,1,1):datetime.date(2019,10,30)].length
+            len(calendar[datetime.date(2019,1,1):datetime.date(2019,10,30)])
         )
         self.assertEqual(
             calendar.daysfrom("YS", asof=datetime.date(2019,10,31)),
-            calendar[datetime.date(2019,1,1):datetime.date(2019,10,30)].length
+            len(calendar[datetime.date(2019,1,1):datetime.date(2019,10,30)])
         )
     
     def test_daysto(self):
@@ -429,33 +429,33 @@ class CalendarTests(unittest.TestCase):
 
         self.assertEqual(
             calendar.daysto("QE", asof=datetime.date(2018,5,25)),
-            calendar[datetime.date(2018,5,26):datetime.date(2018,6,30)].length
+            len(calendar[datetime.date(2018,5,26):datetime.date(2018,6,30)])
         )
         self.assertEqual(
             calendar.daysto("QE", asof=datetime.date(2018,5,25)),
-            calendar[datetime.date(2018,5,26):datetime.date(2018,6,30)].length
+            len(calendar[datetime.date(2018,5,26):datetime.date(2018,6,30)])
         )
 
         self.assertEqual(
             calendar.daysto("HE", asof=datetime.date(2018,5,25)),
-            calendar[datetime.date(2018,5,26):datetime.date(2018,6,30)].length
+            len(calendar[datetime.date(2018,5,26):datetime.date(2018,6,30)])
         )
         self.assertEqual(
             calendar.daysto("HE", asof=datetime.date(2018,5,25)),
-            calendar[datetime.date(2018,5,26):datetime.date(2018,6,30)].length
+            len(calendar[datetime.date(2018,5,26):datetime.date(2018,6,30)])
         )
 
         self.assertEqual(
             calendar.daysto("YE", asof=datetime.date(2018,5,25)),
-            calendar[datetime.date(2018,5,26):datetime.date(2018,12,31)].length
+            len(calendar[datetime.date(2018,5,26):datetime.date(2018,12,31)])
         )
         self.assertEqual(
             calendar.daysto("YE", asof=datetime.date(2018,5,25)),
-            calendar[datetime.date(2018,5,26):datetime.date(2018,12,31)].length
+            len(calendar[datetime.date(2018,5,26):datetime.date(2018,12,31)])
         )
         self.assertEqual(
             calendar.daysto(datetime.date(2018,12,31), asof=datetime.date(2018,5,25)),
-            calendar[datetime.date(2018,5,26):datetime.date(2018,12,31)].length
+            len(calendar[datetime.date(2018,5,26):datetime.date(2018,12,31)])
         )
     
     def test_between(self):
@@ -479,19 +479,6 @@ class CalendarTests(unittest.TestCase):
         self.assertEqual(
             calendar.daysbetween(calendar[50], calendar[100], "right"), 
             50
-        )
-    
-    def test_iter(self):
-        calendar = load()
-        
-        self.assertEqual(
-            len([date for date in calendar.iter()]), 
-            len([date for date in calendar])
-        )
-
-        self.assertEqual(
-            sum([len(x) for x in calendar.iter("i", "date")]), 
-            sum([2 for i, date in enumerate(calendar)])
         )
 
     def test__add__(self):
