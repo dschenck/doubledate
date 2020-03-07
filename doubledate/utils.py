@@ -552,7 +552,7 @@ class datemap:
 def dayof(frequency, dates=None, *, calendar=None, base=1):
     """
     Returns an efficient iterator that yields the position of each date 
-    in a given frequency. 
+    in a given frequency.
 
     Arguments
     ------------
@@ -560,6 +560,8 @@ def dayof(frequency, dates=None, *, calendar=None, base=1):
         either a date or an iterable of dates
     frequency : str
         one of Y, H, T, Q, M, W, W-MON,W-TUE,W-WED,W-THU,W-FRI,W-SAT,W-SUN
+    calendar: iterable
+        custom calendar to use
     base : int, defaults to 1
         whether the first date of the frequency should have value 0 or 1
 
@@ -699,6 +701,8 @@ def daysto(frequency, dates=None, *, calendar=None):
     ------------
     dates : datetime, iterable
         either a date or an iterable of dates
+    calendar : iterable
+        custom calendar to use
     frequency : str
         one of YE, HE, TE, QE, ME, WE
 

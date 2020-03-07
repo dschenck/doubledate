@@ -33,11 +33,4 @@ The full list of utility functions can be found below.
 API
 ----------------------------------
 .. automodule:: doubledate
-    :members: quarter, trimester, semester, eow, sow, eom, som, eoq, soq, eot, sot, eos, sos, soy, eoy, ceil, floor, offset, isleap
-
-.. autoclass:: doubledate.dayof
-    :members: 
-.. autoclass:: doubledate.daysfrom
-    :members: 
-.. autoclass:: doubledate.daysto
-    :members: 
+    :members: quarter, trimester, semester, eow, sow, eom, som, eoq, soq, eot, sot, eos, sos, soy, eoy, ceil, floor, offset, isleap, dayof, daysfrom, daysto, weekdayof
