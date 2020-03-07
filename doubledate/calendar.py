@@ -356,7 +356,7 @@ class Calendar:
                 - W: groupby by week number
                 - M: groupby by month
                 - Q: groupby by quarter
-                - S: groupby semester
+                - H: groupby semester
                 - Y: groupby year
         """
         if isinstance(grouper, str):

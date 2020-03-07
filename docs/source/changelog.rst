@@ -1,6 +1,14 @@
 Changelog
 ========================
 
+Version 0.0.4 (7 March 2020)
+----------------------------------
+- renamed :code:`map` to :code:`apply`
+- added :code:`weekdayof` utility function
+- refactored :code:`utils.dayof`, :code:`utils.daysfrom` and :code:`utils.daysto`
+- removed :code:`add` method to maintain immutability
+- removed :code:`length` property (use :code:`len(calendar)` instead)
+
 Version 0.0.3 (1 March 2020)
 ----------------------------------
 - added :code:`utils.dayof`, :code:`utils.daysto` and :code:`utils.daysfrom`
