@@ -5,7 +5,7 @@ import pandas as pd
 
 import doubledate.utils as utils
 
-from doubledate import Calendar
+from doubledate import Calendar, BD
 
 def load():
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "calendar.CSV"), "r") as f: 
@@ -546,6 +546,59 @@ class CalendarTests(unittest.TestCase):
             calendar.soy(datetime.date(2014,11,17)),
             datetime.date(2014,11,17)
         )
+
+    def test_splitter(self):
+        cdr = load()
+        self.assertIsInstance(cdr.split(BD(0, "M")).first(), Calendar)
+        self.assertIsInstance(cdr.split(BD(10, "M")).first(), Calendar)
+        self.assertIsInstance(cdr.split(starting=BD(10, "M")).first(), Calendar)
+        self.assertIsInstance(cdr.split(ending=BD(10, "M")).first(), Calendar)
+
+        #simply split on first day of month
+        self.assertEqual(
+            cdr.split(BD(0)).first()[0], 
+            datetime.date(2014,11,17)
+        )
+        self.assertEqual(
+            cdr.split(BD(0)).last()[0], 
+            datetime.date(2014,11,28)
+        )
+
+        #simply split on first day of month
+        self.assertEqual(
+            cdr.split(starting=BD(0)).first()[0], 
+            datetime.date(2014,11,17)
+        )
+        self.assertEqual(
+            cdr.split(starting=BD(0)).last()[0], 
+            datetime.date(2014,11,28)
+        )
+
+        #should be the same as splitting on last day of the month
+        self.assertEqual(
+            cdr.split(ending=BD(-1)).first()[0], 
+            datetime.date(2014,11,17)
+        )
+        self.assertEqual(
+            cdr.split(ending=BD(-1)).last()[0], 
+            datetime.date(2014,11,28)
+        )
+
+        #simply split on first day of month
+        self.assertEqual(
+            cdr.split(ending=BD(0)).first()[0], 
+            datetime.date(2014,11,17)
+        )
+        self.assertEqual(
+            cdr.split(ending=BD(0)).first()[1], 
+            datetime.date(2014,11,18)
+        )
+        self.assertEqual(
+            cdr.split(ending=BD(0)).first()[2], 
+            datetime.date(2014,12,2)
+        )
+        
+
 
 class TestGrouper(unittest.TestCase):
     def test_index(self):

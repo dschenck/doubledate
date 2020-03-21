@@ -8,6 +8,31 @@ import datetime
 import doubledate.utils as utils
 import doubledate.constants as constants
 
+class BD: 
+    def __init__(self, index, frequency="M"):
+        self.index     = index
+        self.frequency = frequency
+
+    def resolve(self, calendar, onerror="last"): 
+        dates = []
+        for subcal in calendar.resample(self.frequency):
+            try:
+                dates.append(subcal[self.index])
+            except Exception as e:
+                if onerror == "raise":
+                    raise e 
+                elif onerror == "drop" or onerror == "skip":
+                    pass
+                elif onerror == "last":
+                    dates.append(subcal[-1])
+                elif onerror == "first":
+                    dates.append(subcal[0])
+                elif callable(onerror):
+                    dates.append(onerror(subcal))
+                else:
+                    raise ValueError("expected onerror to be one of raise, last, first or callable")
+        return Calendar(dates)
+
 class Calendar:
     def __init__(self, dates=None):
         """
@@ -384,7 +409,7 @@ class Calendar:
         """
         return self.groupby(grouper)
 
-    def split(cdr, frequency, on=0):
+    def split(self, on=None, side="left", starting=None, ending=None):
         """
         Splits the calendar in subcalendars at the given frequency and on the given index, 
         assuming that the passed index is the first date of each period. 
@@ -401,51 +426,22 @@ class Calendar:
         subcalendars : Grouper
             the subcalendars
         """
-        if frequency == "month": 
-            if on >= 0: 
-                return self.groupby(lambda date: 
-                                utils.som(date) if self.daysfrom("month-start", asof=date) < on 
-                                else utils.som(date, 1))
-            else: 
-                return self.groupby(lambda date: 
-                                utils.eom(date, -1) if self.daysto("month-end", asof=date) >= abs(on)
-                                else utils.eom(date))
-        if frequency == "quarter":
-            if on >= 0: 
-                return self.groupby(lambda date: 
-                                utils.soq(date) if self.daysfrom("quarter-start", asof=date) < on 
-                                else utils.soq(date, 1))
-            else: 
-                return self.groupby(lambda date: 
-                                utils.eoq(date, -1) if self.daysto("quarter-end", asof=date) >= abs(on)
-                                else utils.eoq(date))
-        if frequency == "trimester":
-            if on >= 0: 
-                return self.groupby(lambda date: 
-                                utils.sot(date) if self.daysfrom("trimester-start", asof=date) < on 
-                                else utils.sot(date, 1))
-            else: 
-                return self.groupby(lambda date: 
-                                utils.eot(date, -1) if self.daysto("trimester-end", asof=date) >= abs(on)
-                                else utils.eot(date))
-        if frequency == "semester":
-            if on >= 0: 
-                return self.groupby(lambda date: 
-                                utils.sos(date) if self.daysfrom("semester-start", asof=date) < on 
-                                else utils.sos(date, 1))
-            else: 
-                return self.groupby(lambda date: 
-                                utils.eos(date, -1) if self.daysto("semester-end", asof=date) >= abs(on)
-                                else utils.eos(date))
-        if frequency == "year":
-            if on >= 0: 
-                return self.groupby(lambda date: 
-                                utils.soy(date) if self.daysfrom("year-start", asof=date) < on 
-                                else utils.soy(date, 1))
-            else: 
-                return self.groupby(lambda date: 
-                                utils.eoy(date, -1) if self.daysto("year-end", asof=date) >= abs(on)
-                                else utils.eoy(date))
+        if sum(0 if arg is None else 1 for arg in [on, starting, ending]) != 1: 
+            raise ValueError("Expected one of on, starting or ending")
+        if starting is not None: 
+            on, side = starting, "left"
+        if ending is not None: 
+            on, side = ending, "right"
+        if not isinstance(on, BD):
+            raise TypeError("expected cutoff to be an instance of BD")
+        splitdays = on.resolve(self, onerror="drop")
+        calendars = collections.defaultdict(lambda: [])
+        for date in self: 
+            try:
+                calendars[splitdays.asof(date, side)].append(date)
+            except:
+                pass
+        return Grouper([Calendar(calendar) for calendar in calendars.values()])
 
     def fa(self, date, default=constants.RAISE):
         """
@@ -725,15 +721,39 @@ class Grouper:
                 return True
         return False
 
-    def apply(self, func):
+    def apply(self, func, onerror="raise"):
         """
         Apply a function to each sub-calendars
         """
         if not callable(func): 
             raise ValueError("Expected func to be a callable function")
-        mapped = [c if isinstance(c, Calendar) else Calendar([c])
-                    for c in [func(c) for c in self.calendars]]
-        return Grouper(mapped)
+        dates = []
+        for c in self.calendars:
+            try:
+                dates.append(func(c))
+            except Exception as e: 
+                if onerror == "raise":
+                    raise e
+                elif onerror == "skip" or onerror == "drop":
+                    pass
+                elif onerror == "first":
+                    dates.append(c[0])
+                elif onerror == "last":
+                    dates.append(c[-1])
+                elif callable(onerror):
+                    dates.append(onerror(c))
+                else: 
+                    raise ValueError("Expected onerror to be one of raise, first, last or callable")
+        for i, value in enumerate(dates):
+            if isinstance(value, (datetime.date, datetime.datetime)): 
+                dates[i] = Calendar([value])
+            elif isinstance(value, (list, tuple)):
+                dates[i] = Calendar(value)
+            elif isinstance(value, Calendar):
+                pass
+            else: 
+                raise ValueError("mapped values must be a datetime, a list thereof or a Calendar")
+        return Grouper(dates)
 
     def filter(self, func):
         """
@@ -754,3 +774,6 @@ class Grouper:
         Returns the 
         """
         return len(self.calendars)
+
+    def __iter__(self):
+        return iter(self.calendars)
