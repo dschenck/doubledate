@@ -63,6 +63,18 @@ class Calendar:
         return self.__dates__[-1]
 
     @property
+    def end(self):
+        """
+        Returns the last date in the calendar
+
+        Throws
+        ------------
+        KeyError
+            if the calendar is empty
+        """
+        return self.last
+
+    @property
     def first(self):
         """
         Returns the first date in the calendar
@@ -74,6 +86,18 @@ class Calendar:
         """
         return self.__dates__[0]
 
+    @property
+    def start(self):
+        """
+        Returns the first date in the calendar
+
+        Throws
+        ------------
+        KeyError
+            if the calendar is empty
+        """
+        return self.first
+        
     @property
     def dates(self):
         """
