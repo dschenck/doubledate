@@ -5,6 +5,34 @@ import dateutil.parser
 import doubledate.constants as constants
 
 
+def today():
+    """
+    Returns today's date as a :code:`datetime.date` object
+    """
+    return datetime.date.today()
+
+
+def tomorrow():
+    """
+    Returns tomorrow's date as a :code:`datetime.date` object
+    """
+    return datetime.date.today() + datetime.timedelta(days=1)
+
+
+def yesterday():
+    """
+    Returns yesterday's date as a :code:`datetime.date` object
+    """
+    return datetime.date.today() - datetime.timedelta(days=-1)
+
+
+def now():
+    """
+    Returns :code:`datetime.datetime.now()`
+    """
+    return datetime.datetime.now()
+
+
 def semester(date, *, base=1):
     """
     Returns the semester index of the given date
