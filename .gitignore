@@ -128,3 +128,6 @@ dmypy.json
 
 # my personal project notes
 .notes
+
+# mac OS 
+.DS_Store
