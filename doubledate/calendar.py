@@ -8,19 +8,21 @@ import datetime
 import doubledate.utils as utils
 import doubledate.constants as constants
 
-class BD: 
-    def __init__(self, index, frequency="M"):
-        self.index     = index
-        self.frequency = frequency
 
-    def resolve(self, calendar, onerror="last"): 
+class BD:
+    def __init__(self, index: int, frequency: str = "M", *, base: int = 0):
+        self.index = index
+        self.frequency = frequency
+        self.base = base
+
+    def resolve(self, calendar, onerror: str = "skip"):
         dates = []
         for subcal in calendar.resample(self.frequency):
             try:
-                dates.append(subcal[self.index])
+                dates.append(subcal[self.index - self.base])
             except Exception as e:
                 if onerror == "raise":
-                    raise e 
+                    raise e
                 elif onerror == "drop" or onerror == "skip":
                     pass
                 elif onerror == "last":
@@ -30,8 +32,11 @@ class BD:
                 elif callable(onerror):
                     dates.append(onerror(subcal))
                 else:
-                    raise ValueError("expected onerror to be one of raise, last, first or callable")
+                    raise ValueError(
+                        "expected onerror to be one of raise, last, first or callable"
+                    )
         return Calendar(dates)
+
 
 class Calendar:
     def __init__(self, dates=None):
@@ -43,13 +48,15 @@ class Calendar:
         TypeError
             if dates is not an iterable of date-like objects
         """
-        if dates is None: 
+        if dates is None:
             dates = []
-        if not all([isinstance(item, (datetime.date, datetime.datetime)) for item in dates]):
+        if not all(
+            [isinstance(item, (datetime.date, datetime.datetime)) for item in dates]
+        ):
             raise TypeError("Calendar expected an iterable of date objects")
-        self.__dates__    = sortedcontainers.SortedSet([date for date in dates])
+        self.__dates__ = sortedcontainers.SortedSet([date for date in dates])
         self.__datemaps__ = {}
-    
+
     @property
     def last(self):
         """
@@ -97,7 +104,7 @@ class Calendar:
             if the calendar is empty
         """
         return self.first
-        
+
     @property
     def dates(self):
         """
@@ -149,11 +156,11 @@ class Calendar:
             return Calendar(self.__dates__.__getitem__(value))
         raise KeyError("Invalid index or slice object")
 
-    def __add__(self, other): 
+    def __add__(self, other):
         """
         Alias for union
         """
-        if isinstance(other, (datetime.date, datetime.datetime)): 
+        if isinstance(other, (datetime.date, datetime.datetime)):
             return Calendar(self).union(Calendar([other]))
         return Calendar(self).union(Calendar(other))
 
@@ -167,11 +174,11 @@ class Calendar:
         other : Calendar, iterable
             the compared calendar
         """
-        for date in self: 
-            if date not in other: 
+        for date in self:
+            if date not in other:
                 return False
         for date in other:
-            if date not in self: 
+            if date not in self:
                 return False
         return True
 
@@ -193,7 +200,17 @@ class Calendar:
         """
         return Calendar(self.__dates__.intersection(*others))
 
-    def filter(self, func=None, *, year=None, semester=None, quarter=None, month=None, week=None, weekday=None):
+    def filter(
+        self,
+        func=None,
+        *,
+        year: int = None,
+        semester: int = None,
+        quarter: int = None,
+        month: int = None,
+        week: int = None,
+        weekday: str = None,
+    ):
         """
         Returns a new filtered calendar
         Either pass a filtering function, one or several filtering criterai
@@ -227,20 +244,26 @@ class Calendar:
         """
         if func is not None:
             if not callable(func):
-                raise ValueError("Filter accepts either a function, one or several named arguments")
+                raise ValueError(
+                    "Filter accepts either a function, one or several named arguments"
+                )
             return Calendar([date for date in self.__dates__ if func(date)])
-        if all([arg is None for arg in [year, semester, quarter, month, week, weekday]]):
-            raise ValueError("You need to provide one of year, semester, quarter, month, week, weekday")
+        if all(
+            [arg is None for arg in [year, semester, quarter, month, week, weekday]]
+        ):
+            raise ValueError(
+                "You need to provide one of year, semester, quarter, month, week, weekday"
+            )
         dates = list(self.__dates__)
-        if year is not None: 
+        if year is not None:
             dates = list(filter(lambda date: date.year == year, dates))
-        if semester is not None: 
+        if semester is not None:
             dates = list(filter(lambda date: utils.semester(date) == semester, dates))
-        if quarter is not None: 
+        if quarter is not None:
             dates = list(filter(lambda date: utils.quarter(date) == quarter, dates))
-        if month is not None: 
+        if month is not None:
             dates = list(filter(lambda date: date.month == month, dates))
-        if week is not None: 
+        if week is not None:
             dates = list(filter(lambda date: date.isocalendar()[1] == week, dates))
         if weekday is not None:
             dates = list(filter(lambda date: date.weekday() == weekday, dates))
@@ -267,7 +290,7 @@ class Calendar:
         """
         return self.filter(lambda date: date.weekday() in [5, 6])
 
-    def inverse(self, starting=None, ending=None):
+    def inverse(self, starting: datetime.date = None, ending=None):
         """
         Returns the negative of the calendar, using this calendar as the holiday mask
 
@@ -275,17 +298,17 @@ class Calendar:
         ------------
         inversed : Calendar
         """
-        if starting is None: 
+        if starting is None:
             starting = self.__dates__[0]
-        if ending is None: 
+        if ending is None:
             ending = self.__dates__[-1]
         dates = []
-        for i in range(1, (ending-starting).days):
+        for i in range(1, (ending - starting).days):
             if starting + datetime.timedelta(i) not in self:
                 dates.append(starting + datetime.timedelta(i))
         return Calendar(dates)
 
-    def dayof(self, date, frequency=None, *, base=1):
+    def dayof(self, date: datetime.date, frequency=None, *, base=1):
         """
         Returns the position of the date in the calendar at a given 
         frequency. By default, base is 1. 
@@ -295,12 +318,12 @@ class Calendar:
         position : int 
             the index + 1 of the given date in the filtered frequency
         """
-        if ("dayof", frequency, base) not in self.__datemaps__: 
+        if ("dayof", frequency, base) not in self.__datemaps__:
             mapping = utils.dayof(frequency, calendar=self, base=base)
             self.__datemaps__[("dayof", frequency, base)] = mapping
         return self.__datemaps__[("dayof", frequency, base)][date]
 
-    def daysfrom(self, start=None, *, asof=None):
+    def daysfrom(self, start: str = None, *, asof: datetime.date = None):
         """
         Returns the number of days since the start of the given frequency
         This is exclusive of the given date (i.e. base 0)
@@ -313,14 +336,14 @@ class Calendar:
         if isinstance(start, (datetime.date, datetime.datetime)):
             return len(self[start:asof]) - 1
 
-        if ("daysfrom", start) not in self.__datemaps__: 
+        if ("daysfrom", start) not in self.__datemaps__:
             mapping = utils.daysfrom(start, calendar=self)
             self.__datemaps__[("daysfrom", start)] = mapping
-        if asof is not None: 
+        if asof is not None:
             return self.__datemaps__[("daysfrom", start)][asof]
         return self.__datemaps__[("daysfrom", start)]
 
-    def daysto(self, to=None, *, asof=None):
+    def daysto(self, to: str = None, *, asof: datetime.date = None):
         """
         returns the number of days left until the end of the given frequency
 
@@ -332,15 +355,17 @@ class Calendar:
         """
         if isinstance(to, (datetime.date, datetime.datetime)):
             return len(self[asof:to]) - 1
-             
-        if ("daysto", to) not in self.__datemaps__: 
+
+        if ("daysto", to) not in self.__datemaps__:
             mapping = utils.daysto(to, calendar=self)
             self.__datemaps__[("daysto", to)] = mapping
-        if asof is not None: 
+        if asof is not None:
             return self.__datemaps__[("daysto", to)][asof]
         self.__datemaps__[("daysto", to)]
-    
-    def daysbetween(self, this, that, bounds="both"): 
+
+    def daysbetween(
+        self, this: datetime.date, that: datetime.date, bounds: str = "left"
+    ):
         """
         returns the number of open days between two dates
 
@@ -360,16 +385,26 @@ class Calendar:
             the calendar starting no earlier than this, and ending no later than that
         """
         if bounds == "both":
-            return len(self.filter(lambda date: min(this, that) <= date <= max(this, that)))
+            return len(
+                self.filter(lambda date: min(this, that) <= date <= max(this, that))
+            )
         if bounds == "left":
-            return len(self.filter(lambda date: min(this, that) <= date < max(this, that)))
+            return len(
+                self.filter(lambda date: min(this, that) <= date < max(this, that))
+            )
         if bounds == "right":
-            return len(self.filter(lambda date: min(this, that) < date <= max(this, that)))
+            return len(
+                self.filter(lambda date: min(this, that) < date <= max(this, that))
+            )
         if bounds is None:
-            return len(self.filter(lambda date: min(this, that) < date < max(this, that)))
-        raise ValueError(f"bounds should be one of 'both', 'left' or 'right', {bounds} given")
+            return len(
+                self.filter(lambda date: min(this, that) < date < max(this, that))
+            )
+        raise ValueError(
+            f"bounds should be one of 'both', 'left' or 'right', {bounds} given"
+        )
 
-    def offset(self, date, days):
+    def offset(self, date: datetime.date, days: int):
         """
         returns the date in the calendar offset by n days
 
@@ -385,7 +420,7 @@ class Calendar:
         offsetted : date-like
             the date in the calendar days-away from the given date
         """
-        if not date in self: 
+        if not date in self:
             raise ValueError(f"{date} is not in the calendar")
         return self[self.index(date) + days]
 
@@ -419,21 +454,29 @@ class Calendar:
                 return self.groupby(lambda date: (date.year, date.month > 6))
             elif grouper == "Y":
                 return self.groupby(lambda date: date.year)
-            raise ValueError(f"grouper should be a callable or one of W,M,Q,H or Y; {grouper} given")
+            raise ValueError(
+                f"grouper should be a callable or one of W,M,Q,H or Y; {grouper} given"
+            )
         if callable(grouper):
             calendars = collections.defaultdict(lambda: [])
-            for date in self: 
+            for date in self:
                 calendars[grouper(date)].append(date)
             return Grouper([Calendar(dates) for dates in calendars.values()])
         raise ValueError("Expected string or function")
 
-    def resample(self, grouper): 
+    def resample(self, grouper):
         """
         alias for groupby
         """
         return self.groupby(grouper)
 
-    def split(self, on=None, side="left", starting=None, ending=None):
+    def split(
+        self,
+        on=None,
+        side: str = "left",
+        starting: datetime.date = None,
+        ending: datetime.date = None,
+    ):
         """
         Splits the calendar in subcalendars at the given frequency and on the given index, 
         assuming that the passed index is the first date of each period. 
@@ -450,24 +493,24 @@ class Calendar:
         subcalendars : Grouper
             the subcalendars
         """
-        if sum(0 if arg is None else 1 for arg in [on, starting, ending]) != 1: 
+        if sum(0 if arg is None else 1 for arg in [on, starting, ending]) != 1:
             raise ValueError("Expected one of on, starting or ending")
-        if starting is not None: 
+        if starting is not None:
             on, side = starting, "left"
-        if ending is not None: 
+        if ending is not None:
             on, side = ending, "right"
         if not isinstance(on, BD):
             raise TypeError("expected cutoff to be an instance of BD")
         splitdays = on.resolve(self, onerror="drop")
         calendars = collections.defaultdict(lambda: [])
-        for date in self: 
+        for date in self:
             try:
                 calendars[splitdays.asof(date, side)].append(date)
             except:
                 pass
         return Grouper([Calendar(calendar) for calendar in calendars.values()])
 
-    def fa(self, date, default=constants.RAISE):
+    def fa(self, date: datetime.date, default=constants.RAISE):
         """
         Returns the first date after ("first-after", or "fa")
 
@@ -486,11 +529,13 @@ class Calendar:
         """
         if date > self.__dates__[-1]:
             if default == constants.RAISE:
-                raise KeyError(f"Out-of-range error: {date} is after last date in the calendar")
+                raise KeyError(
+                    f"Out-of-range error: {date} is after last date in the calendar"
+                )
             return default
         return self.__dates__[self.__dates__.bisect_right(date)]
 
-    def lb(self, date, default=constants.RAISE):
+    def lb(self, date: datetime.date, default=constants.RAISE):
         """
         Returns the last date immediately before ("last-before", or "lb")
 
@@ -507,13 +552,15 @@ class Calendar:
         date : datetime.date
             the last date immediately before the given date argument
         """
-        if date < self.__dates__[0]: 
+        if date < self.__dates__[0]:
             if default == constants.RAISE:
-                raise KeyError(f"Out-of-range error: {date} is before the first date in the calendar")
+                raise KeyError(
+                    f"Out-of-range error: {date} is before the first date in the calendar"
+                )
             return default
         return self.__dates__[self.__dates__.bisect_left(date) - 1]
 
-    def asof(self, date, side="left", default=constants.RAISE):
+    def asof(self, date: datetime.date, side="left", default=constants.RAISE):
         """
         Returns the date if the date is in the calendar, or the last date before that
 
@@ -530,7 +577,7 @@ class Calendar:
         date : datetime.date
             the date or its immediate precedent in the calendar
         """
-        if date in self: 
+        if date in self:
             return date
         if side == "left":
             return self.lb(date, default=default)
@@ -558,13 +605,13 @@ class Calendar:
         snapped : Calendar
             the snapped calendar
         """
-        if fallback not in ["drop", "previous", "ffill", "next", "bfill"]: 
+        if fallback not in ["drop", "previous", "ffill", "next", "bfill"]:
             raise ValueError("fallback should be one of 'drop', 'previous' or 'next'")
         filtered, other = [], Calendar(other)
-        for date in self: 
-            if date in other: 
+        for date in self:
+            if date in other:
                 filtered.append(date)
-            else: 
+            else:
                 if fallback == "drop":
                     pass
                 elif fallback in ["last", "previous", "ffill"]:
@@ -583,130 +630,155 @@ class Calendar:
         ------------
         mapped : Calendar | List
             the mapped values
-        """ 
-        if not callable(func): 
+        """
+        if not callable(func):
             raise ValueError("Expected func to be a callable function")
         mapped = [func(date) for date in self]
-        if all([isinstance(m, (datetime.date, datetime.datetime)) for m in mapped]): 
+        if all([isinstance(m, (datetime.date, datetime.datetime)) for m in mapped]):
             return Calendar(mapped)
         return mapped
 
-    def som(self, date):
+    def som(self, date: datetime.date):
         """
         return the first open day of the month given the date
         """
         for i in range(self.index(date), -1, -1):
-            if self.__dates__[i].month == date.month and self.__dates__[i].year == date.year: 
+            if (
+                self.__dates__[i].month == date.month
+                and self.__dates__[i].year == date.year
+            ):
                 continue
-            return self.__dates__[i+1]
+            return self.__dates__[i + 1]
         return self.__dates__[i]
 
-    def eom(self, date):
+    def eom(self, date: datetime.date):
         """
         return the last open day of the month given the date
         """
         for i in range(self.index(date), len(self)):
-            if self.__dates__[i].month == date.month and self.__dates__[i].year == date.year: 
+            if (
+                self.__dates__[i].month == date.month
+                and self.__dates__[i].year == date.year
+            ):
                 continue
-            return self.__dates__[i-1]
+            return self.__dates__[i - 1]
         return self.__dates__[i]
 
-    def soq(self, date):
+    def soq(self, date: datetime.date):
         """
         return the first open day of the quarter given the date
         """
         for i in range(self.index(date), -1, -1):
-            if utils.quarter(self.__dates__[i]) == utils.quarter(date) and self.__dates__[i].year == date.year:
+            if (
+                utils.quarter(self.__dates__[i]) == utils.quarter(date)
+                and self.__dates__[i].year == date.year
+            ):
                 continue
-            return self.__dates__[i+1]
+            return self.__dates__[i + 1]
         return self.__dates__[i]
 
-    def eoq(self, date):
+    def eoq(self, date: datetime.date):
         """
         Returns the last open date of the quarter
         """
         for i in range(self.index(date), len(self)):
-            if utils.quarter(self.__dates__[i]) == utils.quarter(date) and self.__dates__[i].year == date.year: 
+            if (
+                utils.quarter(self.__dates__[i]) == utils.quarter(date)
+                and self.__dates__[i].year == date.year
+            ):
                 continue
-            return self.__dates__[i-1]
+            return self.__dates__[i - 1]
         return self.__dates__[i]
 
-    def sot(self, date):
+    def sot(self, date: datetime.date):
         """
         return the first open day of the trimester given the date
         """
         for i in range(self.index(date), -1, -1):
-            if utils.trimester(self.__dates__[i]) == utils.trimester(date) and self.__dates__[i].year == date.year:
+            if (
+                utils.trimester(self.__dates__[i]) == utils.trimester(date)
+                and self.__dates__[i].year == date.year
+            ):
                 continue
-            return self.__dates__[i+1]
+            return self.__dates__[i + 1]
         return self.__dates__[i]
 
-    def eot(self, date):
+    def eot(self, date: datetime.date):
         """
         Returns the last open date of the trimester
         """
         for i in range(self.index(date), len(self)):
-            if utils.trimester(self.__dates__[i]) == utils.trimester(date) and self.__dates__[i].year == date.year: 
+            if (
+                utils.trimester(self.__dates__[i]) == utils.trimester(date)
+                and self.__dates__[i].year == date.year
+            ):
                 continue
-            return self.__dates__[i-1]
+            return self.__dates__[i - 1]
         return self.__dates__[i]
 
-    def sos(self, date):
+    def sos(self, date: datetime.date):
         """
         return the first open day of the semester given the date
         """
         for i in range(self.index(date), -1, -1):
-            if utils.semester(self.__dates__[i]) == utils.semester(date) and self.__dates__[i].year == date.year:
+            if (
+                utils.semester(self.__dates__[i]) == utils.semester(date)
+                and self.__dates__[i].year == date.year
+            ):
                 continue
-            return self.__dates__[i+1]
+            return self.__dates__[i + 1]
         return self.__dates__[i]
 
-    def eos(self, date):
+    def eos(self, date: datetime.date):
         """
         Returns the last open date of the semester
         """
         for i in range(self.index(date), len(self)):
-            if utils.semester(self.__dates__[i]) == utils.semester(date) and self.__dates__[i].year == date.year: 
+            if (
+                utils.semester(self.__dates__[i]) == utils.semester(date)
+                and self.__dates__[i].year == date.year
+            ):
                 continue
-            return self.__dates__[i-1]
+            return self.__dates__[i - 1]
         return self.__dates__[i]
 
-    def soy(self, date):
+    def soy(self, date: datetime.date):
         """
         return the first open day of the year given the date
         """
         for i in range(self.index(date), -1, -1):
             if self.__dates__[i].year == date.year:
                 continue
-            return self.__dates__[i+1]
+            return self.__dates__[i + 1]
         return self.__dates__[i]
 
-    def eoy(self, date):
+    def eoy(self, date: datetime.date):
         """
         Returns the last open date of the quarter
         """
         for i in range(self.index(date), len(self)):
-            if self.__dates__[i].year == date.year: 
+            if self.__dates__[i].year == date.year:
                 continue
-            return self.__dates__[i-1]
+            return self.__dates__[i - 1]
         return self.__dates__[i]
 
-class Grouper: 
+
+class Grouper:
     def __init__(self, calendars=None):
-        if calendars is None: 
+        if calendars is None:
             self.calendars = []
         else:
-            if not all([isinstance(calendar, Calendar) for calendar in calendars]): 
+            if not all([isinstance(calendar, Calendar) for calendar in calendars]):
                 raise TypeError("Expected a list of calendar objects")
             self.calendars = list(calendars)
 
-    def first(self):
+    def first(self) -> Calendar:
         """
         Returns the first date of each subcalendar
         """
         return Calendar([calendar[0] for calendar in self.calendars])
 
-    def last(self):
+    def last(self) -> Calendar:
         """
         Returns the last date of each subcalendar
         """
@@ -729,19 +801,19 @@ class Grouper:
         """
         if isinstance(date, (datetime.date, datetime.datetime)):
             for i, calendar in enumerate(self.calendars):
-                if date in calendar: 
+                if date in calendar:
                     return i
             raise IndexError(f"{date} is not in any subcalendar")
-        if isinstance(value, Calendar):
-            return self.calendars.index(value)
+        if isinstance(date, Calendar):
+            return self.calendars.index(date)
         raise ValueError("Invalid use of .index")
 
-    def __contains__(self, date):
+    def __contains__(self, date) -> bool:
         """
         Returns True if one of the subcalendars contains the given date
         """
-        for calendar in self.calendars: 
-            if date in calendar: 
+        for calendar in self.calendars:
+            if date in calendar:
                 return True
         return False
 
@@ -749,13 +821,13 @@ class Grouper:
         """
         Apply a function to each sub-calendars
         """
-        if not callable(func): 
+        if not callable(func):
             raise ValueError("Expected func to be a callable function")
         dates = []
         for c in self.calendars:
             try:
                 dates.append(func(c))
-            except Exception as e: 
+            except Exception as e:
                 if onerror == "raise":
                     raise e
                 elif onerror == "skip" or onerror == "drop":
@@ -766,24 +838,28 @@ class Grouper:
                     dates.append(c[-1])
                 elif callable(onerror):
                     dates.append(onerror(c))
-                else: 
-                    raise ValueError("Expected onerror to be one of raise, first, last or callable")
+                else:
+                    raise ValueError(
+                        "Expected onerror to be one of raise, first, last or callable"
+                    )
         for i, value in enumerate(dates):
-            if isinstance(value, (datetime.date, datetime.datetime)): 
+            if isinstance(value, (datetime.date, datetime.datetime)):
                 dates[i] = Calendar([value])
             elif isinstance(value, (list, tuple)):
                 dates[i] = Calendar(value)
             elif isinstance(value, Calendar):
                 pass
-            else: 
-                raise ValueError("mapped values must be a datetime, a list thereof or a Calendar")
+            else:
+                raise ValueError(
+                    "mapped values must be a datetime, a list thereof or a Calendar"
+                )
         return Grouper(dates)
 
     def filter(self, func):
         """
         Filters out subcalendars
         """
-        if not callable(func): 
+        if not callable(func):
             raise ValueError("Expected func to be a callable function")
         return Grouper([cal for cal in self.calendars if func(cal)])
 
