@@ -1,6 +1,3 @@
-"""
-Calendar object
-"""
 import sortedcontainers
 import collections
 import datetime
@@ -10,12 +7,20 @@ import doubledate.constants as constants
 
 
 class BD:
+    """
+    Business day
+    """
+
     def __init__(self, index: int, frequency: str = "M", *, base: int = 0):
         self.index = index
         self.frequency = frequency
         self.base = base
 
     def resolve(self, calendar, onerror: str = "skip"):
+        """
+        Returns a new Calendar containing only the n'th business day 
+        each frequency.
+        """
         dates = []
         for subcal in calendar.resample(self.frequency):
             try:
@@ -33,7 +38,7 @@ class BD:
                     dates.append(onerror(subcal))
                 else:
                     raise ValueError(
-                        "expected onerror to be one of raise, last, first or callable"
+                        f"expected onerror to be one of 'raise', 'skip', 'last', 'first' or a callable, received {onerror}"
                     )
         return Calendar(dates)
 
@@ -41,7 +46,7 @@ class BD:
 class Calendar:
     def __init__(self, dates=None):
         """
-        Creates a calendar using the optional dates iterable
+        Calendar object
 
         Throws
         ------------
@@ -50,9 +55,7 @@ class Calendar:
         """
         if dates is None:
             dates = []
-        if not all(
-            [isinstance(item, (datetime.date, datetime.datetime)) for item in dates]
-        ):
+        if not all([isinstance(item, datetime.date) for item in dates]):
             raise TypeError("Calendar expected an iterable of date objects")
         self.__dates__ = sortedcontainers.SortedSet([date for date in dates])
         self.__datemaps__ = {}
@@ -149,9 +152,9 @@ class Calendar:
         if isinstance(value, int):
             return self.__dates__.__getitem__(value)
         elif isinstance(value, slice):
-            if isinstance(value.start, (datetime.date, datetime.datetime)):
+            if isinstance(value.start, datetime.date):
                 value = slice(self.__dates__.bisect_left(value.start), value.stop)
-            if isinstance(value.stop, (datetime.date, datetime.datetime)):
+            if isinstance(value.stop, datetime.date):
                 value = slice(value.start, self.__dates__.bisect_right(value.stop))
             return Calendar(self.__dates__.__getitem__(value))
         raise KeyError("Invalid index or slice object")
@@ -160,7 +163,7 @@ class Calendar:
         """
         Alias for union
         """
-        if isinstance(other, (datetime.date, datetime.datetime)):
+        if isinstance(other, datetime.date):
             return Calendar(self).union(Calendar([other]))
         return Calendar(self).union(Calendar(other))
 
@@ -290,7 +293,7 @@ class Calendar:
         """
         return self.filter(lambda date: date.weekday() in [5, 6])
 
-    def inverse(self, starting: datetime.date = None, ending=None):
+    def inverse(self, starting: datetime.date = None, ending: datetime.date = None):
         """
         Returns the negative of the calendar, using this calendar as the holiday mask
 
@@ -308,7 +311,7 @@ class Calendar:
                 dates.append(starting + datetime.timedelta(i))
         return Calendar(dates)
 
-    def dayof(self, date: datetime.date, frequency=None, *, base=1):
+    def dayof(self, date: datetime.date, frequency: str = None, *, base: int = 1):
         """
         Returns the position of the date in the calendar at a given 
         frequency. By default, base is 1. 
@@ -319,8 +322,9 @@ class Calendar:
             the index + 1 of the given date in the filtered frequency
         """
         if ("dayof", frequency, base) not in self.__datemaps__:
-            mapping = utils.dayof(frequency, calendar=self, base=base)
-            self.__datemaps__[("dayof", frequency, base)] = mapping
+            self.__datemaps__[("dayof", frequency, base)] = utils.dayof(
+                frequency, calendar=self, base=base
+            )
         return self.__datemaps__[("dayof", frequency, base)][date]
 
     def daysfrom(self, start: str = None, *, asof: datetime.date = None):
@@ -333,12 +337,13 @@ class Calendar:
         days : int 
             the number of days prior to the date but in the same frequency
         """
-        if isinstance(start, (datetime.date, datetime.datetime)):
+        if isinstance(start, datetime.date):
             return len(self[start:asof]) - 1
 
         if ("daysfrom", start) not in self.__datemaps__:
-            mapping = utils.daysfrom(start, calendar=self)
-            self.__datemaps__[("daysfrom", start)] = mapping
+            self.__datemaps__[("daysfrom", start)] = utils.daysfrom(
+                start, calendar=self
+            )
         if asof is not None:
             return self.__datemaps__[("daysfrom", start)][asof]
         return self.__datemaps__[("daysfrom", start)]
@@ -353,12 +358,11 @@ class Calendar:
             number of days in the calendar until the end of the frequency;
             exlusive of the given date
         """
-        if isinstance(to, (datetime.date, datetime.datetime)):
+        if isinstance(to, datetime.date):
             return len(self[asof:to]) - 1
 
         if ("daysto", to) not in self.__datemaps__:
-            mapping = utils.daysto(to, calendar=self)
-            self.__datemaps__[("daysto", to)] = mapping
+            self.__datemaps__[("daysto", to)] = utils.daysto(to, calendar=self)
         if asof is not None:
             return self.__datemaps__[("daysto", to)][asof]
         self.__datemaps__[("daysto", to)]
@@ -377,7 +381,7 @@ class Calendar:
             the right-bound of the calenar
         bounds : str, optional
             whether to include this or that in the count
-            one of 'both' (default), 'left' or 'right' or None
+            one of 'both', 'left' (default) or 'right' or None
 
         Returns 
         ------------
@@ -483,10 +487,8 @@ class Calendar:
 
         Arguments
         ---------------
-        frequency : str
-            one of 'month', 'quarter', 'trimester', 'semester' or 'year
-        on : int
-            one of 0...27 or -1...-27
+        on : BD
+            the business day on which to split
 
         Returns
         ---------------
@@ -634,7 +636,7 @@ class Calendar:
         if not callable(func):
             raise ValueError("Expected func to be a callable function")
         mapped = [func(date) for date in self]
-        if all([isinstance(m, (datetime.date, datetime.datetime)) for m in mapped]):
+        if all([isinstance(m, datetime.date) for m in mapped]):
             return Calendar(mapped)
         return mapped
 
@@ -764,6 +766,10 @@ class Calendar:
 
 
 class Grouper:
+    """
+    Collection of subcalendars
+    """
+
     def __init__(self, calendars=None):
         if calendars is None:
             self.calendars = []
@@ -790,7 +796,7 @@ class Grouper:
         """
         if isinstance(value, int):
             return self.calendars[value]
-        if isinstance(value, (datetime.date, datetime.datetime)):
+        if isinstance(value, datetime.date):
             return self[self.index(value)]
         if isinstance(value, slice):
             return Calendar().union(*self.calendars[value])
@@ -799,7 +805,7 @@ class Grouper:
         """
         Returns the 0-based index of the calendar containing the date
         """
-        if isinstance(date, (datetime.date, datetime.datetime)):
+        if isinstance(date, datetime.date):
             for i, calendar in enumerate(self.calendars):
                 if date in calendar:
                     return i
@@ -843,7 +849,7 @@ class Grouper:
                         "Expected onerror to be one of raise, first, last or callable"
                     )
         for i, value in enumerate(dates):
-            if isinstance(value, (datetime.date, datetime.datetime)):
+            if isinstance(value, datetime.date):
                 dates[i] = Calendar([value])
             elif isinstance(value, (list, tuple)):
                 dates[i] = Calendar(value)
