@@ -221,7 +221,7 @@ class Calendar:
         Arguments
         ------------
         func : function, optional
-            the filtering function
+            the filtering function (receives each date as argument)
         year : int, optional
             pass a value to filter dates of the given year only
         semester : int, optional (1 or 2)
