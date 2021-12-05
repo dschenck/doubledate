@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="doubledate",
-    version="0.0.6",
+    version="0.0.7",
     author="david.schenck@outlook.com",
     author_email="david.schenck@outlook.com",
     description="A calendar wrapper",
@@ -18,5 +18,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=['python-dateutil', 'sortedcontainers']
+    install_requires=["python-dateutil", "sortedcontainers"],
 )

@@ -1,11 +1,12 @@
 =====================================
-API Documentation
+API
 =====================================
 The API documentation provides information on specific functions, classes and modules in the doubledate package. 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
    :caption: Contents
 
-   utilities
-   calendar
+   utils/doubledate.utils
+   Calendar/doubledate.Calendar
+   BD/index

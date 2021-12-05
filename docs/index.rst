@@ -1,15 +1,25 @@
 doubledate: another datetime library
 =====================================
-**doubledate** is yet another datetime library, because one is never enough. It comes with a few utility functions as well as a `Calendar` object designed to interface custom calendars.
+**doubledate**, yet another datetime library, exposes a set of 20+ utility functions as well as an immutable :code:`Calendar` object representing a sorted-list of dates.
 
->>> import doubledate as dtwo
+.. image:: https://badge.fury.io/py/doubledate.svg
+   :target: https://badge.fury.io/py/doubledate
 
-Quickstart
+.. image:: https://readthedocs.org/projects/doubledate/badge/?version=latest
+   :target: https://doubledate.readthedocs.io/en/latest/?badge=latest
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
+
+Installation
 -------------------------------------
-Installing doubledate is simple with pip: 
+**doubledate** is written in pure Python. Installing doubledate is simple with pip: 
 ::
 
     $ pip install doubledate
+
+Quickstart 
+-------------------------------------
 
 Using doubledate is also easy
 ::
@@ -33,11 +43,6 @@ Using doubledate is also easy
 
     >>> dtwo.offset(datetime.datetime(2020, 3, 31), months=1, handle=lambda eom, gap: 1)
     datetime.datetime(2020, 5, 1) #handle function returned 1... i.e. eom + 1 day
-    
-
-Documentation
--------------------------------------
-Complete documentation for doubledate is available at https://doubledate.readthedocs.io
 
 
 .. toctree::
@@ -47,3 +52,8 @@ Complete documentation for doubledate is available at https://doubledate.readthe
    source/installation
    source/API/index
    source/changelog
+
+
+Documentation
+-------------------------------------
+Complete documentation for doubledate is available at https://doubledate.readthedocs.io
