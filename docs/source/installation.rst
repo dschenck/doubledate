@@ -16,7 +16,7 @@ Installing a specific version of :code:`doubledate`:
     $ pip install doubledate==0.0.7
 
 Dependencies
-========================
+-------------------------
 :code:`doubledate` has the following dependencies: 
 
 - `sortedcontainers <http://www.grantjenks.com/docs/sortedcontainers/>`_

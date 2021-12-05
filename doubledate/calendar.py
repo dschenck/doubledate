@@ -48,10 +48,10 @@ class Calendar:
         """
         Calendar object
 
-        Throws
+        Raises
         ------------
         TypeError
-            if dates is not an iterable of date-like objects
+            if dates is not an iterable of datetime.date objects
         """
         if dates is None:
             dates = []
@@ -65,7 +65,7 @@ class Calendar:
         """
         Returns the last date in the calendar
 
-        Throws
+        Raises
         ------------
         KeyError
             if the calendar is empty
@@ -77,7 +77,7 @@ class Calendar:
         """
         Returns the last date in the calendar
 
-        Throws
+        Raises
         ------------
         KeyError
             if the calendar is empty
@@ -89,7 +89,7 @@ class Calendar:
         """
         Returns the first date in the calendar
 
-        Throws
+        Raises
         ------------
         KeyError
             if the calendar is empty
@@ -101,7 +101,7 @@ class Calendar:
         """
         Returns the first date in the calendar
 
-        Throws
+        Raises
         ------------
         KeyError
             if the calendar is empty
@@ -375,9 +375,9 @@ class Calendar:
 
         Arguments
         ------------
-        this : date-like
+        this : datetime.date
             the left-bound of the calendar
-        that : date-like
+        that : datetime.date
             the right-bound of the calenar
         bounds : str, optional
             whether to include this or that in the count
@@ -414,14 +414,14 @@ class Calendar:
 
         Arguments
         ------------
-        date : date-like
+        date : datetime.date
             the reference date
         days : int
             the offset
 
         Returns
         ------------
-        offsetted : date-like
+        offsetted : datetime.date
             the date in the calendar days-away from the given date
         """
         if not date in self:
@@ -441,11 +441,12 @@ class Calendar:
         grouper : str | callable
             the criterion to group dates by
             string groupers include
-                - W: groupby by week number
-                - M: groupby by month
-                - Q: groupby by quarter
-                - H: groupby semester
-                - Y: groupby year
+            - W: groupby by week number
+            - M: groupby by month
+            - Q: groupby by quarter
+            - H: groupby semester
+            - Y: groupby year
+
         """
         if isinstance(grouper, str):
             if grouper == "W":
@@ -518,7 +519,7 @@ class Calendar:
 
         Arguments
         ------------
-        date : date-like
+        date : datetime.date
             the date from which to compute the first date strictly after in the calendar
         default : optional
             the default value if the given date is on or after the last date in the calendar
@@ -543,10 +544,10 @@ class Calendar:
 
         Arguments
         ------------
-        date : date-like
+        date : datetime.date
             the lookup date
 
-        default: *, optional
+        default: optional
             default value if the given date is strictly before the first date in the calendar
 
         Return
@@ -568,10 +569,10 @@ class Calendar:
 
         Arguments
         ------------
-        date : date-like
+        date : datetime.date
             the lookup date
 
-        default: *, optional
+        default: optional
             default value if the given date is strictly before the first date in the calendar
 
         Return
@@ -625,7 +626,7 @@ class Calendar:
     def apply(self, func):
         """
         Passes all the dates in the calendar to the function
-        If all mapped values are date-like objects, function returns a new calendar
+        If all mapped values are datetime.date objects, function returns a new calendar
         Else it returns a new list
 
         Returns

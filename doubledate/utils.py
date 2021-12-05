@@ -8,6 +8,17 @@ import doubledate.constants as constants
 def today():
     """
     Returns today's date as a :code:`datetime.date` object
+
+    Returns
+    -------
+    datetime.date
+        today's date
+
+    See also
+    --------
+    tomorrow : compute tomorrow's date
+    yesterday : compute yesterday's date
+    now : compute current datetime
     """
     return datetime.date.today()
 
@@ -15,6 +26,15 @@ def today():
 def tomorrow():
     """
     Returns tomorrow's date as a :code:`datetime.date` object
+
+    Returns
+    -------
+    datetime.date
+        tomorrow's date
+
+    See also
+    --------
+    today, yesterday, now
     """
     return datetime.date.today() + datetime.timedelta(days=1)
 
@@ -22,6 +42,15 @@ def tomorrow():
 def yesterday():
     """
     Returns yesterday's date as a :code:`datetime.date` object
+
+    Returns
+    -------
+    datetime.date
+        yesterday's date
+
+    See also
+    --------
+    today, tomorrow, now
     """
     return datetime.date.today() - datetime.timedelta(days=-1)
 
@@ -29,13 +58,37 @@ def yesterday():
 def now():
     """
     Returns :code:`datetime.datetime.now()`
+
+    Returns
+    -------
+    datetime.datetime
+        current datetime
+
+    See also
+    --------
+    today, tomorrow, yesterday
     """
     return datetime.datetime.now()
 
 
 def semester(date, *, base=1):
     """
-    Returns the semester index of the given date
+    Returns the semester of the given date.
+
+    The first semester runs from 1 January to 30 June; the second
+    from 1 July to 31 December.
+
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to determine the semester
+    base : int, optional
+        the index of the first semester (default is 1)
+
+    Returns
+    -------
+    int
+        semester's index
 
     Examples
     ------------
@@ -44,16 +97,35 @@ def semester(date, *, base=1):
 
     >>> semester(datetime.date(2020, 1, 10), base=0)
     0
+
+    See also
+    --------
+    trimester, quarter
     """
     return (date.month - 1) // 6 + base
 
 
 def trimester(date, *, base=1):
     """
-    returns the trimester index of the given date
+    Returns the trimester of the given date
+
+    Trimesters run from 1 January to 30 April, 1 May to 31 August 
+    and 1 September to 31 December.
+
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to determine the trimester
+    base : int, optional
+        the index of the first trimester (default is 1)
+
+    Returns
+    -------
+    int
+        trimester's index
 
     Examples
-    ------------
+    --------
     >>> trimester(datetime.date(2020, 5, 10))
     2
 
@@ -62,13 +134,32 @@ def trimester(date, *, base=1):
 
     >>> trimester(datetime.date(2020, 9, 10))
     3
+
+    See also
+    --------
+    semester, quarter
     """
     return (date.month - 1) // 4 + base
 
 
 def quarter(date, *, base=1):
     """
-    Returns the quarter index of the given date
+    Returns the quarter of the given date
+
+    Quarters run from 1 January to 31 March, 1 April to 30 June, 
+    1 July to 30 September and 1 October to 31 December.
+
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to determine the quarter
+    base : int, optional
+        the index of the first trimester (default is 1)
+
+    Returns
+    -------
+    int
+        quarter's index
 
     Examples
     ------------
@@ -77,43 +168,132 @@ def quarter(date, *, base=1):
 
     >>> quarter(datetime.date(2020, 1, 10), base=0)
     0
+
+    See also
+    --------
+    semester, trimester
     """
     return (date.month - 1) // 3 + base
 
 
-def sow(date, offset=0, weekday="MON"):
+def sow(date: datetime.date, offset: int = 0, weekday: str = "MON") -> datetime.date:
     """
     Returns the start of the week, i.e. the first date on or before the given date 
     whose weekday is equal to the the weekday argument, and 
-    offset by a given number of weeks. Weekday must be one of MON...SUN.
+    offset by a given number of weeks. 
+    
+    Weekday must be one of :code:`'MON'`, :code:`'TUE'`, :code:`'WED'`, :code:`'THU'`, 
+    :code:`'FRI'`, :code:`'SAT'` or :code:`'SUN'`.
+
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to determine the start of the week
+    offset : int, optional
+        the number of weeks from which to offset the most recent start 
+        of the week (default is 0)
+    weekday : str, optional
+        the weekday which defines the start of the week (default is :code:`"MON"`)
+
+    Returns
+    -------
+    :code:`datetime.date`
+        The start of the week
 
     Examples
-    ------------
+    --------
     >>> today = datetime.date(2020, 1, 15) #Wednesday
     >>> sow(today) 
-    datetime.date(2020, 1, 13) #Monday
+    datetime.date(2020, 1, 13) #last Monday
 
     >>> sow(today, 1)
     datetime.date(2020, 1, 20) #following Monday
 
+    >>> sow(today, weekday="WED") 
+    datetime.date(2020, 1, 15) #today
+
     >>> sow(today, weekday="THU")
     datetime.date(2020, 1, 9) #last Thursday
+
+    See also
+    --------
+    eow : compute end of week
+    som : compute start of month
+    soq : compute start of quarter
+    sot : compute start of trimester
+    soy : compute start of year
     """
     if isinstance(weekday, str):
-        weekday = constants.WEEKDAYS.index(weekday)
+        weekday = constants.WEEKDAYS[weekday]
     return date + datetime.timedelta(offset * 7 - ((date.weekday() - weekday) % 7))
 
 
-def eow(date, offset=0, weekday="SUN"):
+def next(weekday: str, *, asof=None) -> datetime.date:
     """
-    Returns the end of the week, i.e. the first date on or after the given date
-    whose weekday is equal to the the weekday argument, and 
-    offset by a given number of weeks. 
-    
-    Weekday must be one of MON...SUN.
+    Returns the first weekday strictly after the :code:`asof` date (or today) 
+    for which the weekday is equal to the passed :code:`weekday` argument.
+
+    Weekday must be one of :code:`'MON'`, :code:`'TUE'`, :code:`'WED'`, :code:`'THU'`, 
+    :code:`'FRI'`, :code:`'SAT'` or :code:`'SUN'`.
+
+    Parameters
+    ----------
+    weekday : str
+        the target weekday
+    asof : datetime.date, optional
+        the date from which to determine the next date (default is :code:`today`)
+
+    Returns
+    -------
+    :code:`datetime.date`
+        The first weekday strictly after the asof date
 
     Examples
-    ------------
+    --------
+    >>> next("MON") #assume today is Wed 15 Jan 2020
+    datetime.date(2020, 1, 20)
+
+    >>> next("WED")
+    datetime.date(2020,1,22)
+
+    >>> next("MON", asof=datetime.date(2020,1,15))
+    datetime.date(2020, 1, 20)
+
+    See also
+    --------
+    sow : compute start of week
+    last : compute last weekday (e.g. Monday)
+    """
+    return sow(asof or today(), offset=1, weekday=weekday)
+
+
+def eow(date: datetime.date, offset: int = 0, weekday: str = "SUN") -> datetime.date:
+    """
+    Returns the end of the week, i.e. the first date on or after the given date
+    whose weekday is equal to the the :code:`weekday` argument, and 
+    offset by a given number of weeks. 
+    
+    Weekday must be one of :code:`'MON'`, :code:`'TUE'`, :code:`'WED'`, :code:`'THU'`, 
+    :code:`'FRI'`, :code:`'SAT'` or :code:`'SUN'`.
+
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to determine the end of the week
+    offset : int, optional
+        the number of weeks from which to offset the most recent end 
+        of the week (default is 0)
+    weekday : str, optional
+        the weekday which defines the end of the week (default is :code:`"SUN"`)
+
+    Returns
+    -------
+    :code:`datetime.date`
+        The end of the week
+
+
+    Examples
+    --------
     >>> today = datetime.date(2020, 1, 15) #Wednesday
     >>> eow(today) 
     datetime.date(2020, 1, 20) #Sunday (by default)
@@ -128,14 +308,65 @@ def eow(date, offset=0, weekday="SUN"):
     datetime.date(2020, 1, 8) #most recent Thursday strictly before today
     """
     if isinstance(weekday, str):
-        weekday = constants.WEEKDAYS.index(weekday)
+        weekday = constants.WEEKDAYS[weekday]
     return date + datetime.timedelta((weekday - date.weekday()) % 7 + offset * 7)
 
 
-def som(date, offset=0):
+def last(weekday: str, *, asof=None) -> datetime.date:
     """
-    Returns the first date of the month for the given date, then optionally 
-    offsets it by :code:`offset` months. 
+    Returns the most recent date strictly before today (or the :code:`asof` date) 
+    for which the weekday is equal to the passed :code:`weekday` argument
+
+    Parameters
+    ----------
+    weekday : str
+        the target weekday
+    asof : datetime.date, optional
+        the date from which to determine the last date (default is :code:`today`)
+
+    Returns
+    -------
+    :code:`datetime.date`
+        The first weekday strictly before the asof date
+
+    Example
+    -------
+    >>> last("MON") #assume today is Wed 15 Jan 2020
+    datetime.date(2020, 1, 13)
+
+    >>> last("SUN")
+    datetime.date(2020, 1, 12)
+
+    >>> last("WED", asof=datetime.date(2020, 1, 15))
+    datetime.date(2020, 1, 8)
+
+    """
+    if asof is None:
+        asof = today()
+
+    if constants.WEEKDAYS[weekday] == asof.weekday():
+        return asof - datetime.timedelta(days=7)
+
+    return sow(asof, weekday=weekday)
+
+
+def som(date: datetime.date, offset: int = 0) -> datetime.date:
+    """
+    Returns the start of the month for the given :code:`date`, then optionally 
+    offsets it by :code:`offset` months.
+
+    Parameters
+    ----------
+    date : datetime.date
+        The date for which to compute the start of the month
+    offset : int, optional  
+        The number of months from which to offset the start of 
+        the month
+
+    Returns
+    -------
+    :code:`datetime.date`
+        The start of the month
 
     Example
     ------------
@@ -148,6 +379,10 @@ def som(date, offset=0):
 
     >>> som(today, -1):
     datetime.date(2019, 12, 1) #start of the previous month
+
+    See also
+    --------
+    eom : compute the end of the month
     """
     return date.replace(
         year=(date.year + (date.month + offset - 1) // 12),
@@ -156,10 +391,27 @@ def som(date, offset=0):
     )
 
 
-def eom(date, offset=0):
+def eom(date: datetime.date, offset: int = 0):
     """
     Returns the last date of month for the given date, then optionally 
-    offsets it by :code:`offset` months, emulating Excel's EOM function
+    offsets it by :code:`offset` months.
+
+    Parameters
+    ----------
+    date : datetime.date
+        The date for which to compute the end of the month
+    offset : int, optional  
+        The number of months from which to offset the end of 
+        the month
+
+    Returns
+    -------
+    :code:`datetime.date`
+        The end of the month
+
+    Note
+    ----
+    This function emulates Excel's EOM function
 
     Examples
     ------------
@@ -172,6 +424,10 @@ def eom(date, offset=0):
 
     >>> eom(today, -1)
     datetime.date(2019, 12, 31) #end of previous month
+
+    See also
+    --------
+    som : compute the start of the month
     """
     if offset == 0:
         return date.replace(
@@ -180,13 +436,26 @@ def eom(date, offset=0):
     return eom(som(date, offset))
 
 
-def soq(date, offset=0):
+def soq(date: datetime.date, offset: int = 0) -> datetime.date:
     """
     Returns the first date of the quarter, i.e. one of 
-    1 January, 1 April, 1 July or 1 October
+    1 January, 1 April, 1 July or 1 October, then optionally 
+    offsets it by :code:`offset` quarters
+
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to compute the start of the quarter
+    offset : int, optional
+        an offset from the start of the quarter of the date
+
+    Returns
+    -------
+    datetime.date
+        The start of the quarter
 
     Examples
-    ------------
+    --------
     >>> today = datetime.date(2020, 1, 15)
     >>> soq(today):
     datetime.date(2020,1,1)
@@ -197,14 +466,26 @@ def soq(date, offset=0):
     return (eoq(date, offset) - datetime.timedelta(2 * 31 + 1)).replace(day=1)
 
 
-def eoq(date, offset=0):
+def eoq(date: datetime.date, offset: int = 0) -> datetime.date:
     """
-    Returns the end of the calendar quarter, i.e. one of
+    Returns the end of the quarter, i.e. one of
     31 March, 30 June, 30 September or 31 December, then 
     optionally offsets it by :code:`offset` quarters
 
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to compute the end of the quarter
+    offset : int, optional
+        an offset from the end of the quarter of the date
+
+    Returns
+    -------
+    datetime.date
+        The end of the quarter
+
     Examples
-    ------------
+    --------
     >>> today = datetime.date(2020, 1, 15)
     >>> eoq(today):
     datetime.date(2020,3,31)
@@ -221,14 +502,26 @@ def eoq(date, offset=0):
     )
 
 
-def eot(date, offset=0):
+def eot(date: datetime.date, offset: int = 0) -> datetime.date:
     """
     Returns the end of the calendar trimester, i.e. one of 
     30 April, 31 August or 31 December, then optionally offsets it 
-    by :code:`offset` quarters
+    by :code:`offset` trimesters
+
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to compute the end of the trimester
+    offset : int, optional
+        an offset from the end of the trimester of the date
+
+    Returns
+    -------
+    datetime.date
+        The end of the trimester
 
     Examples
-    ------------
+    --------
     >>> today = datetime.date(2020, 1, 15)
     >>> eot(today):
     datetime.date(2020,4,30)
@@ -245,20 +538,44 @@ def eot(date, offset=0):
     )
 
 
-def sot(date, offset=0):
+def sot(date: datetime.date, offset: int = 0) -> datetime.date:
     """
     Returns the first date of the calendar trimester, i.e. one of
     1 January, 1 May or 1 September, then optionally offsets it 
-    by :code:`offset` quarters
+    by :code:`offset` trimesters
+
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to compute the start of the trimester
+    offset : int, optional
+        an offset from the start of the trimester of the date
+
+    Returns
+    -------
+    datetime.date
+        The start of the trimester
     """
     return (eot(date, offset) - datetime.timedelta(3 * 31 + 1)).replace(day=1)
 
 
-def eos(date, offset=0):
+def eos(date: datetime.date, offset: int = 0) -> datetime.date:
     """
     Returns the end of the calendar semester, i.e. one of 
     30 June or 31 December, then optionally offsets it 
     by :code:`offset` semesters
+
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to compute the end of the semester
+    offset : int, optional
+        an offset from the end of the semester of the date
+
+    Returns
+    -------
+    datetime.date
+        The end of the semester
     """
     return eom(
         date.replace(
@@ -269,36 +586,74 @@ def eos(date, offset=0):
     )
 
 
-def sos(date, offset=0):
+def sos(date: datetime.date, offset: int = 0) -> datetime.date:
     """
     Returns the first date of the calendar semester, i.e. one of
     1 January or 1 July, then optionally offsets it 
     by :code:`offset` semesters
+
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to compute the start of the semester
+    offset : int, optional
+        an offset from the start of the semester of the date
+
+    Returns
+    -------
+    datetime.date
+        The start of the semester
     """
     return (eos(date, offset) - datetime.timedelta(5 * 31 + 1)).replace(day=1)
 
 
-def soy(date, offset=0):
+def soy(date: datetime.date, offset: int = 0) -> datetime.date:
     """
-    Returns the start of the year at a given offset
+    Returns the start of the year, i.e. the 1st January of the current date, 
+    then optionally offset by :code:`offset` years.
+
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to compute the start of the year
+    offset : int, optional
+        an offset from the start of the year of the date
+
+    Returns
+    -------
+    datetime.date
+        The start of the year
     """
     return type(date)(date.year + offset, 1, 1)
 
 
-def eoy(date, offset=0):
+def eoy(date: datetime.date, offset: int = 0) -> datetime.date:
     """
-    Returns the end of the year at a given offset
+    Returns the end of the year, i.e. the 31 December of the date's year, 
+    then optionally offset by :code:`offset` years.
+
+    Parameters
+    ----------
+    date : datetime.date
+        the date from which to compute the end of the year
+    offset : int, optional
+        an offset from the end of the year of the date
+
+    Returns
+    -------
+    datetime.date
+        The end of the year
     """
     return type(date)(date.year + offset, 12, 31)
 
 
-def floor(date, frequency):
+def floor(date: datetime.date, frequency: str) -> datetime.date:
     """
     Returns the first date of the frequency (e.g. quarter) 
     for the date passed as first argument. 
 
-    Arguments
-    ------------
+    Parameters
+    ----------
     date : datetime-like
         the date
     frequency : str
@@ -306,7 +661,7 @@ def floor(date, frequency):
         month, week (or specific weekday)
 
     Examples
-    ------------
+    --------
     >>> floor(datetime.date(2020, 4, 10), "Y")
     datetime.date(2020, 1, 1) #start of year
 
@@ -330,12 +685,12 @@ def floor(date, frequency):
     raise ValueError(f"Unrecognized frequency {frequency}")
 
 
-def ceil(date, frequency):
+def ceil(date: datetime.date, frequency: str) -> datetime.date:
     """
     Returns the end of the frequency (e.g. quarter) for the date passed as first argument
 
-    Arguments
-    ------------
+    Parameters
+    ----------
     date : datetime-like
         the date to offset
     frequency : str
@@ -343,7 +698,7 @@ def ceil(date, frequency):
         month, week (or specific weekday)
 
     Examples
-    ------------
+    --------
     >>> ceil(datetime.date(2020, 4, 10), "Y")
     datetime.date(2020, 12, 31) #end of year
 
@@ -367,12 +722,18 @@ def ceil(date, frequency):
     raise ValueError(f"Unrecognized frequency {frequency}")
 
 
-def isleap(year):
+def isleap(year) -> bool:
     """
-    Returns whether the given year is a leap-year
+    Returns whether the given year (or date's year) is a leap-year.
+
+    Parameters
+    ----------
+    year : int, datetime.date
+        the year, or the date for whose year to determine
+        whether it is a leap year or not
 
     Examples
-    ------------
+    --------
     >>> isleap(2020)
     True #2020 is a leap year
 
@@ -396,13 +757,13 @@ def parse(date, dayfirst=True, yearfirst=True, fuzzy=True):
 
 
 def offset(
-    date,
-    days=None,
-    weekdays=None,
-    weeks=None,
-    months=None,
-    years=None,
-    to=None,
+    date: datetime.date,
+    days: int = None,
+    weekdays: int = None,
+    weeks: int = None,
+    months: int = None,
+    years: int = None,
+    to: str = None,
     handle=0,
 ):
     """
@@ -579,15 +940,13 @@ def offset(
             )
     if to is not None:
         if to in constants.WEEKDAYS:
-            if date.weekday() == constants.WEEKDAYS.index(to):
+            if date.weekday() == constants.WEEKDAYS[to]:
                 return date
-            if date.weekday() > constants.WEEKDAYS.index(to):
+            if date.weekday() > constants.WEEKDAYS[to]:
                 return date + datetime.timedelta(
-                    7 - (date.weekday() - constants.WEEKDAYS.index(to))
+                    7 - (date.weekday() - constants.WEEKDAYS[to])
                 )
-            return date + datetime.timedelta(
-                constants.WEEKDAYS.index(to) - date.weekday()
-            )
+            return date + datetime.timedelta(constants.WEEKDAYS[to] - date.weekday())
         if to == "EOM":
             return eom(date, 0)
         if to == "EOQ":
@@ -633,7 +992,7 @@ class datemap:
         return [self[v] for v in value]
 
 
-def dayof(frequency, dates=None, *, calendar=None, base=1):
+def dayof(frequency: str, dates=None, *, calendar=None, base=1):
     """
     Returns an efficient iterator that yields the position of each date 
     in a given frequency.
@@ -738,7 +1097,7 @@ def dayof(frequency, dates=None, *, calendar=None, base=1):
     return datemap(mapping)
 
 
-def daysfrom(frequency, dates=None, *, calendar=None):
+def daysfrom(frequency: str, dates=None, *, calendar=None):
     """
     Returns an efficient iterator that yields the number of days since the  
     start of a given frequency. 
@@ -794,7 +1153,7 @@ def daysfrom(frequency, dates=None, *, calendar=None):
     return dayof(FREQUENCIES[frequency], dates, calendar=calendar, base=0)
 
 
-def daysto(frequency, dates=None, *, calendar=None):
+def daysto(frequency: str, dates=None, *, calendar=None):
     """
     Returns an efficient iterator that yields the number of days to the  
     end of a given frequency. 
@@ -874,7 +1233,7 @@ def daysto(frequency, dates=None, *, calendar=None):
     return datemap(mapping)
 
 
-def weekdayof(frequency, date=None, *, base=1):
+def weekdayof(frequency: str, date=None, *, base=1):
     """
     Returns the number of weeks since the start of the frequency
     assuming the week starts on the same weekday as the date given.
@@ -915,4 +1274,3 @@ def weekdayof(frequency, date=None, *, base=1):
         )
         + base
     )
-

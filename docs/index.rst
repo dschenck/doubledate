@@ -1,10 +1,19 @@
 doubledate: another datetime library
 =====================================
-**doubledate** is yet another datetime library, because one is never enough.
+**doubledate**, yet another datetime library, exposes a set of 20+ utility functions as well as an immutable :code:`Calendar` object representing a sorted-list of dates.
+
+.. image:: https://badge.fury.io/py/doubledate.svg
+   :target: https://badge.fury.io/py/doubledate
+
+.. image:: https://readthedocs.org/projects/doubledate/badge/?version=latest
+   :target: https://doubledate.readthedocs.io/en/latest/?badge=latest
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
 
 Installation
 -------------------------------------
-Installing doubledate is simple with pip: 
+**doubledate** is written in pure Python. Installing doubledate is simple with pip: 
 ::
 
     $ pip install doubledate

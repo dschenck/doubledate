@@ -10,6 +10,7 @@ from .utils import (
     sow,
     eom,
     som,
+    now,
     eoq,
     soq,
     eot,
@@ -30,6 +31,8 @@ from .utils import (
     today,
     tomorrow,
     yesterday,
+    last,
+    next,
 )
-from .constants import Y, H, T, Q, M, W, MON, TUE, WED, THU, FRI, SAT, SUN, WEEKDAYS
 
+from .constants import Y, H, T, Q, M, W, MON, TUE, WED, THU, FRI, SAT, SUN, WEEKDAYS

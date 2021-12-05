@@ -1,5 +1,6 @@
 Changelog
 ========================
+The source code is hosted and maintained on `github <https://github.com/dschenck/doubledate/>`_.
 
 Version 0.0.4 (7 March 2020)
 ----------------------------------

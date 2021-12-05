@@ -448,3 +448,25 @@ class TestUtils(unittest.TestCase):
 
         assert utils.weekdayof("M", datetime.date(2020, 3, 31)) == 5
 
+    def test_next(self):
+        assert utils.next("MON", asof=datetime.date(2021, 12, 5)) == datetime.date(
+            2021, 12, 6
+        )
+
+        assert utils.next("TUE", asof=datetime.date(2021, 12, 5)) == datetime.date(
+            2021, 12, 7
+        )
+
+        assert utils.next("SUN", asof=datetime.date(2021, 12, 5)) == datetime.date(
+            2021, 12, 12
+        )
+
+    def test_last(self):
+        assert utils.last("MON", asof=datetime.date(2021, 12, 5)) == datetime.date(
+            2021, 11, 29
+        )
+
+        assert utils.last("SUN", asof=datetime.date(2021, 12, 5)) == datetime.date(
+            2021, 11, 28
+        )
+
