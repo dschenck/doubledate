@@ -966,13 +966,7 @@ class datemap:
     """
 
     def __init__(self, mapping):
-        self._mapping = mapping
-
-    def __repr__(self):
-        return repr(list(self._mapping.values()))
-
-    def __str__(self):
-        return repr(self)
+        self._mapping = {date: mapping[date] for date in sorted(mapping)}
 
     def __len__(self):
         return len(self._mapping)
