@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="doubledate",
-    version="0.0.7",
+    version="0.0.8",
     author="david.schenck@outlook.com",
     author_email="david.schenck@outlook.com",
     description="A calendar wrapper",
