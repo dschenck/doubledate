@@ -962,7 +962,27 @@ def offset(
 
 class datemap:
     """
-    Container mapping dates to values
+    Read-only sorted dictionary mapping dates to values
+
+    Example
+    -------
+    .. code-block::
+
+        >>> import doubledate as dtwo
+        >>> import datetime
+
+        >>> holidays = [
+        ...     datetime.date(2022, 1, 17), 
+        ...     datetime.date(2022, 5, 30), 
+        ...     datetime.date(2022, 6, 4), 
+        ...     datetime.date(2022, 9, 5), 
+        ...     datetime.date(2022, 11, 11), 
+        ...     datetime.date(2022, 12, 24),
+        ...     datetime.date(2022, 12, 26)
+        ... ]
+
+        >>> mapping = dtwo.datemap({d:i for d, i in enumerate(holidays)})
+        <doubledate.utils.datemap at 0x7fd0fa4cfa60>
     """
 
     def __init__(self, mapping):

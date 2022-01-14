@@ -50,7 +50,9 @@ Using doubledate is also easy
    :caption: Contents
 
    source/installation
-   source/API/index
+   source/utils/doubledate.utils
+   source/Calendar/doubledate.Calendar
+   source/BD/index
    source/changelog
 
 

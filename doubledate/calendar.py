@@ -68,23 +68,22 @@ class BD:
 
 
 class Calendar:
-    def __init__(self, dates=None):
-        """
-        Immutable calendar object
+    """
+    Immutable sorted set of dates
 
-        Parameters
-        ----------
-        dates : iterable
-            list of datetime.date objects
+    Parameters
+    ----------
+    dates : iterable
+        list of datetime objects
 
-        Raises
-        ------
-        TypeError
-            if dates is not an iterable of datetime.date objects
+    Example
+    -------
 
-        Example
-        -------
+    .. code-block::
+
         >>> import datetime
+        >>> import doubledate as dtwo
+
         >>> holidays = [
         ...     datetime.date(2022, 1, 17), 
         ...     datetime.date(2022, 5, 30), 
@@ -94,10 +93,17 @@ class Calendar:
         ...     datetime.date(2022, 12, 24),
         ...     datetime.date(2022, 12, 26)
         ... ]
-        >>> Calendar(holidays)
-        """
-        if dates is None:
-            dates = []
+
+        >>> dtwo.Calendar(holidays)
+        <doubledate.Calendar at 0x7fd0fa4cfa60>
+
+    Raises
+    ------
+    TypeError
+        if dates is not an iterable of datetime objects
+    """
+
+    def __init__(self, dates):
         if not all([isinstance(item, datetime.date) for item in dates]):
             raise TypeError("Calendar expected an iterable of date objects")
         self.__dates__ = sortedcontainers.SortedSet([date for date in dates])
