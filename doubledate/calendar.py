@@ -1231,7 +1231,7 @@ class Grouper:
         if isinstance(value, datetime.date):
             return self[self.index(value)]
         if isinstance(value, slice):
-            return Calendar().union(*self.calendars[value])
+            return Calendar([]).union(*self.calendars[value])
         raise TypeError(
             f"Expected value to be an int, datetime.date or slice, received {type(value).__name__}"
         )
@@ -1329,7 +1329,7 @@ class Grouper:
         -------
         Calendar
         """
-        return Calendar().union(*self.calendars)
+        return Calendar([]).union(*self.calendars)
 
     def __len__(self):
         """
