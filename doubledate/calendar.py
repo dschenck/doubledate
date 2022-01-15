@@ -1260,47 +1260,100 @@ class Grouper:
     Collection of calendars
     """
 
-    def __init__(self, calendars=None):
-        if calendars is None:
-            self.calendars = []
-        else:
-            if not all([isinstance(calendar, Calendar) for calendar in calendars]):
-                raise TypeError("Expected a list of calendar objects")
-            self.calendars = list(calendars)
+    def __init__(self, calendars):
+        if not all([isinstance(calendar, Calendar) for calendar in calendars]):
+            raise TypeError("Expected a list of calendar objects")
+        self.calendars = list(calendars)
 
-    def first(self) -> Calendar:
+    def first(self, onerror="raise") -> Calendar:
         """
-        Returns the first date of each subcalendar
+        Returns a calendar with the first date each period
 
-        Returns
-        -------
-        Calendar
-        """
-        return Calendar([calendar[0] for calendar in self.calendars])
+        Allowed values for the onerror parameter: 
+            - 'skip' to skip empty calendars
+            - 'raise' to raise an error
 
-    def last(self) -> Calendar:
-        """
-        Returns the last date of each subcalendar
+        Parameters
+        ----------
+        onerror : str
+            handling policy for empty calendars
 
         Returns
         -------
         Calendar
         """
-        return Calendar([calendar[-1] for calendar in self.calendars])
+        return self.apply(lambda period: period[0], onerror=onerror).combine()
 
-    def __getitem__(self, value):
+    def last(self, onerror="raise") -> Calendar:
         """
-        Returns one or several subcalendars
+        Returns a calendar with the last date each period
+
+        Allowed values for the onerror parameter: 
+            - 'skip' to skip empty calendars
+            - 'raise' to raise an error
+
+        Parameters
+        ----------
+        onerror : str
+            handling policy for empty calendars
+
+        Returns
+        -------
+        Calendar
         """
-        if isinstance(value, int):
-            return self.calendars[value]
-        if isinstance(value, datetime.date):
-            return self[self.index(value)]
-        if isinstance(value, slice):
-            return Calendar([]).union(*self.calendars[value])
-        raise TypeError(
-            f"Expected value to be an int, datetime.date or slice, received {type(value).__name__}"
-        )
+        return self.apply(lambda period: period[-1], onerror=onerror).combine()
+
+    def nth(self, index, *, base=0, onerror="raise") -> Calendar:
+        """
+        Returns a calendar with the nth date each period
+        
+        Allowed values for the onerror parameter: 
+            - 'skip' to skip periods where the n'th business day is not defined
+            - 'first' to fallback to the first date in the period when the n'th 
+              business day is not defined
+            - 'last' to fallback to the last date in the period when the n'th 
+              business day is not defined
+            - 'raise' to raise an error if the n'th business day is not defined
+
+        Parameters
+        ----------
+        index : int, slice
+            the index or range of indices
+        base : 0, 1
+            whether indices are 0 or 1 based
+        onerror : str
+            handling policy for periods the n'th business day is not defined
+
+        Returns
+        -------
+        Calendar
+        """
+        if isinstance(index, slice):
+            if isinstance(index.start, int):
+                index = slice(index.start - base, index.stop, index.step)
+            if isinstance(index.stop, int):
+                index = slice(index.start, index.stop - base, index.step)
+            return self.apply(
+                lambda calendar: calendar[index], onerror=onerror
+            ).combine()
+
+        return self.apply(
+            lambda period: period[index - base], onerror=onerror
+        ).combine()
+
+    def __getitem__(self, value) -> Calendar:
+        """
+        Slices or indexes each calendar, combining the result
+
+        Returns
+        -------
+        Calendar
+
+        Note
+        ----
+        Indices and slices thereof are assumed 0-based
+        """
+        return self.apply(lambda calendar: calendar[value], onerror="raise").combine()
 
     def index(self, value) -> int:
         """
@@ -1315,27 +1368,39 @@ class Grouper:
             for i, calendar in enumerate(self.calendars):
                 if value in calendar:
                     return i
-            raise IndexError(f"{value} is not in any subcalendar")
+            raise IndexError(f"{value} is not in any of the calendars")
+
         if isinstance(value, Calendar):
             return self.calendars.index(value)
-        raise ValueError("Invalid use of .index")
 
-    def __contains__(self, date) -> bool:
+        raise ValueError(
+            f"Expected value to be datetime.date or Calendar, received {type(value).__name__}"
+        )
+
+    def __contains__(self, value) -> bool:
         """
-        Returns True if one of the subcalendars contains the given date
+        Returns True if one of the calendars contains the given date
 
         Returns
         -------
         bool
         """
-        for calendar in self.calendars:
-            if date in calendar:
-                return True
-        return False
+        if isinstance(value, Calendar):
+            return value in self.calendars
+
+        if isinstance(value, datetime.date):
+            for calendar in self.calendars:
+                if value in calendar:
+                    return True
+            return False
+
+        raise ValueError(
+            f"Expected value to be datetime.date or Calendar, received {type(value).__name__}"
+        )
 
     def apply(self, func, onerror="raise"):
         """
-        Apply a function to each sub-calendars
+        Applies a function to each calendar
 
         Returns
         -------
@@ -1343,25 +1408,27 @@ class Grouper:
         """
         if not callable(func):
             raise ValueError("Expected func to be a callable function")
+
         dates = []
-        for c in self.calendars:
+        for calendar in self.calendars:
             try:
-                dates.append(func(c))
+                dates.append(func(calendar))
             except Exception as e:
                 if onerror == "raise":
                     raise e
                 elif onerror == "skip" or onerror == "drop":
                     pass
                 elif onerror == "first":
-                    dates.append(c[0])
+                    dates.append(calendar[0])
                 elif onerror == "last":
-                    dates.append(c[-1])
+                    dates.append(calendar[-1])
                 elif callable(onerror):
-                    dates.append(onerror(c))
+                    dates.append(onerror(calendar))
                 else:
                     raise ValueError(
                         "Expected onerror to be one of 'raise', 'first', 'last' or callable"
                     )
+
         for i, value in enumerate(dates):
             if isinstance(value, datetime.date):
                 dates[i] = Calendar([value])
@@ -1373,11 +1440,27 @@ class Grouper:
                 raise ValueError(
                     "mapped values must be a datetime, a list thereof or a Calendar"
                 )
+
         return Grouper(dates)
+
+    def combine(self):
+        """
+        Combines the calendars back in one
+
+        Returns
+        -------
+        Calendar
+        """
+        return Calendar([]).union(*self.calendars)
 
     def filter(self, func):
         """
-        Filters out subcalendars
+        Filters out calendars
+
+        Parameters
+        ----------
+        func : callable
+            filtering function
 
         Returns
         -------
@@ -1387,19 +1470,9 @@ class Grouper:
             raise ValueError("Expected func to be a callable function")
         return Grouper([cal for cal in self.calendars if func(cal)])
 
-    def combine(self):
-        """
-        Combines the subcalendars in one
-
-        Returns
-        -------
-        Calendar
-        """
-        return Calendar([]).union(*self.calendars)
-
     def __len__(self):
         """
-        Returns the number of subcalendars
+        Returns the number of calendars
 
         Returns
         -------

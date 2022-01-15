@@ -20,7 +20,9 @@ def load():
 
 class CalendarTests(unittest.TestCase):
     def test_init(self):
-        self.assertIsInstance(Calendar(), Calendar)
+        with self.assertRaises(Exception):
+            self.assertIsInstance(Calendar(), Calendar)
+
         self.assertIsInstance(Calendar([]), Calendar)
         self.assertIsInstance(Calendar([datetime.date.today()]), Calendar)
         self.assertIsInstance(
@@ -482,8 +484,6 @@ class TestGrouper(unittest.TestCase):
         self.assertTrue(datetime.date(2014, 12, 16) in cals)
 
         self.assertFalse(datetime.date(2014, 12, 25) in cals)
-
-        self.assertIsInstance(cals[datetime.date(2014, 12, 16)], Calendar)
 
 
 if __name__ == "__main__":
