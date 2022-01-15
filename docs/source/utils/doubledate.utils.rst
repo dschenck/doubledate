@@ -12,6 +12,7 @@ doubledate comes with 20+ utility functions allowing to easily compute the start
    doubledate.utils.dayof.rst
    doubledate.utils.daysfrom.rst
    doubledate.utils.daysto.rst
+   doubledate.utils.datemap.rst
    doubledate.utils.eom.rst
    doubledate.utils.eoq.rst
    doubledate.utils.eos.rst

@@ -33,17 +33,25 @@ class BD:
         Returns a new Calendar containing only the n'th business day 
         each frequency.
 
+        Allowed values for the onerror parameter: 
+            - 'skip' to skip periods where the n'th business day is not defined
+            - 'first' to fallback to the first date in the period when the n'th 
+              business day is not defined
+            - 'last' to fallback to the last date in the period when the n'th 
+              business day is not defined
+            - 'raise' to raise an error if the n'th business day is not defined
+
         Parameters
         ----------
         calendar : Calendar
             the calendar from which to compute the n'th business day
         onerror : str
-            handling policy for periods from which it is impossible to compute
-            the n'th business day
+            handling policy for periods the n'th business day is not defined
 
         Returns
         -------
         Calendar
+            Calendar containing the n'th business day each frequency
         """
         dates = []
         for subcal in calendar.resample(self.frequency):
@@ -69,7 +77,7 @@ class BD:
 
 class Calendar:
     """
-    Immutable sorted set of dates
+    Immutable, sorted set of dates
 
     Parameters
     ----------
@@ -639,7 +647,7 @@ class Calendar:
 
     def daysbetween(
         self, this: datetime.date, that: datetime.date, bounds: str = "left"
-    ):
+    ) -> int:
         """
         Returns the number of open days between two dates
 
@@ -678,7 +686,7 @@ class Calendar:
             f"bounds should be one of 'both', 'left' or 'right', {bounds} given"
         )
 
-    def offset(self, date: datetime.date, days: int):
+    def offset(self, date: datetime.date, days: int) -> datetime.date:
         """
         Returns the date in the calendar offset by n days
 
@@ -704,9 +712,9 @@ class Calendar:
 
     def groupby(self, grouper):
         """
-        Group dates by the :code:`grouper` criterion. 
+        Group dates by the grouper parameter. 
 
-        Allowed values of the grouper: 
+        Allowed values for the grouper: 
             - callable - the callable will receive the date and must return a hashable value
             - frequency criterion - a string representing a frequency 
 
@@ -719,16 +727,22 @@ class Calendar:
         
         Parameters
         ----------
-        grouper : str
+        grouper : str, callable
             the criterion to group dates by
 
         Returns
         -------
-        Grouper
+        :class:`doubledate.calendar.Grouper`
             Collection of calendars    
 
         Example
         -------
+        Group dates by month
+
+        >>> calendar = Calendar(dates)
+        >>> calendar.groupby("M")
+        <doubledate.Grouper at 0x7fd0fa52c2e0>
+
         Group dates in half months
 
         >>> calendar = Calendar(dates)
@@ -748,18 +762,20 @@ class Calendar:
             elif grouper == "Y":
                 return self.groupby(lambda date: date.year)
             raise ValueError(
-                f"grouper should be a callable or one of W,M,Q,H or Y; {grouper} given"
+                f"Expected one of 'W', 'M', 'Q', 'H' or 'Y'; '{grouper}' given"
             )
+
         if callable(grouper):
             calendars = collections.defaultdict(lambda: [])
             for date in self:
                 calendars[grouper(date)].append(date)
             return Grouper([Calendar(dates) for dates in calendars.values()])
-        raise ValueError("Expected string or function")
+
+        raise ValueError(f"Expected string or function, received '{grouper}'")
 
     def resample(self, grouper):
         """
-        alias for groupby
+        Alias for :class:`doubledate.Calendar.groupby`
         """
         return self.groupby(grouper)
 
@@ -834,9 +850,9 @@ class Calendar:
 
         return Grouper([Calendar(calendar) for calendar in calendars.values()])
 
-    def fa(self, date: datetime.date, default=constants.RAISE):
+    def fa(self, date: datetime.date, default=constants.RAISE) -> datetime.date:
         """
-        Returns the first date after ("first-after", or "fa")
+        Returns the first date strictly after ("first-after", or "fa")
 
         Parameters
         ----------
@@ -849,7 +865,7 @@ class Calendar:
         Returns
         -------
         datetime.date
-            The first following date
+            The first date strictly after the given date
 
         See also
         --------
@@ -864,9 +880,9 @@ class Calendar:
             return default
         return self.__dates__[self.__dates__.bisect_right(date)]
 
-    def lb(self, date: datetime.date, default=constants.RAISE):
+    def lb(self, date: datetime.date, default=constants.RAISE) -> datetime.date:
         """
-        Returns the last date immediately before ("last-before", or "lb")
+        Returns the most recent date strictly before ("last-before", or "lb")
 
         Parameters
         ----------
@@ -879,11 +895,14 @@ class Calendar:
         Returns
         -------
         datetime.date
+            the most recent date strictly before date
 
         See also
         --------
         Calendar.fa
             Returns the first date after
+        Calendar.asof
+            Returns the most recent date on or before (after) another date
         """
         if date < self.__dates__[0]:
             if default == constants.RAISE:
@@ -893,21 +912,68 @@ class Calendar:
             return default
         return self.__dates__[self.__dates__.bisect_left(date) - 1]
 
-    def asof(self, date: datetime.date, side="left", default=constants.RAISE):
+    def asof(
+        self, date: datetime.date, side: str = "left", default=constants.RAISE
+    ) -> datetime.date:
         """
-        Returns the date if the date is in the calendar, or the last date before that
+        Returns the date if the date is in the calendar, or 
+        the last (first) date before (after) that
 
         Parameters
         ----------
         date : datetime.date
             the lookup date
-
+        side : 'left', 'right'
+            direction to search if date is not in calendar
         default: optional
-            default value if the given date is strictly before the first date in the calendar
+            default value if the given date is strictly before (after) 
+            the first (last) date in the calendar
 
         Returns
         -------
         datetime.date
+            the last (first) date on or before (after) date
+
+        Raises
+        ------
+        KeyError
+            if date is before (after) the first (last) date
+            in the calendar, and no default is provided
+
+        Example
+        -------
+        
+        .. code-block::
+
+            >>> import datetime
+
+            >>> calendar = Calendar([
+            ...     datetime.date(2020, 1, 20),
+            ...     datetime.date(2020, 4, 28)
+            ... ])
+
+            >>> calendar.asof(datetime.date(2020, 1, 20))
+            datetime.date(2020, 1, 20)
+
+            >>> calendar.asof(datetime.date(2020, 2, 15))
+            datetime.date(2020, 1, 20)
+
+            >>> calendar.asof(datetime.date(2020, 2, 15), side="right")
+            datetime.date(2020, 4, 28)
+
+            >>> calendar.asof(datetime.date(2020, 1, 1))
+            KeyError("Out-of-range error: 2020-01-01 is before first date in the calendar")
+
+            >>> calendar.asof(datetime.date(2020, 1, 1), default=None)
+            None
+
+        See also
+        --------
+        Calendar.lb
+            last date strictly before 
+        Calendar.fa
+            first date strictly after
+        
         """
         if date in self:
             return date
@@ -974,7 +1040,7 @@ class Calendar:
             return Calendar(mapped)
         return mapped
 
-    def som(self, date: datetime.date):
+    def som(self, date: datetime.date) -> datetime.date:
         """
         Return the first open day of the month given the date
 
@@ -996,7 +1062,7 @@ class Calendar:
             return self.__dates__[i + 1]
         return self.__dates__[i]
 
-    def eom(self, date: datetime.date):
+    def eom(self, date: datetime.date) -> datetime.date:
         """
         Return the last open day of the month given the date
 
@@ -1018,7 +1084,7 @@ class Calendar:
             return self.__dates__[i - 1]
         return self.__dates__[i]
 
-    def soq(self, date: datetime.date):
+    def soq(self, date: datetime.date) -> datetime.date:
         """
         Returns the first open day of the quarter given the date
 
@@ -1040,7 +1106,7 @@ class Calendar:
             return self.__dates__[i + 1]
         return self.__dates__[i]
 
-    def eoq(self, date: datetime.date):
+    def eoq(self, date: datetime.date) -> datetime.date:
         """
         Returns the last open date of the quarter
 
@@ -1062,7 +1128,7 @@ class Calendar:
             return self.__dates__[i - 1]
         return self.__dates__[i]
 
-    def sot(self, date: datetime.date):
+    def sot(self, date: datetime.date) -> datetime.date:
         """
         Returns the first open day of the trimester given the date
 
@@ -1084,7 +1150,7 @@ class Calendar:
             return self.__dates__[i + 1]
         return self.__dates__[i]
 
-    def eot(self, date: datetime.date):
+    def eot(self, date: datetime.date) -> datetime.date:
         """
         Returns the last open date of the trimester
 
@@ -1106,7 +1172,7 @@ class Calendar:
             return self.__dates__[i - 1]
         return self.__dates__[i]
 
-    def sos(self, date: datetime.date):
+    def sos(self, date: datetime.date) -> datetime.date:
         """
         Returns the first open day of the semester given the date
 
@@ -1128,7 +1194,7 @@ class Calendar:
             return self.__dates__[i + 1]
         return self.__dates__[i]
 
-    def eos(self, date: datetime.date):
+    def eos(self, date: datetime.date) -> datetime.date:
         """
         Returns the last open date of the semester
 
@@ -1150,7 +1216,7 @@ class Calendar:
             return self.__dates__[i - 1]
         return self.__dates__[i]
 
-    def soy(self, date: datetime.date):
+    def soy(self, date: datetime.date) -> datetime.date:
         """
         Return the first open day of the year given the date
 
@@ -1169,7 +1235,7 @@ class Calendar:
             return self.__dates__[i + 1]
         return self.__dates__[i]
 
-    def eoy(self, date: datetime.date):
+    def eoy(self, date: datetime.date) -> datetime.date:
         """
         Returns the last open date of the year
 
@@ -1236,7 +1302,7 @@ class Grouper:
             f"Expected value to be an int, datetime.date or slice, received {type(value).__name__}"
         )
 
-    def index(self, value):
+    def index(self, value) -> int:
         """
         Returns the 0-based index of the calendar, 
         or 0-based index of the calendar containing the date
