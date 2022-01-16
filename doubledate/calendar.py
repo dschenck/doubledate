@@ -20,7 +20,7 @@ class BD:
 
         if frequency not in ["W", "M", "Q", "H", "Y"]:
             raise ValueError(
-                f"Expected frequency to be one of 'W','M','Q','H' or 'Y', received '{frequency}"
+                f"Expected frequency to be one of 'W','M','Q','H' or 'Y', received '{frequency}'"
             )
         self.frequency = frequency
 
@@ -116,6 +116,12 @@ class Calendar:
             raise TypeError("Calendar expected an iterable of date objects")
         self.__dates__ = sortedcontainers.SortedSet([date for date in dates])
         self.__datemaps__ = {}
+
+    def __hash__(self):
+        """
+        Returns the hash of the Calendar
+        """
+        return hash((date for date in self))
 
     @property
     def last(self) -> datetime.date:
