@@ -123,6 +123,35 @@ class Calendar:
         """
         return hash((date for date in self))
 
+    @classmethod
+    def generate(cls, starting: datetime.date, ending: datetime.date):
+        """
+        Creates a new calendar with all the calendar days between the starting
+        and ending dates, with both bounds included
+
+        Parameters
+        ----------
+        starting : datetime.date
+            the starting date
+        ending : datetime.date
+            the ending date
+        
+        Returns
+        -------
+        Calendar
+            the calendar
+
+        """
+        if not all(isinstance(d, datetime.date) for d in (starting, ending)):
+            raise TypeError("Expected starting and ending dates to be datetime objects")
+
+        return cls(
+            [
+                starting + datetime.timedelta(days=i)
+                for i in range((ending - starting).days + 1)
+            ]
+        )
+
     @property
     def last(self) -> datetime.date:
         """
