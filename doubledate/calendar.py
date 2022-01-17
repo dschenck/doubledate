@@ -599,11 +599,13 @@ class Calendar:
 
         """
         if starting is None:
-            starting = self.__dates__[0]
+            starting = self[0]
+
         if ending is None:
-            ending = self.__dates__[-1]
+            ending = self[-1]
+
         dates = []
-        for i in range(1, (ending - starting).days):
+        for i in range((ending - starting).days + 1):
             if starting + datetime.timedelta(i) not in self:
                 dates.append(starting + datetime.timedelta(i))
         return Calendar(dates)
