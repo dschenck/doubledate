@@ -1,4 +1,4 @@
-datemap
+doubledate.datemap
 =====================================
 
-.. autoclass:: doubledate.utils.datemap
+.. autoclass:: doubledate.datemap

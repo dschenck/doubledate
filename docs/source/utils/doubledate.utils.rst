@@ -9,10 +9,12 @@ doubledate comes with 20+ utility functions allowing to easily compute the start
    :caption: Contents
 
    doubledate.utils.ceil.rst
+   doubledate.date.rst
+   doubledate.utils.datemap.rst
+   doubledate.datetime.rst
    doubledate.utils.dayof.rst
    doubledate.utils.daysfrom.rst
    doubledate.utils.daysto.rst
-   doubledate.utils.datemap.rst
    doubledate.utils.eom.rst
    doubledate.utils.eoq.rst
    doubledate.utils.eos.rst
@@ -34,8 +36,12 @@ doubledate comes with 20+ utility functions allowing to easily compute the start
    doubledate.utils.sot.rst
    doubledate.utils.sow.rst
    doubledate.utils.soy.rst
+   doubledate.timedelta.rst
+   doubledate.time.rst
    doubledate.utils.today.rst
    doubledate.utils.tomorrow.rst
    doubledate.utils.trimester.rst
+   doubledate.tzinfo.rst
+   doubledate.timezone.rst
    doubledate.utils.weekdayof.rst
    doubledate.utils.yesterday.rst
