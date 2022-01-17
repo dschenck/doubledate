@@ -24,6 +24,7 @@ Calendar
    doubledate.Calendar.fa.rst
    doubledate.Calendar.filter.rst
    doubledate.Calendar.first.rst
+   doubledate.Calendar.generate.rst
    doubledate.Calendar.groupby.rst
    doubledate.Calendar.index.rst
    doubledate.Calendar.intersection.rst

@@ -141,6 +141,27 @@ class Calendar:
         Calendar
             the calendar
 
+        Example
+        -------
+
+        .. code-block:: 
+
+            >>> import datetime
+            >>> import doubledate as dtwo
+
+            >>> calendar = dtwo.Calendar.generate(
+            ...     datetime.date(2021,1,1), 
+            ...     datetime.date(2021,12,31)
+            ... )
+            >>> len(calendar)
+            365
+
+            >>> calendar[0]
+            datetime.date(2021,1,1)
+
+            >>> calendar[-1]
+            datetime.date(2021,12,31)
+
         """
         if not all(isinstance(d, datetime.date) for d in (starting, ending)):
             raise TypeError("Expected starting and ending dates to be datetime objects")
