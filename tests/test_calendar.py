@@ -32,6 +32,29 @@ class CalendarTests(unittest.TestCase):
         with self.assertRaises(Exception):
             cdr = Calendar(True)
 
+    def test_generate(self):
+        calendar = Calendar.generate(
+            datetime.date(2021, 1, 1), datetime.date(2021, 12, 31)
+        )
+
+        assert len(calendar) == 365
+        assert calendar[0] == datetime.date(2021, 1, 1)
+        assert calendar[-1] == datetime.date(2021, 12, 31)
+
+        calendar = Calendar.generate(
+            datetime.date(2021, 1, 1), datetime.date(2021, 1, 1)
+        )
+
+        assert len(calendar) == 1
+        assert calendar[0] == calendar[-1] == datetime.date(2021, 1, 1)
+
+        # test if starting > ending date
+        calendar = Calendar.generate(
+            datetime.date(2021, 12, 31), datetime.date(2021, 1, 1)
+        )
+
+        assert len(calendar) == 0
+
     def test_indexing(self):
         cal = Calendar(
             [datetime.date(2019, 1, 1) + datetime.timedelta(i) for i in range(45)]
