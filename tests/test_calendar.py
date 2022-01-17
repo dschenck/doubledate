@@ -499,6 +499,33 @@ class CalendarTests(unittest.TestCase):
         )
         self.assertEqual(cdr.split(ending=BD(0)).first()[2], datetime.date(2014, 12, 2))
 
+    def test_inversing_with_no_bounds(self):
+        calendar = Calendar(
+            [datetime.date(2022, 1, 17), datetime.date(2022, 2, 14)]
+        ).inverse()
+
+        assert calendar[0] == datetime.date(2022, 1, 18)
+        assert calendar[-1] == datetime.date(2022, 2, 13)
+
+    def test_inversing_with_bounds(self):
+        calendar = Calendar(
+            [datetime.date(2022, 1, 17), datetime.date(2022, 2, 14)]
+        ).inverse(datetime.date(2022, 1, 1), datetime.date(2022, 12, 31))
+
+        assert calendar[0] == datetime.date(2022, 1, 1)
+        assert calendar[-1] == datetime.date(2022, 12, 31)
+
+        assert datetime.date(2022, 1, 17) not in calendar
+        assert datetime.date(2022, 2, 14) not in calendar
+        assert len(calendar) == 365 - 2
+
+        # test with starting date equal to a holiday
+        calendar = Calendar(
+            [datetime.date(2022, 1, 17), datetime.date(2022, 2, 14)]
+        ).inverse(datetime.date(2022, 1, 17), datetime.date(2022, 12, 31))
+
+        assert calendar[0] == datetime.date(2022, 1, 18)
+
 
 class TestGrouper(unittest.TestCase):
     def test_index(self):
