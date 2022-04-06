@@ -1,4 +1,4 @@
-doubledate.Calendar.daysto 
+Calendar.daysto 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.daysto

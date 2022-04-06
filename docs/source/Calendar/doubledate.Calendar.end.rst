@@ -1,4 +1,4 @@
-doubledate.Calendar.end 
+Calendar.end 
 ============================================ 
 
 .. autoproperty:: doubledate.Calendar.end

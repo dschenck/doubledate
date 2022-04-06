@@ -1,4 +1,4 @@
-doubledate.Calendar.start 
+Calendar.start 
 ============================================ 
 
 .. autoproperty:: doubledate.Calendar.start

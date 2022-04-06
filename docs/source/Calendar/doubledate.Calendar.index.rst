@@ -1,4 +1,4 @@
-doubledate.Calendar.index 
+Calendar.index 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.index

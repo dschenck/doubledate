@@ -1,4 +1,4 @@
-doubledate.Calendar.lb 
+Calendar.lb 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.lb

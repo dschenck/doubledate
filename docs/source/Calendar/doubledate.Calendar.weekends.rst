@@ -1,4 +1,4 @@
-doubledate.Calendar.weekends
+Calendar.weekends
 ============================================ 
 
 .. automethod:: doubledate.Calendar.weekends

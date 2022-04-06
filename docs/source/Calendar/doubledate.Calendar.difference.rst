@@ -1,4 +1,4 @@
-doubledate.Calendar.difference 
+Calendar.difference 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.difference

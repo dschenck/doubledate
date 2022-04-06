@@ -1,4 +1,4 @@
-doubledate.Calendar.apply 
+Calendar.apply 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.apply

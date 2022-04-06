@@ -1,4 +1,4 @@
-doubledate.Calendar.som 
+Calendar.som 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.som

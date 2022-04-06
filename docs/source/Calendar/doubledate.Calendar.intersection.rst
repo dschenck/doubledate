@@ -1,4 +1,4 @@
-doubledate.Calendar.intersection 
+Calendar.intersection 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.intersection

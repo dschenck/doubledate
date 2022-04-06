@@ -1,4 +1,4 @@
-doubledate.Calendar.split 
+Calendar.split 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.split

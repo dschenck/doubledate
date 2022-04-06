@@ -1,4 +1,4 @@
-doubledate.Calendar.filter 
+Calendar.filter 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.filter

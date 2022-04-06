@@ -1,4 +1,4 @@
-doubledate.Calendar.first 
+Calendar.first 
 ============================================ 
 
 .. autoproperty:: doubledate.Calendar.first

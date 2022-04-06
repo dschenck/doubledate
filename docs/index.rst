@@ -1,6 +1,6 @@
 doubledate: another datetime library
 =====================================
-**doubledate**, yet another datetime library, exposes a set of 20+ utility functions as well as an immutable :code:`Calendar` object representing a sorted-list of dates.
+**doubledate**, yet another datetime library, exposes a set of 20+ utility functions as well as an immutable :code:`Calendar` object representing a sorted-set of dates.
 
 .. image:: https://badge.fury.io/py/doubledate.svg
    :target: https://badge.fury.io/py/doubledate
@@ -52,7 +52,8 @@ Using doubledate is also easy
    source/installation
    source/utils/doubledate.utils
    source/Calendar/doubledate.Calendar
-   source/BD/index
+   source/BD/doubledate.BD
+   source/Collection/doubledate.Collection
    source/changelog
 
 

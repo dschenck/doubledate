@@ -1,4 +1,4 @@
-doubledate.Calendar.groupby 
+Calendar.groupby 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.groupby

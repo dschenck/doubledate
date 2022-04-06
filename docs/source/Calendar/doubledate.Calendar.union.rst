@@ -1,4 +1,4 @@
-doubledate.Calendar.union 
+Calendar.union 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.union

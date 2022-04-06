@@ -1,4 +1,4 @@
-doubledate.Calendar.sos 
+Calendar.sos 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.sos

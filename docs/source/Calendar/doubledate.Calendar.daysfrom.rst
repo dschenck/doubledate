@@ -1,4 +1,4 @@
-doubledate.Calendar.daysfrom 
+Calendar.daysfrom 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.daysfrom

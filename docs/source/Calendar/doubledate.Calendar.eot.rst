@@ -1,4 +1,4 @@
-doubledate.Calendar.eot 
+Calendar.eot 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.eot

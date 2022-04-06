@@ -1,4 +1,4 @@
-doubledate.Calendar.snap 
+Calendar.snap 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.snap

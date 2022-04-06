@@ -1,4 +1,4 @@
-doubledate.Calendar.generate 
+Calendar.generate 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.generate

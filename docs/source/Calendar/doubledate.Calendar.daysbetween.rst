@@ -1,4 +1,4 @@
-doubledate.Calendar.daysbetween 
+Calendar.daysbetween 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.daysbetween

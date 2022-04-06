@@ -1,4 +1,4 @@
-doubledate.Calendar.offset 
+Calendar.offset 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.offset

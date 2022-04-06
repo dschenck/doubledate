@@ -1,4 +1,4 @@
-doubledate.Calendar.resample 
+Calendar.resample 
 ============================================ 
 
 .. automethod:: doubledate.Calendar.resample
