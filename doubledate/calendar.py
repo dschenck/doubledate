@@ -9,6 +9,15 @@ import doubledate.constants as constants
 class BD:
     """
     Business day
+
+    Parameters
+    ----------
+    index : int
+        day of the frequency
+    frequency : str
+        one of 'D','W','M','Q','H' or 'Y'
+    base : 0 (default), 1
+        whether to consider the index 1-based or 0-based 
     """
 
     def __init__(self, index: int, frequency: str = "M", *, base: int = 0):
@@ -18,9 +27,9 @@ class BD:
             )
         self.index = index
 
-        if frequency not in ["W", "M", "Q", "H", "Y"]:
+        if frequency not in ["D", "W", "M", "Q", "H", "Y"]:
             raise ValueError(
-                f"Expected frequency to be one of 'W','M','Q','H' or 'Y', received '{frequency}'"
+                f"Expected frequency to be one of 'D','W','M','Q','H' or 'Y', received '{frequency}'"
             )
         self.frequency = frequency
 
@@ -53,6 +62,9 @@ class BD:
         Calendar
             Calendar containing the n'th business day each frequency
         """
+        if self.frequency == "D":
+            return calendar
+
         dates = []
         for subcal in calendar.resample(self.frequency):
             try:
@@ -790,7 +802,7 @@ class Calendar:
 
         Returns
         -------
-        :class:`doubledate.calendar.Grouper`
+        :class:`doubledate.calendar.Collection`
             Collection of calendars    
 
         Example
@@ -799,13 +811,13 @@ class Calendar:
 
         >>> calendar = Calendar(dates)
         >>> calendar.groupby("M")
-        <doubledate.Grouper at 0x7fd0fa52c2e0>
+        <doubledate.Collection at 0x7fd0fa52c2e0>
 
         Group dates in half months
 
         >>> calendar = Calendar(dates)
         >>> calendar.groupby(lambda date: (date.year, date.month, date.day < 15))
-        <doubledate.Grouper at 0x7fd0fa52c2e0>
+        <doubledate.Collection at 0x7fd0fa52c2e0>
 
         """
         if isinstance(grouper, str):
@@ -827,7 +839,7 @@ class Calendar:
             calendars = collections.defaultdict(lambda: [])
             for date in self:
                 calendars[grouper(date)].append(date)
-            return Grouper([Calendar(dates) for dates in calendars.values()])
+            return Collection([Calendar(dates) for dates in calendars.values()])
 
         raise ValueError(f"Expected string or function, received '{grouper}'")
 
@@ -862,7 +874,7 @@ class Calendar:
 
         Returns
         -------
-        Grouper
+        Collection
             The collection of calendars each starting or ending 
             on the given business day
 
@@ -873,12 +885,12 @@ class Calendar:
         >>> from doubledate import BD
         >>> calendar = Calendar(dates)
         >>> calendar.split(BD(10, "M"))
-        <doubledate.Grouper at 0x7fd0fa52c2e0>
+        <doubledate.Collection at 0x7fd0fa52c2e0>
 
         Split the calendar on the penultimate day each quarter
 
         >>> calendar.split(BD(-2, "Y"))
-        <doubledate.Grouper at 0x7fd0fa52c2e0>
+        <doubledate.Collection at 0x7fd0fa52c2e0>
 
         See also
         --------
@@ -906,7 +918,7 @@ class Calendar:
             except:
                 pass
 
-        return Grouper([Calendar(calendar) for calendar in calendars.values()])
+        return Collection([Calendar(calendar) for calendar in calendars.values()])
 
     def fa(self, date: datetime.date, default=constants.RAISE) -> datetime.date:
         """
@@ -1313,19 +1325,56 @@ class Calendar:
         return self.__dates__[i]
 
 
-class Grouper:
+class Collection:
     """
-    Collection of calendars
+    Collection of calendars. 
+
+    Collections are normally generated from splitting a Calendar in several periods 
+    via resampling or grouping
+
+    Example
+    -------
+    .. code-block::
+
+        >>> import datetime
+        >>> import doubledate as dtwo
+
+        >>> holidays = [
+        ...     datetime.date(2022, 1, 17), 
+        ...     datetime.date(2022, 5, 30), 
+        ...     datetime.date(2022, 6, 4), 
+        ...     datetime.date(2022, 9, 5), 
+        ...     datetime.date(2022, 11, 11), 
+        ...     datetime.date(2022, 12, 24),
+        ...     datetime.date(2022, 12, 26)
+        ... ]
+
+        >>> calendar = dtwo.Calendar(holidays).inverse().weekdays()
+        >>> calendar
+        <doubledate.Calendar>
+
+        >>> calendar.resample("M") #split the calendar by month
+        <doubledate.Collection>
+
+        >>> calendar.resample("M").nth(10, base=1) #get the 10th business day each month
+        <doubledate.Calendar>
+
     """
 
     def __init__(self, calendars):
+        """
+        Parameters
+        ----------
+        calendars : iterable
+            list of Calendar instances
+        """
         if not all([isinstance(calendar, Calendar) for calendar in calendars]):
             raise TypeError("Expected a list of calendar objects")
         self.calendars = list(calendars)
 
     def first(self, onerror="raise") -> Calendar:
         """
-        Returns a calendar with the first date each period
+        Returns a calendar with the first date each period in the collection
 
         Allowed values for the onerror parameter: 
             - 'skip' to skip empty calendars
@@ -1344,7 +1393,7 @@ class Grouper:
 
     def last(self, onerror="raise") -> Calendar:
         """
-        Returns a calendar with the last date each period
+        Returns a calendar with the last date each period in the collection
 
         Allowed values for the onerror parameter: 
             - 'skip' to skip empty calendars
@@ -1363,7 +1412,7 @@ class Grouper:
 
     def nth(self, index, *, base=0, onerror="raise") -> Calendar:
         """
-        Returns a calendar with the nth date each period
+        Returns a calendar with the nth date each period from the collection
         
         Allowed values for the onerror parameter: 
             - 'skip' to skip periods where the n'th business day is not defined
@@ -1462,7 +1511,7 @@ class Grouper:
 
         Returns
         -------
-        Grouper
+        Collection
         """
         if not callable(func):
             raise ValueError("Expected func to be a callable function")
@@ -1499,11 +1548,12 @@ class Grouper:
                     "mapped values must be a datetime, a list thereof or a Calendar"
                 )
 
-        return Grouper(dates)
+        return Collection(dates)
 
     def combine(self):
         """
-        Combines the calendars back in one
+        Combines the calendars of the collection back into a 
+        single Calendar object
 
         Returns
         -------
@@ -1513,7 +1563,7 @@ class Grouper:
 
     def filter(self, func):
         """
-        Filters out calendars
+        Filters out calendars from the collection
 
         Parameters
         ----------
@@ -1522,11 +1572,11 @@ class Grouper:
 
         Returns
         -------
-        Grouper
+        Collection
         """
         if not callable(func):
             raise ValueError("Expected func to be a callable function")
-        return Grouper([cal for cal in self.calendars if func(cal)])
+        return Collection([cal for cal in self.calendars if func(cal)])
 
     def __len__(self):
         """
@@ -1539,4 +1589,7 @@ class Grouper:
         return len(self.calendars)
 
     def __iter__(self):
+        """
+        Iterate over each calendar in the collection
+        """
         return iter(self.calendars)
