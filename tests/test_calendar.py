@@ -527,7 +527,7 @@ class CalendarTests(unittest.TestCase):
         assert calendar[0] == datetime.date(2022, 1, 18)
 
 
-class TestGrouper(unittest.TestCase):
+class TestCollection(unittest.TestCase):
     def test_index(self):
         cals = load().groupby("M")
 
