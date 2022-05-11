@@ -1,6 +1,7 @@
 import sortedcontainers
 import collections
 import datetime
+import numbers
 
 import doubledate.utils as utils
 import doubledate.constants as constants
@@ -21,7 +22,7 @@ class BD:
     """
 
     def __init__(self, index: int, frequency: str = "M", *, base: int = 0):
-        if not isinstance(index, int):
+        if not isinstance(index, numbers.Integral):
             raise TypeError(
                 f"Expected index to be an integer, received {type(index).__name__}"
             )
@@ -363,7 +364,7 @@ class Calendar:
         KeyError
             if the index is out of range 
         """
-        if isinstance(value, int):
+        if isinstance(value, numbers.Integral):
             return self.__dates__.__getitem__(value)
         elif isinstance(value, slice):
             if isinstance(value.start, datetime.date):
@@ -1436,9 +1437,9 @@ class Collection:
         Calendar
         """
         if isinstance(index, slice):
-            if isinstance(index.start, int):
+            if isinstance(index.start, numbers.Integral):
                 index = slice(index.start - base, index.stop, index.step)
-            if isinstance(index.stop, int):
+            if isinstance(index.stop, numbers.Integral):
                 index = slice(index.start, index.stop - base, index.step)
             return self.apply(
                 lambda calendar: calendar[index], onerror=onerror
