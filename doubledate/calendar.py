@@ -364,15 +364,13 @@ class Calendar:
         KeyError
             if the index is out of range 
         """
-        if isinstance(value, numbers.Integral):
-            return self.__dates__.__getitem__(value)
-        elif isinstance(value, slice):
+        if isinstance(value, slice):
             if isinstance(value.start, datetime.date):
                 value = slice(self.__dates__.bisect_left(value.start), value.stop)
             if isinstance(value.stop, datetime.date):
                 value = slice(value.start, self.__dates__.bisect_right(value.stop))
             return Calendar(self.__dates__.__getitem__(value))
-        raise TypeError("Invalid index or slice object")
+        return self.__dates__.__getitem__(value)
 
     def __add__(self, other):
         """
