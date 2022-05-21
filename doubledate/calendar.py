@@ -386,8 +386,8 @@ class Calendar:
         Calendar
         """
         if isinstance(other, datetime.date):
-            return Calendar(self).union(Calendar([other]))
-        return Calendar(self).union(Calendar(other))
+            return self.union([other])
+        return self.union(other)
 
     def __eq__(self, other):
         """
