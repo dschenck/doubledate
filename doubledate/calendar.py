@@ -403,13 +403,16 @@ class Calendar:
         -------
         Calendar
         """
-        for date in self:
-            if date not in other:
-                return False
-        for date in other:
-            if date not in self:
-                return False
-        return True
+        try:
+            for date in self:
+                if date not in other:
+                    return False
+            for date in other:
+                if date not in self:
+                    return False
+            return True
+        except Exception:
+            return False
 
     def union(self, *others):
         """

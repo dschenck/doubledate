@@ -526,6 +526,17 @@ class CalendarTests(unittest.TestCase):
 
         assert calendar[0] == datetime.date(2022, 1, 18)
 
+    def test_equals(self):
+        calendar = Calendar([datetime.date(2022, 1, 17), datetime.date(2022, 2, 14)])
+
+        assert calendar == calendar
+        assert calendar == [datetime.date(2022, 1, 17), datetime.date(2022, 2, 14)]
+        assert calendar == {datetime.date(2022, 1, 17), datetime.date(2022, 2, 14)}
+        assert calendar != [datetime.date(2022, 1, 18), datetime.date(2022, 2, 14)]
+        assert calendar != False
+        assert calendar != "a string"
+        assert calendar != 1
+
 
 class TestCollection(unittest.TestCase):
     def test_index(self):
