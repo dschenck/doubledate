@@ -944,7 +944,7 @@ class Calendar:
         Calendar.lb
             Return the last date before
         """
-        if date > self.__dates__[-1]:
+        if len(self) == 0 or date > self.__dates__[-1]:
             if default == constants.RAISE:
                 raise KeyError(
                     f"Out-of-range error: {date} is after last date in the calendar"
@@ -976,7 +976,7 @@ class Calendar:
         Calendar.asof
             Returns the most recent date on or before (after) another date
         """
-        if date < self.__dates__[0]:
+        if len(self) == 0 or date < self.__dates__[0]:
             if default == constants.RAISE:
                 raise KeyError(
                     f"Out-of-range error: {date} is before the first date in the calendar"
