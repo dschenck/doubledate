@@ -147,7 +147,7 @@ EOS = "EOS"
 SOY = "SOY"
 EOY = "EOY"
 
-RAISE = "RAISE"
+RAISE = "raise"
 
 JAN = "JAN"
 FEB = "FEB"

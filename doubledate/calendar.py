@@ -71,7 +71,7 @@ class BD:
             try:
                 dates.append(subcal[self.index - self.base])
             except Exception as e:
-                if onerror == "raise":
+                if onerror == constants.RAISE:
                     raise e
                 elif onerror == "drop" or onerror == "skip":
                     pass
@@ -905,6 +905,7 @@ class Calendar:
 
         if starting is not None:
             on, side = starting, "left"
+
         if ending is not None:
             on, side = ending, "right"
 
@@ -1374,7 +1375,7 @@ class Collection:
             raise TypeError("Expected a list of calendar objects")
         self.calendars = list(calendars)
 
-    def first(self, onerror="raise") -> Calendar:
+    def first(self, onerror=constants.RAISE) -> Calendar:
         """
         Returns a calendar with the first date each period in the collection
 
@@ -1393,7 +1394,7 @@ class Collection:
         """
         return self.apply(lambda period: period[0], onerror=onerror).combine()
 
-    def last(self, onerror="raise") -> Calendar:
+    def last(self, onerror=constants.RAISE) -> Calendar:
         """
         Returns a calendar with the last date each period in the collection
 
@@ -1412,7 +1413,7 @@ class Collection:
         """
         return self.apply(lambda period: period[-1], onerror=onerror).combine()
 
-    def nth(self, index, *, base=0, onerror="raise") -> Calendar:
+    def nth(self, index, *, base=0, onerror=constants.RAISE) -> Calendar:
         """
         Returns a calendar with the nth date each period from the collection
         
@@ -1462,7 +1463,9 @@ class Collection:
         ----
         Indices and slices thereof are assumed 0-based
         """
-        return self.apply(lambda calendar: calendar[value], onerror="raise").combine()
+        return self.apply(
+            lambda calendar: calendar[value], onerror=constants.RAISE
+        ).combine()
 
     def index(self, value) -> int:
         """
@@ -1507,7 +1510,7 @@ class Collection:
             f"Expected value to be datetime.date or Calendar, received {type(value).__name__}"
         )
 
-    def apply(self, func, onerror="raise"):
+    def apply(self, func, onerror=constants.RAISE):
         """
         Applies a function to each calendar
 
@@ -1523,7 +1526,7 @@ class Collection:
             try:
                 dates.append(func(calendar))
             except Exception as e:
-                if onerror == "raise":
+                if onerror == constants.RAISE:
                     raise e
                 elif onerror == "skip" or onerror == "drop":
                     pass
