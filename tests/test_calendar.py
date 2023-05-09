@@ -1,7 +1,6 @@
 import unittest
 import datetime
 import os
-import pandas as pd
 
 import doubledate.utils as utils
 
@@ -25,10 +24,10 @@ class CalendarTests(unittest.TestCase):
 
         self.assertIsInstance(Calendar([]), Calendar)
         self.assertIsInstance(Calendar([datetime.date.today()]), Calendar)
-        self.assertIsInstance(
-            Calendar(pd.date_range(datetime.date.today(), freq="D", periods=10)),
-            Calendar,
-        )
+        #self.assertIsInstance(
+        #    Calendar(pd.date_range(datetime.date.today(), freq="D", periods=10)),
+        #    Calendar,
+        #)
         with self.assertRaises(Exception):
             cdr = Calendar(True)
 

@@ -1,7 +1,6 @@
 import unittest
 import datetime
 import os
-import pandas as pd
 
 import doubledate.utils as utils
 
