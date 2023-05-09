@@ -52,7 +52,7 @@ def yesterday():
     --------
     today, tomorrow, now
     """
-    return datetime.date.today() - datetime.timedelta(days=-1)
+    return datetime.date.today() - datetime.timedelta(days=1)
 
 
 def now():
