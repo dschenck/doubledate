@@ -52,6 +52,7 @@ Using doubledate is also easy
    source/installation
    source/utils/doubledate.utils
    source/Calendar/doubledate.Calendar
+   source/diem/doubledate.diem
    source/BD/doubledate.BD
    source/Collection/doubledate.Collection
    source/changelog

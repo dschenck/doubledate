@@ -1,6 +1,7 @@
 import sortedcontainers
 import collections
 import datetime
+import numbers
 
 import doubledate.utils as utils
 import doubledate.constants as constants
@@ -21,7 +22,7 @@ class BD:
     """
 
     def __init__(self, index: int, frequency: str = "M", *, base: int = 0):
-        if not isinstance(index, int):
+        if not isinstance(index, numbers.Integral):
             raise TypeError(
                 f"Expected index to be an integer, received {type(index).__name__}"
             )
@@ -70,7 +71,7 @@ class BD:
             try:
                 dates.append(subcal[self.index - self.base])
             except Exception as e:
-                if onerror == "raise":
+                if onerror == constants.RAISE:
                     raise e
                 elif onerror == "drop" or onerror == "skip":
                     pass
@@ -363,15 +364,13 @@ class Calendar:
         KeyError
             if the index is out of range 
         """
-        if isinstance(value, int):
-            return self.__dates__.__getitem__(value)
-        elif isinstance(value, slice):
+        if isinstance(value, slice):
             if isinstance(value.start, datetime.date):
                 value = slice(self.__dates__.bisect_left(value.start), value.stop)
             if isinstance(value.stop, datetime.date):
                 value = slice(value.start, self.__dates__.bisect_right(value.stop))
             return Calendar(self.__dates__.__getitem__(value))
-        raise TypeError("Invalid index or slice object")
+        return self.__dates__.__getitem__(value)
 
     def __add__(self, other):
         """
@@ -387,8 +386,8 @@ class Calendar:
         Calendar
         """
         if isinstance(other, datetime.date):
-            return Calendar(self).union(Calendar([other]))
-        return Calendar(self).union(Calendar(other))
+            return self.union([other])
+        return self.union(other)
 
     def __eq__(self, other):
         """
@@ -404,13 +403,16 @@ class Calendar:
         -------
         Calendar
         """
-        for date in self:
-            if date not in other:
-                return False
-        for date in other:
-            if date not in self:
-                return False
-        return True
+        try:
+            for date in self:
+                if date not in other:
+                    return False
+            for date in other:
+                if date not in self:
+                    return False
+            return True
+        except Exception:
+            return False
 
     def union(self, *others):
         """
@@ -903,6 +905,7 @@ class Calendar:
 
         if starting is not None:
             on, side = starting, "left"
+
         if ending is not None:
             on, side = ending, "right"
 
@@ -942,7 +945,7 @@ class Calendar:
         Calendar.lb
             Return the last date before
         """
-        if date > self.__dates__[-1]:
+        if len(self) == 0 or date > self.__dates__[-1]:
             if default == constants.RAISE:
                 raise KeyError(
                     f"Out-of-range error: {date} is after last date in the calendar"
@@ -974,7 +977,7 @@ class Calendar:
         Calendar.asof
             Returns the most recent date on or before (after) another date
         """
-        if date < self.__dates__[0]:
+        if len(self) == 0 or date < self.__dates__[0]:
             if default == constants.RAISE:
                 raise KeyError(
                     f"Out-of-range error: {date} is before the first date in the calendar"
@@ -1372,7 +1375,7 @@ class Collection:
             raise TypeError("Expected a list of calendar objects")
         self.calendars = list(calendars)
 
-    def first(self, onerror="raise") -> Calendar:
+    def first(self, onerror=constants.RAISE) -> Calendar:
         """
         Returns a calendar with the first date each period in the collection
 
@@ -1391,7 +1394,7 @@ class Collection:
         """
         return self.apply(lambda period: period[0], onerror=onerror).combine()
 
-    def last(self, onerror="raise") -> Calendar:
+    def last(self, onerror=constants.RAISE) -> Calendar:
         """
         Returns a calendar with the last date each period in the collection
 
@@ -1410,7 +1413,7 @@ class Collection:
         """
         return self.apply(lambda period: period[-1], onerror=onerror).combine()
 
-    def nth(self, index, *, base=0, onerror="raise") -> Calendar:
+    def nth(self, index, *, base=0, onerror=constants.RAISE) -> Calendar:
         """
         Returns a calendar with the nth date each period from the collection
         
@@ -1436,9 +1439,9 @@ class Collection:
         Calendar
         """
         if isinstance(index, slice):
-            if isinstance(index.start, int):
+            if isinstance(index.start, numbers.Integral):
                 index = slice(index.start - base, index.stop, index.step)
-            if isinstance(index.stop, int):
+            if isinstance(index.stop, numbers.Integral):
                 index = slice(index.start, index.stop - base, index.step)
             return self.apply(
                 lambda calendar: calendar[index], onerror=onerror
@@ -1460,7 +1463,9 @@ class Collection:
         ----
         Indices and slices thereof are assumed 0-based
         """
-        return self.apply(lambda calendar: calendar[value], onerror="raise").combine()
+        return self.apply(
+            lambda calendar: calendar[value], onerror=constants.RAISE
+        ).combine()
 
     def index(self, value) -> int:
         """
@@ -1505,7 +1510,7 @@ class Collection:
             f"Expected value to be datetime.date or Calendar, received {type(value).__name__}"
         )
 
-    def apply(self, func, onerror="raise"):
+    def apply(self, func, onerror=constants.RAISE):
         """
         Applies a function to each calendar
 
@@ -1521,7 +1526,7 @@ class Collection:
             try:
                 dates.append(func(calendar))
             except Exception as e:
-                if onerror == "raise":
+                if onerror == constants.RAISE:
                     raise e
                 elif onerror == "skip" or onerror == "drop":
                     pass

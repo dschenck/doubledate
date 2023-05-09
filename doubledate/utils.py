@@ -1,6 +1,7 @@
 import calendar
 import datetime
 import dateutil.parser
+import numbers
 
 import doubledate.constants as constants
 
@@ -919,7 +920,7 @@ def offset(
             return som(date, months).replace(day=date.day)
         except:
             # if it fails, it must be that date is 29 February
-            if isinstance(handle, int):
+            if isinstance(handle, numbers.Integral):
                 return eom(date, months) + datetime.timedelta(handle)
             monthend = eom(date, months)
             return monthend + datetime.timedelta(
@@ -930,7 +931,7 @@ def offset(
             return date.replace(year=date.year + years)
         except:
             # 29 February + 1 year...  adjust with the handle
-            if isinstance(handle, int):
+            if isinstance(handle, numbers.Integral):
                 return date.replace(
                     year=date.year + years, day=date.day - 1
                 ) + datetime.timedelta(handle)
