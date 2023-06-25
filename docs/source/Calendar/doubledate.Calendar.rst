@@ -4,7 +4,7 @@ Calendar
 .. autoclass:: doubledate.Calendar
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
    :caption: Contents   
 
    doubledate.Calendar.apply.rst
