@@ -18,7 +18,7 @@ class BD:
     frequency : str
         one of 'D','W','M','Q','H' or 'Y'
     base : 0 (default), 1
-        whether to consider the index 1-based or 0-based 
+        whether to consider the index 1-based or 0-based
     """
 
     def __init__(self, index: int, frequency: str = "M", *, base: int = 0):
@@ -40,14 +40,14 @@ class BD:
 
     def resolve(self, calendar, onerror: str = "skip"):
         """
-        Returns a new Calendar containing only the n'th business day 
+        Returns a new Calendar containing only the n'th business day
         each frequency.
 
-        Allowed values for the onerror parameter: 
+        Allowed values for the onerror parameter:
             - 'skip' to skip periods where the n'th business day is not defined
-            - 'first' to fallback to the first date in the period when the n'th 
+            - 'first' to fallback to the first date in the period when the n'th
               business day is not defined
-            - 'last' to fallback to the last date in the period when the n'th 
+            - 'last' to fallback to the last date in the period when the n'th
               business day is not defined
             - 'raise' to raise an error if the n'th business day is not defined
 
@@ -106,11 +106,11 @@ class Calendar:
         >>> import doubledate as dtwo
 
         >>> holidays = [
-        ...     datetime.date(2022, 1, 17), 
-        ...     datetime.date(2022, 5, 30), 
-        ...     datetime.date(2022, 6, 4), 
-        ...     datetime.date(2022, 9, 5), 
-        ...     datetime.date(2022, 11, 11), 
+        ...     datetime.date(2022, 1, 17),
+        ...     datetime.date(2022, 5, 30),
+        ...     datetime.date(2022, 6, 4),
+        ...     datetime.date(2022, 9, 5),
+        ...     datetime.date(2022, 11, 11),
         ...     datetime.date(2022, 12, 24),
         ...     datetime.date(2022, 12, 26)
         ... ]
@@ -148,7 +148,7 @@ class Calendar:
             the starting date
         ending : datetime.date
             the ending date
-        
+
         Returns
         -------
         Calendar
@@ -157,13 +157,13 @@ class Calendar:
         Example
         -------
 
-        .. code-block:: 
+        .. code-block::
 
             >>> import datetime
             >>> import doubledate as dtwo
 
             >>> calendar = dtwo.Calendar.generate(
-            ...     datetime.date(2021,1,1), 
+            ...     datetime.date(2021,1,1),
             ...     datetime.date(2021,12,31)
             ... )
             >>> len(calendar)
@@ -324,7 +324,7 @@ class Calendar:
         ----------
         date : datetime-like
             the date whose index is searched
-        
+
         Raises
         ------
         ValueError
@@ -347,12 +347,12 @@ class Calendar:
         """
         Retrieves a date by index or slices a calendar
 
-        If `value` is a slice, the start and stop values can be 
-        either integers or datetime.date objects. 
+        If `value` is a slice, the start and stop values can be
+        either integers or datetime.date objects.
 
         Returns
         -------
-        datetime.date 
+        datetime.date
             if passed an index
         Calendar
             if passed a slice
@@ -362,7 +362,7 @@ class Calendar:
         TypeError
             if value is neither an integer nor a slice
         KeyError
-            if the index is out of range 
+            if the index is out of range
         """
         if isinstance(value, slice):
             if isinstance(value.start, datetime.date):
@@ -398,7 +398,7 @@ class Calendar:
         ----------
         other : iterable
             the compared calendar
-        
+
         Returns
         -------
         Calendar
@@ -431,9 +431,9 @@ class Calendar:
 
     def difference(self, *others):
         """
-        Returns a calendar containing dates in self and 
+        Returns a calendar containing dates in self and
         not in others
-        
+
         Parameters
         ----------
         others : iterables
@@ -448,7 +448,7 @@ class Calendar:
 
     def intersection(self, *others):
         """
-        Returns a calendar containing dates from self 
+        Returns a calendar containing dates from self
         which are also in all the others
 
         Parameters
@@ -474,10 +474,10 @@ class Calendar:
         weekday: str = None,
     ):
         """
-        Filters and returns a new calendar from this calendar based 
-        on a criteria. 
+        Filters and returns a new calendar from this calendar based
+        on a criteria.
 
-        Allowed criteria are: 
+        Allowed criteria are:
         - either a filtering function (lambda)
         - one or several filtering frequencies as named arguments
 
@@ -503,7 +503,7 @@ class Calendar:
         -------
         Calendar
 
-        Example 
+        Example
         -------
         Filter dates from 3Q 2020
         >>> calendar = Calendar(dates) #assume dates is a list of dates
@@ -585,7 +585,7 @@ class Calendar:
         ----------
         starting : datetime.date
             the starting date of the new calendar (defaults to :code:`calendar[0]`)
-        ending : datetime.date 
+        ending : datetime.date
             the ending date of the new calendar (defaults to :code:`calendar[-1]`)
 
         Returns
@@ -596,14 +596,14 @@ class Calendar:
         Example
         -------
         Compute the open weekdays in 2022 from a list of holidays
-        
+
         >>> import datetime
         >>> holidays = [
-        ...     datetime.date(2022, 1, 17), 
-        ...     datetime.date(2022, 5, 30), 
-        ...     datetime.date(2022, 6, 4), 
-        ...     datetime.date(2022, 9, 5), 
-        ...     datetime.date(2022, 11, 11), 
+        ...     datetime.date(2022, 1, 17),
+        ...     datetime.date(2022, 5, 30),
+        ...     datetime.date(2022, 6, 4),
+        ...     datetime.date(2022, 9, 5),
+        ...     datetime.date(2022, 11, 11),
         ...     datetime.date(2022, 12, 24),
         ...     datetime.date(2022, 12, 26)
         ... ]
@@ -626,10 +626,10 @@ class Calendar:
 
     def dayof(self, frequency: str, *, base: int = 1):
         """
-        Returns a :code:`datemap` mapping dates to their index 
+        Returns a :code:`datemap` mapping dates to their index
         in the given frequency.
 
-        The frequency can be one of: 
+        The frequency can be one of:
             - :code:`W` for day of week (assumes week starts on Monday)
             - :code:`W-MON` for day of week (assumes week starts on Monday)
             - :code:`W-TUE` for day of week (assumes week starts on Tuesday)
@@ -659,7 +659,7 @@ class Calendar:
 
         Note
         ----
-        The default base is 1 
+        The default base is 1
 
         Note
         ----
@@ -687,7 +687,7 @@ class Calendar:
 
         Parameters
         ----------
-        frequency : str, 
+        frequency : str,
             the frequency at which to reset the counter
         base : int
             the index of the first day each frequency
@@ -733,7 +733,7 @@ class Calendar:
             whether to include this or that in the count
             one of 'both', 'left' (default) or 'right' or None
 
-        Returns 
+        Returns
         --------
         int
             The number of dates between this and that
@@ -784,19 +784,19 @@ class Calendar:
 
     def groupby(self, grouper):
         """
-        Group dates by the grouper parameter. 
+        Group dates by the grouper parameter.
 
-        Allowed values for the grouper: 
+        Allowed values for the grouper:
             - callable - the callable will receive the date and must return a hashable value
-            - frequency criterion - a string representing a frequency 
+            - frequency criterion - a string representing a frequency
 
-        Frequency criteria include: 
+        Frequency criteria include:
             - :code:`W`: group by week number each year
             - :code:`M`: group by month each year
             - :code:`Q`: group by quarter each year
             - :code:`H`: group by semester each year
             - :code:`Y`: group by year each year
-        
+
         Parameters
         ----------
         grouper : str, callable
@@ -805,7 +805,7 @@ class Calendar:
         Returns
         -------
         :class:`doubledate.calendar.Collection`
-            Collection of calendars    
+            Collection of calendars
 
         Example
         -------
@@ -859,8 +859,8 @@ class Calendar:
         ending: datetime.date = None,
     ):
         """
-        Splits the calendar at the given business day, 
-        assuming that the passed index is the first (or last) 
+        Splits the calendar at the given business day,
+        assuming that the passed index is the first (or last)
         date of each period.
 
         Parameters
@@ -877,7 +877,7 @@ class Calendar:
         Returns
         -------
         Collection
-            The collection of calendars each starting or ending 
+            The collection of calendars each starting or ending
             on the given business day
 
         Example
@@ -898,7 +898,7 @@ class Calendar:
         --------
         Calendar.groupby
             Split the calendar on a criteria
-        
+
         """
         if sum(0 if arg is None else 1 for arg in [on, starting, ending]) != 1:
             raise ValueError("Expected one of on, starting or ending")
@@ -989,7 +989,7 @@ class Calendar:
         self, date: datetime.date, side: str = "left", default=constants.RAISE
     ) -> datetime.date:
         """
-        Returns the date if the date is in the calendar, or 
+        Returns the date if the date is in the calendar, or
         the last (first) date before (after) that
 
         Parameters
@@ -999,7 +999,7 @@ class Calendar:
         side : 'left', 'right'
             direction to search if date is not in calendar
         default: optional
-            default value if the given date is strictly before (after) 
+            default value if the given date is strictly before (after)
             the first (last) date in the calendar
 
         Returns
@@ -1015,7 +1015,7 @@ class Calendar:
 
         Example
         -------
-        
+
         .. code-block::
 
             >>> import datetime
@@ -1043,10 +1043,10 @@ class Calendar:
         See also
         --------
         Calendar.lb
-            last date strictly before 
+            last date strictly before
         Calendar.fa
             first date strictly after
-        
+
         """
         if date in self:
             return date
@@ -1058,7 +1058,7 @@ class Calendar:
 
     def snap(self, other, fallback="drop"):
         """
-        Combines this calendar with other, such as: 
+        Combines this calendar with other, such as:
             - Dates in both calendars are kept
             - Dates in this calendar but not in other are either dropped or
               replaced with either the first previous or following date in other
@@ -1067,7 +1067,7 @@ class Calendar:
         ------------
         other : iterable
             other calendar
-        
+
         fallback : str
             one of 'drop', 'previous' (a.k.a. ffill), 'next' (a.k.a. bfill)
 
@@ -1327,12 +1327,24 @@ class Calendar:
             return self.__dates__[i - 1]
         return self.__dates__[i]
 
+    def pipe(self, callable):
+        """
+        Returns the result from the callable on self
+
+        Parameters
+        ----------
+        callable : callable
+            a function or callable that accepts a Calendar object
+            as unique argument
+        """
+        return callable(self)
+
 
 class Collection:
     """
-    Collection of calendars. 
+    Collection of calendars.
 
-    Collections are normally generated from splitting a Calendar in several periods 
+    Collections are normally generated from splitting a Calendar in several periods
     via resampling or grouping
 
     Example
@@ -1343,11 +1355,11 @@ class Collection:
         >>> import doubledate as dtwo
 
         >>> holidays = [
-        ...     datetime.date(2022, 1, 17), 
-        ...     datetime.date(2022, 5, 30), 
-        ...     datetime.date(2022, 6, 4), 
-        ...     datetime.date(2022, 9, 5), 
-        ...     datetime.date(2022, 11, 11), 
+        ...     datetime.date(2022, 1, 17),
+        ...     datetime.date(2022, 5, 30),
+        ...     datetime.date(2022, 6, 4),
+        ...     datetime.date(2022, 9, 5),
+        ...     datetime.date(2022, 11, 11),
         ...     datetime.date(2022, 12, 24),
         ...     datetime.date(2022, 12, 26)
         ... ]
@@ -1379,7 +1391,7 @@ class Collection:
         """
         Returns a calendar with the first date each period in the collection
 
-        Allowed values for the onerror parameter: 
+        Allowed values for the onerror parameter:
             - 'skip' to skip empty calendars
             - 'raise' to raise an error
 
@@ -1398,7 +1410,7 @@ class Collection:
         """
         Returns a calendar with the last date each period in the collection
 
-        Allowed values for the onerror parameter: 
+        Allowed values for the onerror parameter:
             - 'skip' to skip empty calendars
             - 'raise' to raise an error
 
@@ -1416,13 +1428,13 @@ class Collection:
     def nth(self, index, *, base=0, onerror=constants.RAISE) -> Calendar:
         """
         Returns a calendar with the nth date each period from the collection
-        
-        Allowed values for the onerror parameter: 
+
+        Allowed values for the onerror parameter:
             - 'skip' to skip periods where the n'th business day is not defined
-            - 'first' to fallback to the first date in the period when the n'th 
-              business day is not defined
-            - 'last' to fallback to the last date in the period when the n'th 
-              business day is not defined
+            - 'first' to fallback to the first date in the period when the n'th
+               business day is not defined
+            - 'last' to fallback to the last date in the period when the n'th
+               business day is not defined
             - 'raise' to raise an error if the n'th business day is not defined
 
         Parameters
@@ -1469,7 +1481,7 @@ class Collection:
 
     def index(self, value) -> int:
         """
-        Returns the 0-based index of the calendar, 
+        Returns the 0-based index of the calendar,
         or 0-based index of the calendar containing the date
 
         Returns
@@ -1557,7 +1569,7 @@ class Collection:
 
     def combine(self):
         """
-        Combines the calendars of the collection back into a 
+        Combines the calendars of the collection back into a
         single Calendar object
 
         Returns
