@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath("../"))
 # -- Project information -----------------------------------------------------
 
 project = "doubledate"
-copyright = "2021, David Schenck"
+copyright = "2023, David Schenck"
 author = "David Schenck"
 
 # The full version, including alpha/beta/rc tags
@@ -61,4 +61,3 @@ html_static_path = ["_static"]
 
 # https://github.com/readthedocs/readthedocs.org/issues/2569
 master_doc = "index"
-
