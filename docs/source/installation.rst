@@ -1,5 +1,7 @@
 Installation
-========================
+============
+.. include:: ../fragments/badges.rst
+
 :code:`doubledate` is hosted in `PyPI <https://pypi.org/project/doubledate/>`_ - you can install it using pip:
 ::
 
@@ -17,7 +19,7 @@ Installing a specific version of :code:`doubledate`:
 
 Dependencies
 -------------------------
-:code:`doubledate` has the following dependencies: 
+:code:`doubledate` has the following 2 dependencies: 
 
 - `sortedcontainers <http://www.grantjenks.com/docs/sortedcontainers/>`_
 - `python-dateutil <https://dateutil.readthedocs.io/en/stable/>`_
