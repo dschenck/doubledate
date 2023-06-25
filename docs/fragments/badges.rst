@@ -12,3 +12,6 @@
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
+
+.. image:: https://codecov.io/gh/dschenck/doubledate/branch/master/graph/badge.svg?token=TIJJGYZYK5 
+   :target: https://codecov.io/gh/dschenck/doubledate
