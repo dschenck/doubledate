@@ -34,7 +34,7 @@ class diem:
 
     Note
     ----
-    The fold argument determines how to resolve 29 February 
+    The fold argument determines how to resolve 29 February
     for years which are not leap years
     """
 
@@ -51,12 +51,12 @@ class diem:
             raise TypeError("Expected day to be an integer")
 
         if day < 1 or day > DAYCOUNTBYMONTH[month]:
-            raise ValueError("day must be in 1..{DAYCOUNTBYMONTH[month]}")
+            raise ValueError(f"day must be in 1..{DAYCOUNTBYMONTH[month]}")
 
         self.day = day
 
         if fold not in ("forward", "back"):
-            raise ValueError("fold must be one of 'back' or 'forward', '{fold}' given")
+            raise ValueError(f"fold must be one of 'back' or 'forward', '{fold}' given")
 
         self.fold = fold
 
@@ -72,10 +72,10 @@ class diem:
             how to treat 29 Feb
         dtype : type
             the datetime type to instantiate (default is `datetime.date`)
-        
+
         Returns
         -------
-        date 
+        date
             an instance of the dtype with the (year, month, day)
 
         Note
@@ -93,7 +93,7 @@ class diem:
         >>> diem(2, 29).resolve(2021, fold="forward")
         datetime.date(2021, 3, 1)
 
-        >>> diem(2, 29, fold="forward").resolve(2021) # set default fold 
+        >>> diem(2, 29, fold="forward").resolve(2021) # set default fold
         datetime.date(2021, 3, 1)
 
         >>> diem(2, 29, fold="forward").resolve(2021, fold="back") # override default fold
@@ -200,7 +200,7 @@ class diem:
 
         Returns
         -------
-        diem 
+        diem
             parsed input
 
         Example
@@ -299,7 +299,7 @@ class diem:
 
         Note
         ----
-        If the diem is `29 Feb`, the `diem.fa` will resolve based 
+        If the diem is `29 Feb`, the `diem.fa` will resolve based
         on the fold attribute (e.g. back to 28 Feb or forward to 29 Feb)
         """
         if (self.month, self.day) > (date.month, date.day):
@@ -313,7 +313,7 @@ class diem:
         Parameters
         ----------
         date: datetime.date
-            the date from which to 
+            the date from which to compute the target date
         side : 'left', 'right'
             whether to resolve to the most recent (left) or the first date after (right)
             the given date
@@ -333,7 +333,7 @@ class diem:
 
     def replace(self, *, month=None, day=None, fold=None):
         """
-        Return a copy of the diem, partially replacing some 
+        Return a copy of the diem, partially replacing some
         of the attributes
 
         Parameters
