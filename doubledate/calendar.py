@@ -208,7 +208,7 @@ class Calendar:
         Calendar.end
             Alias
         """
-        return self.__dates__[-1]
+        return self[-1]
 
     @property
     def end(self) -> datetime.date:
@@ -256,7 +256,7 @@ class Calendar:
         Calendar.last
             Returns the last date in the calendar
         """
-        return self.__dates__[0]
+        return self[0]
 
     @property
     def start(self) -> datetime.date:
@@ -518,7 +518,7 @@ class Calendar:
                 raise ValueError(
                     "Filter accepts either a function, one or several named arguments"
                 )
-            return Calendar([date for date in self.__dates__ if func(date)])
+            return Calendar([date for date in self if func(date)])
         if all(
             [arg is None for arg in [year, semester, quarter, month, week, weekday]]
         ):
@@ -945,13 +945,13 @@ class Calendar:
         Calendar.lb
             Return the last date before
         """
-        if len(self) == 0 or date > self.__dates__[-1]:
+        if len(self) == 0 or date > self[-1]:
             if default == constants.RAISE:
                 raise KeyError(
                     f"Out-of-range error: {date} is after last date in the calendar"
                 )
             return default
-        return self.__dates__[self.__dates__.bisect_right(date)]
+        return self[self.__dates__.bisect_right(date)]
 
     def lb(self, date: datetime.date, default=constants.RAISE) -> datetime.date:
         """
@@ -977,13 +977,13 @@ class Calendar:
         Calendar.asof
             Returns the most recent date on or before (after) another date
         """
-        if len(self) == 0 or date < self.__dates__[0]:
+        if len(self) == 0 or date < self[0]:
             if default == constants.RAISE:
                 raise KeyError(
                     f"Out-of-range error: {date} is before the first date in the calendar"
                 )
             return default
-        return self.__dates__[self.__dates__.bisect_left(date) - 1]
+        return self[self.__dates__.bisect_left(date) - 1]
 
     def asof(
         self, date: datetime.date, side: str = "left", default=constants.RAISE
@@ -1127,13 +1127,10 @@ class Calendar:
         datetime.date
         """
         for i in range(self.index(date), -1, -1):
-            if (
-                self.__dates__[i].month == date.month
-                and self.__dates__[i].year == date.year
-            ):
+            if self[i].month == date.month and self[i].year == date.year:
                 continue
-            return self.__dates__[i + 1]
-        return self.__dates__[i]
+            return self[i + 1]
+        return self[i]
 
     def eom(self, date: datetime.date) -> datetime.date:
         """
@@ -1149,13 +1146,10 @@ class Calendar:
         datetime.date
         """
         for i in range(self.index(date), len(self)):
-            if (
-                self.__dates__[i].month == date.month
-                and self.__dates__[i].year == date.year
-            ):
+            if self[i].month == date.month and self[i].year == date.year:
                 continue
-            return self.__dates__[i - 1]
-        return self.__dates__[i]
+            return self[i - 1]
+        return self[i]
 
     def soq(self, date: datetime.date) -> datetime.date:
         """
@@ -1172,12 +1166,12 @@ class Calendar:
         """
         for i in range(self.index(date), -1, -1):
             if (
-                utils.quarter(self.__dates__[i]) == utils.quarter(date)
-                and self.__dates__[i].year == date.year
+                utils.quarter(self[i]) == utils.quarter(date)
+                and self[i].year == date.year
             ):
                 continue
-            return self.__dates__[i + 1]
-        return self.__dates__[i]
+            return self[i + 1]
+        return self[i]
 
     def eoq(self, date: datetime.date) -> datetime.date:
         """
@@ -1194,12 +1188,12 @@ class Calendar:
         """
         for i in range(self.index(date), len(self)):
             if (
-                utils.quarter(self.__dates__[i]) == utils.quarter(date)
-                and self.__dates__[i].year == date.year
+                utils.quarter(self[i]) == utils.quarter(date)
+                and self[i].year == date.year
             ):
                 continue
-            return self.__dates__[i - 1]
-        return self.__dates__[i]
+            return self[i - 1]
+        return self[i]
 
     def sot(self, date: datetime.date) -> datetime.date:
         """
@@ -1216,12 +1210,12 @@ class Calendar:
         """
         for i in range(self.index(date), -1, -1):
             if (
-                utils.trimester(self.__dates__[i]) == utils.trimester(date)
-                and self.__dates__[i].year == date.year
+                utils.trimester(self[i]) == utils.trimester(date)
+                and self[i].year == date.year
             ):
                 continue
-            return self.__dates__[i + 1]
-        return self.__dates__[i]
+            return self[i + 1]
+        return self[i]
 
     def eot(self, date: datetime.date) -> datetime.date:
         """
@@ -1238,12 +1232,12 @@ class Calendar:
         """
         for i in range(self.index(date), len(self)):
             if (
-                utils.trimester(self.__dates__[i]) == utils.trimester(date)
-                and self.__dates__[i].year == date.year
+                utils.trimester(self[i]) == utils.trimester(date)
+                and self[i].year == date.year
             ):
                 continue
-            return self.__dates__[i - 1]
-        return self.__dates__[i]
+            return self[i - 1]
+        return self[i]
 
     def sos(self, date: datetime.date) -> datetime.date:
         """
@@ -1260,12 +1254,12 @@ class Calendar:
         """
         for i in range(self.index(date), -1, -1):
             if (
-                utils.semester(self.__dates__[i]) == utils.semester(date)
-                and self.__dates__[i].year == date.year
+                utils.semester(self[i]) == utils.semester(date)
+                and self[i].year == date.year
             ):
                 continue
-            return self.__dates__[i + 1]
-        return self.__dates__[i]
+            return self[i + 1]
+        return self[i]
 
     def eos(self, date: datetime.date) -> datetime.date:
         """
@@ -1282,12 +1276,12 @@ class Calendar:
         """
         for i in range(self.index(date), len(self)):
             if (
-                utils.semester(self.__dates__[i]) == utils.semester(date)
-                and self.__dates__[i].year == date.year
+                utils.semester(self[i]) == utils.semester(date)
+                and self[i].year == date.year
             ):
                 continue
-            return self.__dates__[i - 1]
-        return self.__dates__[i]
+            return self[i - 1]
+        return self[i]
 
     def soy(self, date: datetime.date) -> datetime.date:
         """
@@ -1303,10 +1297,10 @@ class Calendar:
         datetime.date
         """
         for i in range(self.index(date), -1, -1):
-            if self.__dates__[i].year == date.year:
+            if self[i].year == date.year:
                 continue
-            return self.__dates__[i + 1]
-        return self.__dates__[i]
+            return self[i + 1]
+        return self[i]
 
     def eoy(self, date: datetime.date) -> datetime.date:
         """
@@ -1322,10 +1316,10 @@ class Calendar:
         datetime.date
         """
         for i in range(self.index(date), len(self)):
-            if self.__dates__[i].year == date.year:
+            if self[i].year == date.year:
                 continue
-            return self.__dates__[i - 1]
-        return self.__dates__[i]
+            return self[i - 1]
+        return self[i]
 
     def pipe(self, callable):
         """
