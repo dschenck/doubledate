@@ -1,5 +1,6 @@
 import sortedcontainers
 import collections
+import collections.abc
 import datetime
 import numbers
 
@@ -322,7 +323,7 @@ class Calendar:
 
         Parameters
         ----------
-        date : datetime-like
+        date : datetime
             the date whose index is searched
 
         Raises
@@ -335,6 +336,8 @@ class Calendar:
         int
             Position (0-based) of the date
         """
+        if isinstance(date, collections.abc.Iterable):
+            return [self.index(d) for d in date]
         return self.__dates__.index(date)
 
     def __iter__(self):
@@ -774,6 +777,8 @@ class Calendar:
         offsetted : datetime.date
             the date in the calendar days-away from the given date
         """
+        if isinstance(date, collections.abc.Iterable):
+            return [self.offset(date=d, days=days) for d in date]
         if not date in self:
             raise ValueError(f"{date} is not in the calendar")
         if self.index(date) + days < 0:
@@ -945,6 +950,9 @@ class Calendar:
         Calendar.lb
             Return the last date before
         """
+        if isinstance(date, collections.abc.Iterable):
+            return [self.fa(d, default=default) for d in date]
+
         if len(self) == 0 or date > self[-1]:
             if default == constants.RAISE:
                 raise KeyError(
@@ -977,6 +985,9 @@ class Calendar:
         Calendar.asof
             Returns the most recent date on or before (after) another date
         """
+        if isinstance(date, collections.abc.Iterable):
+            return [self.lb(d, default=default) for d in date]
+
         if len(self) == 0 or date < self[0]:
             if default == constants.RAISE:
                 raise KeyError(
@@ -1048,6 +1059,9 @@ class Calendar:
             first date strictly after
 
         """
+        if isinstance(date, collections.abc.Iterable):
+            return [self.asof(d, side=side, default=default) for d in date]
+
         if date in self:
             return date
         if side == "left":
