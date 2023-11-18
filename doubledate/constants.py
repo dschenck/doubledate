@@ -1,12 +1,12 @@
-MON = "MON"
-TUE = "TUE"
-WED = "WED"
-THU = "THU"
-FRI = "FRI"
-SAT = "SAT"
-SUN = "SUN"
+MON = 0
+TUE = 1
+WED = 2
+THU = 3
+FRI = 4
+SAT = 5
+SUN = 6
 
-WEEKDAYS = {MON: 0, TUE: 1, WED: 2, THU: 3, FRI: 4, SAT: 5, SUN: 6}
+WEEKDAYS = {"MON": 0, "TUE": 1, "WED": 2, "THU": 3, "FRI": 4, "SAT": 5, "SUN": 6}
 
 Y = "Y"
 Y_JAN = "Y-JAN"

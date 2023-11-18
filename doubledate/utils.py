@@ -110,7 +110,7 @@ def trimester(date, *, base=1):
     """
     Returns the trimester of the given date
 
-    Trimesters run from 1 January to 30 April, 1 May to 31 August 
+    Trimesters run from 1 January to 30 April, 1 May to 31 August
     and 1 September to 31 December.
 
     Parameters
@@ -147,7 +147,7 @@ def quarter(date, *, base=1):
     """
     Returns the quarter of the given date
 
-    Quarters run from 1 January to 31 March, 1 April to 30 June, 
+    Quarters run from 1 January to 31 March, 1 April to 30 June,
     1 July to 30 September and 1 October to 31 December.
 
     Parameters
@@ -179,11 +179,11 @@ def quarter(date, *, base=1):
 
 def sow(date: datetime.date, offset: int = 0, weekday: str = "MON") -> datetime.date:
     """
-    Returns the start of the week, i.e. the first date on or before the given date 
-    whose weekday is equal to the the weekday argument, and 
-    offset by a given number of weeks. 
-    
-    Weekday must be one of :code:`'MON'`, :code:`'TUE'`, :code:`'WED'`, :code:`'THU'`, 
+    Returns the start of the week, i.e. the first date on or before the given date
+    whose weekday is equal to the the weekday argument, and
+    offset by a given number of weeks.
+
+    Weekday must be one of :code:`'MON'`, :code:`'TUE'`, :code:`'WED'`, :code:`'THU'`,
     :code:`'FRI'`, :code:`'SAT'` or :code:`'SUN'`.
 
     Parameters
@@ -191,7 +191,7 @@ def sow(date: datetime.date, offset: int = 0, weekday: str = "MON") -> datetime.
     date : datetime.date
         the date from which to determine the start of the week
     offset : int, optional
-        the number of weeks from which to offset the most recent start 
+        the number of weeks from which to offset the most recent start
         of the week (default is 0)
     weekday : str, optional
         the weekday which defines the start of the week (default is :code:`"MON"`)
@@ -204,13 +204,13 @@ def sow(date: datetime.date, offset: int = 0, weekday: str = "MON") -> datetime.
     Examples
     --------
     >>> today = datetime.date(2020, 1, 15) #Wednesday
-    >>> sow(today) 
+    >>> sow(today)
     datetime.date(2020, 1, 13) #last Monday
 
     >>> sow(today, 1)
     datetime.date(2020, 1, 20) #following Monday
 
-    >>> sow(today, weekday="WED") 
+    >>> sow(today, weekday="WED")
     datetime.date(2020, 1, 15) #today
 
     >>> sow(today, weekday="THU")
@@ -231,10 +231,10 @@ def sow(date: datetime.date, offset: int = 0, weekday: str = "MON") -> datetime.
 
 def next(weekday: str, *, asof=None) -> datetime.date:
     """
-    Returns the first weekday strictly after the :code:`asof` date (or today) 
+    Returns the first weekday strictly after the :code:`asof` date (or today)
     for which the weekday is equal to the passed :code:`weekday` argument.
 
-    Weekday must be one of :code:`'MON'`, :code:`'TUE'`, :code:`'WED'`, :code:`'THU'`, 
+    Weekday must be one of :code:`'MON'`, :code:`'TUE'`, :code:`'WED'`, :code:`'THU'`,
     :code:`'FRI'`, :code:`'SAT'` or :code:`'SUN'`.
 
     Parameters
@@ -271,10 +271,10 @@ def next(weekday: str, *, asof=None) -> datetime.date:
 def eow(date: datetime.date, offset: int = 0, weekday: str = "SUN") -> datetime.date:
     """
     Returns the end of the week, i.e. the first date on or after the given date
-    whose weekday is equal to the the :code:`weekday` argument, and 
-    offset by a given number of weeks. 
-    
-    Weekday must be one of :code:`'MON'`, :code:`'TUE'`, :code:`'WED'`, :code:`'THU'`, 
+    whose weekday is equal to the the :code:`weekday` argument, and
+    offset by a given number of weeks.
+
+    Weekday must be one of :code:`'MON'`, :code:`'TUE'`, :code:`'WED'`, :code:`'THU'`,
     :code:`'FRI'`, :code:`'SAT'` or :code:`'SUN'`.
 
     Parameters
@@ -282,7 +282,7 @@ def eow(date: datetime.date, offset: int = 0, weekday: str = "SUN") -> datetime.
     date : datetime.date
         the date from which to determine the end of the week
     offset : int, optional
-        the number of weeks from which to offset the most recent end 
+        the number of weeks from which to offset the most recent end
         of the week (default is 0)
     weekday : str, optional
         the weekday which defines the end of the week (default is :code:`"SUN"`)
@@ -296,7 +296,7 @@ def eow(date: datetime.date, offset: int = 0, weekday: str = "SUN") -> datetime.
     Examples
     --------
     >>> today = datetime.date(2020, 1, 15) #Wednesday
-    >>> eow(today) 
+    >>> eow(today)
     datetime.date(2020, 1, 20) #Sunday (by default)
 
     >>> eow(today, 1)
@@ -315,7 +315,7 @@ def eow(date: datetime.date, offset: int = 0, weekday: str = "SUN") -> datetime.
 
 def last(weekday: str, *, asof=None) -> datetime.date:
     """
-    Returns the most recent date strictly before today (or the :code:`asof` date) 
+    Returns the most recent date strictly before today (or the :code:`asof` date)
     for which the weekday is equal to the passed :code:`weekday` argument
 
     Parameters
@@ -353,15 +353,15 @@ def last(weekday: str, *, asof=None) -> datetime.date:
 
 def som(date: datetime.date, offset: int = 0) -> datetime.date:
     """
-    Returns the start of the month for the given :code:`date`, then optionally 
+    Returns the start of the month for the given :code:`date`, then optionally
     offsets it by :code:`offset` months.
 
     Parameters
     ----------
     date : datetime.date
         The date for which to compute the start of the month
-    offset : int, optional  
-        The number of months from which to offset the start of 
+    offset : int, optional
+        The number of months from which to offset the start of
         the month
 
     Returns
@@ -394,15 +394,15 @@ def som(date: datetime.date, offset: int = 0) -> datetime.date:
 
 def eom(date: datetime.date, offset: int = 0):
     """
-    Returns the last date of month for the given date, then optionally 
+    Returns the last date of month for the given date, then optionally
     offsets it by :code:`offset` months.
 
     Parameters
     ----------
     date : datetime.date
         The date for which to compute the end of the month
-    offset : int, optional  
-        The number of months from which to offset the end of 
+    offset : int, optional
+        The number of months from which to offset the end of
         the month
 
     Returns
@@ -417,7 +417,7 @@ def eom(date: datetime.date, offset: int = 0):
     Examples
     ------------
     >>> today = datetime.date(2020, 1, 15)
-    >>> eom(today) 
+    >>> eom(today)
     datetime.date(2020, 1, 31)
 
     >>> eom(today, 1)
@@ -439,8 +439,8 @@ def eom(date: datetime.date, offset: int = 0):
 
 def soq(date: datetime.date, offset: int = 0) -> datetime.date:
     """
-    Returns the first date of the quarter, i.e. one of 
-    1 January, 1 April, 1 July or 1 October, then optionally 
+    Returns the first date of the quarter, i.e. one of
+    1 January, 1 April, 1 July or 1 October, then optionally
     offsets it by :code:`offset` quarters
 
     Parameters
@@ -470,7 +470,7 @@ def soq(date: datetime.date, offset: int = 0) -> datetime.date:
 def eoq(date: datetime.date, offset: int = 0) -> datetime.date:
     """
     Returns the end of the quarter, i.e. one of
-    31 March, 30 June, 30 September or 31 December, then 
+    31 March, 30 June, 30 September or 31 December, then
     optionally offsets it by :code:`offset` quarters
 
     Parameters
@@ -505,8 +505,8 @@ def eoq(date: datetime.date, offset: int = 0) -> datetime.date:
 
 def eot(date: datetime.date, offset: int = 0) -> datetime.date:
     """
-    Returns the end of the calendar trimester, i.e. one of 
-    30 April, 31 August or 31 December, then optionally offsets it 
+    Returns the end of the calendar trimester, i.e. one of
+    30 April, 31 August or 31 December, then optionally offsets it
     by :code:`offset` trimesters
 
     Parameters
@@ -542,7 +542,7 @@ def eot(date: datetime.date, offset: int = 0) -> datetime.date:
 def sot(date: datetime.date, offset: int = 0) -> datetime.date:
     """
     Returns the first date of the calendar trimester, i.e. one of
-    1 January, 1 May or 1 September, then optionally offsets it 
+    1 January, 1 May or 1 September, then optionally offsets it
     by :code:`offset` trimesters
 
     Parameters
@@ -562,8 +562,8 @@ def sot(date: datetime.date, offset: int = 0) -> datetime.date:
 
 def eos(date: datetime.date, offset: int = 0) -> datetime.date:
     """
-    Returns the end of the calendar semester, i.e. one of 
-    30 June or 31 December, then optionally offsets it 
+    Returns the end of the calendar semester, i.e. one of
+    30 June or 31 December, then optionally offsets it
     by :code:`offset` semesters
 
     Parameters
@@ -590,7 +590,7 @@ def eos(date: datetime.date, offset: int = 0) -> datetime.date:
 def sos(date: datetime.date, offset: int = 0) -> datetime.date:
     """
     Returns the first date of the calendar semester, i.e. one of
-    1 January or 1 July, then optionally offsets it 
+    1 January or 1 July, then optionally offsets it
     by :code:`offset` semesters
 
     Parameters
@@ -610,7 +610,7 @@ def sos(date: datetime.date, offset: int = 0) -> datetime.date:
 
 def soy(date: datetime.date, offset: int = 0) -> datetime.date:
     """
-    Returns the start of the year, i.e. the 1st January of the current date, 
+    Returns the start of the year, i.e. the 1st January of the current date,
     then optionally offset by :code:`offset` years.
 
     Parameters
@@ -630,7 +630,7 @@ def soy(date: datetime.date, offset: int = 0) -> datetime.date:
 
 def eoy(date: datetime.date, offset: int = 0) -> datetime.date:
     """
-    Returns the end of the year, i.e. the 31 December of the date's year, 
+    Returns the end of the year, i.e. the 31 December of the date's year,
     then optionally offset by :code:`offset` years.
 
     Parameters
@@ -650,15 +650,15 @@ def eoy(date: datetime.date, offset: int = 0) -> datetime.date:
 
 def floor(date: datetime.date, frequency: str) -> datetime.date:
     """
-    Returns the first date of the frequency (e.g. quarter) 
-    for the date passed as first argument. 
+    Returns the first date of the frequency (e.g. quarter)
+    for the date passed as first argument.
 
     Parameters
     ----------
     date : datetime-like
         the date
     frequency : str
-        one of Y, H, Q, M, W or W-MON...W-SUN for, respectively, year, semester, quarter, 
+        one of Y, H, Q, M, W or W-MON...W-SUN for, respectively, year, semester, quarter,
         month, week (or specific weekday)
 
     Examples
@@ -695,7 +695,7 @@ def ceil(date: datetime.date, frequency: str) -> datetime.date:
     date : datetime-like
         the date to offset
     frequency : str
-        one of Y, H, Q, M, W or W-MON...W-SUN for, respectively, year, semester, quarter, 
+        one of Y, H, Q, M, W or W-MON...W-SUN for, respectively, year, semester, quarter,
         month, week (or specific weekday)
 
     Examples
@@ -768,10 +768,10 @@ def offset(
     handle=0,
 ):
     """
-    Returns the date offset either by a number of frequencies 
+    Returns the date offset either by a number of frequencies
     or else to the nearest frequency. Only one of the :code:`days`, :code:`weekdays`,
     :code:`weeks`, :code:`months`, :code:`years` or :code:`to` must be provided.
-    
+
     Arguments
     ------------
     date : datetime-like
@@ -780,43 +780,43 @@ def offset(
         to offset the reference date by *n* calendar days
     weekdays : int, optional
         to offset the reference date by *n* weekdays
-    weeks : int, optional 
+    weeks : int, optional
         to offset the reference date by *n* weeks
-    months : int, optional 
+    months : int, optional
         to offset the reference date by *n* months. See notes below
         on handling out-of-range dates (e.g. 31 Jan + 1m)
     years : int, optional
-        to offset the reference date by *n* months. See notes below 
+        to offset the reference date by *n* months. See notes below
         if the reference date is 29 February
     to : str, optional
         to offset the reference date to a given period start or period end
     handle : int, function, optional
         optional callback function (or integer) to customize the way out-of-range
         dates are handled (e.g. 31 Jan + 1m). See note below
-    
-    Raises 
+
+    Raises
     ------------
-    ValueError 
+    ValueError
         on invalid arguments
-        
+
     Notes
     ------------
     When adding months or years, there may ambiguity as to what the function should
-    return when the "intended" target date is out-of-range. For example, 31 January + 1m 
-    should - in a perfect world - yield 31 February... which is out-of-range. 
+    return when the "intended" target date is out-of-range. For example, 31 January + 1m
+    should - in a perfect world - yield 31 February... which is out-of-range.
 
     By default, the function will handle these out-of-range cases by returning the last
     calendar date in the target month (e.g. 28 February, or 29 February if the year is a
-    leap year). 
+    leap year).
     ::
 
         >>> offset(datetime.date(2020, 1, 31), months=1)
         datetime.date(2020, 2, 29)
 
-    You can can customize this behavior using the :code:`handle` argument, which can take 
-    either an integer or a callback function: 
+    You can can customize this behavior using the :code:`handle` argument, which can take
+    either an integer or a callback function:
 
-    - if given an integer (e.g. 1), the function adds that number of days to the end 
+    - if given an integer (e.g. 1), the function adds that number of days to the end
       of target month (e.g. 28 February + 1 day is 1 March)
 
     ::
@@ -837,13 +837,13 @@ def offset(
         datetime.date(2021, 3, 1)
 
 
-    - if given a callback function (e.g. lambda function), the function must accept the 
-      end of the month (e.g. 28 February) and the number of gap days between the "intended" 
+    - if given a callback function (e.g. lambda function), the function must accept the
+      end of the month (e.g. 28 February) and the number of gap days between the "intended"
       target date (e.g. 31 February) and the most recent feasible date (29 February)
       and return an integer (e.g. 1). The result of the callback function is then added to
-      end of the month. 
+      end of the month.
 
-    :: 
+    ::
 
         >>> offset(datetime.date(2020, 1, 31), months=1, handle=lambda eom, gap: 0)
         datetime.date(2020, 2, 29)
@@ -868,35 +868,35 @@ def offset(
     >>> today = datetime.date(2020, 1, 10)
     >>> today
     datetime.date(2020, 1, 10) #Friday
-    
+
     >>> offset(today, days=1)
     datetime.date(2020, 1, 11) #Saturday
-    
+
     >>> offset(today, weekdays=1)
     datetime.date(2020, 1, 13) #Monday
-    
+
     >>> offset(today, weekdays=-1)
     datetime.date(2020, 1, 9) #Thursday
-    
+
     >>> offset(today, weeks=1)
     datetime.date(2020, 1, 17) #Friday next week
-    
+
     >>> offset(today, weekdays=5)
     datetime.date(2020, 1, 17) #also Friday next week
-    
+
     >>> offset(today, months=1)
     datetime.date(2020, 2, 10)
-    
+
     >>> jan31 = datetime.date(2020, 1, 31)
     >>> offset(jan31, months=1)
     datetime.date(2020, 2, 29) #defaults to end of month
-    
+
     >>> offset(jan31, months=1, handle=1)
     datetime.date(2020, 3, 1)
-    
+
     >>> offset(jan31, months=1, handle=lambda eom, days: 1)
     datetime.date(2020, 3, 1) #handle returns 1
-    
+
     >>> offset(jan31, months=1, handle=lambda eom, days: days)
     datetime.dte(2020, 3, 2) #handle returns the size of the gap
     """
@@ -973,11 +973,11 @@ class datemap:
         >>> import datetime
 
         >>> holidays = [
-        ...     datetime.date(2022, 1, 17), 
-        ...     datetime.date(2022, 5, 30), 
-        ...     datetime.date(2022, 6, 4), 
-        ...     datetime.date(2022, 9, 5), 
-        ...     datetime.date(2022, 11, 11), 
+        ...     datetime.date(2022, 1, 17),
+        ...     datetime.date(2022, 5, 30),
+        ...     datetime.date(2022, 6, 4),
+        ...     datetime.date(2022, 9, 5),
+        ...     datetime.date(2022, 11, 11),
         ...     datetime.date(2022, 12, 24),
         ...     datetime.date(2022, 12, 26)
         ... ]
@@ -1009,7 +1009,7 @@ class datemap:
 
 def dayof(frequency: str, dates=None, *, calendar=None, base=1):
     """
-    Returns an efficient iterator that yields the position of each date 
+    Returns an efficient iterator that yields the position of each date
     in a given frequency.
 
     Arguments
@@ -1025,13 +1025,13 @@ def dayof(frequency: str, dates=None, *, calendar=None, base=1):
 
     Returns
     ------------
-    mapping : datemap 
+    mapping : datemap
         dictionary-like container mapping dates to position in frequency
 
     Examples
     ------------
-    :: 
-    
+    ::
+
         >>> dayof(datetime.date(2020,2,29), "M")
         29
         >>> dayof(datetime.date(2020,2,29), "Q")
@@ -1055,15 +1055,15 @@ def dayof(frequency: str, dates=None, *, calendar=None, base=1):
 
     Notes
     ------------
-    .. warning:: 
+    .. warning::
         If given a calendar and no dates, the function returns a date-map, mapping each date
-        of the custom calendar to its position within the frequency. 
-        
+        of the custom calendar to its position within the frequency.
+
         If given a set of dates and no calendar, the function returns the number of days
-        from the generic start of the frequency. 
-        
+        from the generic start of the frequency.
+
         If given a set of dates and a custom calendar, the function returns the number of days
-        since the start of the frequency using the custom calendar as the reference.  
+        since the start of the frequency using the custom calendar as the reference.
     """
 
     FREQUENCIES = [
@@ -1114,8 +1114,8 @@ def dayof(frequency: str, dates=None, *, calendar=None, base=1):
 
 def daysfrom(frequency: str, dates=None, *, calendar=None):
     """
-    Returns an efficient iterator that yields the number of days since the  
-    start of a given frequency. 
+    Returns an efficient iterator that yields the number of days since the
+    start of a given frequency.
 
     Arguments
     ------------
@@ -1128,20 +1128,20 @@ def daysfrom(frequency: str, dates=None, *, calendar=None):
 
     Notes
     ------------
-    .. warning:: 
+    .. warning::
         If given a calendar and no dates, the function returns a date-map, mapping each date
-        of the custom calendar to its position within the frequency. 
-        
+        of the custom calendar to its position within the frequency.
+
         If given a set of dates and no calendar, the function returns the number of days
-        from the generic start of the frequency. 
-        
+        from the generic start of the frequency.
+
         If given a set of dates and a custom calendar, the function returns the number of days
-        since the start of the frequency using the custom calendar as the reference. 
+        since the start of the frequency using the custom calendar as the reference.
 
     Examples
     ------------
     ::
-    
+
         >>> daysfrom(datetime.date(2020,2,29), "MS")
         28
         >>> daysfrom(datetime.date(2020,2,29), "QS")
@@ -1170,8 +1170,8 @@ def daysfrom(frequency: str, dates=None, *, calendar=None):
 
 def daysto(frequency: str, dates=None, *, calendar=None):
     """
-    Returns an efficient iterator that yields the number of days to the  
-    end of a given frequency. 
+    Returns an efficient iterator that yields the number of days to the
+    end of a given frequency.
 
     Arguments
     ------------
@@ -1185,7 +1185,7 @@ def daysto(frequency: str, dates=None, *, calendar=None):
     Examples
     ------------
     ::
-    
+
         >>> daysto("ME",datetime.date(2020,2,29))
         0
         >>> daysto("QE",datetime.date(2020,2,29))
@@ -1204,12 +1204,12 @@ def daysto(frequency: str, dates=None, *, calendar=None):
 
     Notes
     ------------
-    .. warning:: 
-        If given a date (rather than a list of dates), the function returns the number of days to the 
-        end of the calendar frequency. 
+    .. warning::
+        If given a date (rather than a list of dates), the function returns the number of days to the
+        end of the calendar frequency.
 
-    .. note:: 
-        The list of dates is assumed to be sorted chronologically (from oldest to 
+    .. note::
+        The list of dates is assumed to be sorted chronologically (from oldest to
         most recent), i.e. period changes are detected by comparing two adjacent dates
     """
 
@@ -1258,10 +1258,10 @@ def weekdayof(frequency: str, date=None, *, base=1):
     frequency : str
         one of Y, H, T, Q, M
     date : datetime-like
-        the date 
+        the date
     base : int
         whether to consider the first date as 0 or 1
-    
+
     Examples
     -------------
     >>> weekdayof("Y", datetime.date(2020,1,27))
@@ -1279,6 +1279,7 @@ def weekdayof(frequency: str, date=None, *, base=1):
         )
 
     freqstart = floor(date, frequency)
+
     return (
         int(
             (
