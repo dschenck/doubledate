@@ -3,6 +3,23 @@ import doubledate as dtwo
 import datetime
 
 
+def test_today():
+    assert dtwo.today() == datetime.date.today()
+
+
+def test_tomorrow():
+    assert dtwo.tomorrow() == datetime.date.today() + datetime.timedelta(days=1)
+
+
+def test_yesterday():
+    assert dtwo.yesterday() == datetime.date.today() - datetime.timedelta(days=1)
+
+
+def test_last_weekday_default():
+    assert dtwo.today() >= dtwo.last("MON")
+    assert dtwo.today() - datetime.timedelta(days=7) < dtwo.last("MON")
+
+
 @pytest.mark.parametrize(
     ("date", "semester"),
     [

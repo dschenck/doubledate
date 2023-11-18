@@ -7,6 +7,12 @@ from doubledate import diem
 def test_instanciation():
     ann = diem(3, 31)
 
+    with pytest.raises(TypeError):
+        diem("a", 2020)
+
+    with pytest.raises(TypeError):
+        diem(10, "not a valid year")
+
 
 def test_out_of_range():
     with pytest.raises(Exception):
@@ -88,6 +94,12 @@ def test_resolve():
     day = diem(2, 29, fold="back")
     assert day.resolve(2021, fold="forward") == datetime.date(2021, 3, 1)
 
+    with pytest.raises(TypeError):
+        assert diem(1, 1).resolve(year="not an integer")
+
+    with pytest.raises(ValueError):
+        assert diem(2, 29).resolve(year=2021, fold="not a valid fold")
+
 
 def test_parsing():
     day = diem.parse("JAN")
@@ -163,10 +175,16 @@ def test_asof():
     assert date == datetime.date(2020, 3, 31)
 
     date = diem(2, 29).asof(datetime.date(2020, 2, 1))
-    assert datetime.date(2019, 2, 28)
+    assert date == datetime.date(2019, 2, 28)
 
     date = diem(2, 29).asof(datetime.date(2020, 2, 1), side="right")
-    assert datetime.date(2020, 2, 29)
+    assert date == datetime.date(2020, 2, 29)
+
+    date = diem(2, 29).asof(datetime.date(2020, 2, 29), side="right")
+    assert date == datetime.date(2020, 2, 29)
+
+    date = diem(2, 29).asof(datetime.date(2020, 2, 29), side="left")
+    assert date == datetime.date(2020, 2, 29)
 
 
 def test_replace():
