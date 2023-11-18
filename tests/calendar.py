@@ -456,3 +456,12 @@ def test_apply(calendar):
     )
 
     assert isinstance(calendar.apply(lambda date: date.year), list)
+
+
+def test_resample_calendar_by_weekday(calendar):
+    groups = calendar.resample("W-MON")
+    assert all(len(week) < 7 for week in groups)
+    assert groups.calendars[-1][0] == datetime.date(2019, 11, 12)  # Tuesday
+
+    dates = calendar.resample("W-TUE").first()
+    assert dates[-1] == datetime.date(2019, 11, 13)  # Wednesday

@@ -54,6 +54,7 @@ def test_trimester(date, trimester):
         (datetime.date(2020, 1, 4), 0, "WED", datetime.date(2020, 1, 8)),
         (datetime.date(2020, 1, 4), 0, "TUE", datetime.date(2020, 1, 7)),
         (datetime.date(2020, 1, 4), 0, "MON", datetime.date(2020, 1, 6)),
+        (datetime.date(2019, 11, 12), 0, "TUE", datetime.date(2019, 11, 12)),
     ],
 )
 def test_end_of_week(date, offset, weekday, eow):

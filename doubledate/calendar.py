@@ -796,7 +796,8 @@ class Calendar:
             - frequency criterion - a string representing a frequency
 
         Frequency criteria include:
-            - :code:`W`: group by week number each year
+            - :code:`W`: group by week number each year (same as :code:`W-SUN`)
+            - :code:`W-MON`: to :code:`W-SUN` group week ending on a particular weekday
             - :code:`M`: group by month each year
             - :code:`Q`: group by quarter each year
             - :code:`H`: group by semester each year
@@ -830,6 +831,16 @@ class Calendar:
         if isinstance(grouper, str):
             if grouper == "W":
                 return self.groupby(lambda date: (date.year, date.isocalendar()[1]))
+            elif grouper in [
+                "W-MON",
+                "W-TUE",
+                "W-WED",
+                "W-THU",
+                "W-FRI",
+                "W-SAT",
+                "W-SUN",
+            ]:
+                return self.groupby(lambda date: utils.eow(date, weekday=grouper[-3:]))
             elif grouper == "M":
                 return self.groupby(lambda date: (date.year, date.month))
             elif grouper == "Q":
