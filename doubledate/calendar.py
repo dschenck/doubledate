@@ -850,7 +850,7 @@ class Calendar:
             elif grouper == "Y":
                 return self.groupby(lambda date: date.year)
             raise ValueError(
-                f"Expected one of 'W', 'M', 'Q', 'H' or 'Y'; '{grouper}' given"
+                f"Expected one of 'W', 'W-MON', 'W-TUE', ..., 'M', 'Q', 'H' or 'Y'; '{grouper}' given"
             )
 
         if callable(grouper):
