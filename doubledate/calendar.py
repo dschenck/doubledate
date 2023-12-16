@@ -3,6 +3,8 @@ import collections
 import collections.abc
 import datetime
 import numbers
+import dateutil.rrule
+import warnings
 
 import doubledate.utils as utils
 import doubledate.constants as constants
@@ -138,6 +140,69 @@ class Calendar:
         return hash((date for date in self))
 
     @classmethod
+    def create(
+        cls, *, freq=None, starting=None, ending=None, rrule=None, dtype=None, **kwargs
+    ):
+        """
+        Create a new calendar, wrapping :code:`dateutil.rrule`
+
+        Parameters
+        ----------
+        freq : str, int
+            the calendar frequency; one of:
+
+                - 'Y'   for yearly
+                - 'M'   for monthly
+                - 'W'   for weekly
+                - 'D'   for daily
+                - 'H'   for hourly
+                - 'MIN' for minutely
+                - 'S'   for secondly
+
+                or any :code:`dateutil.rrule` constant (e.g. :code:`dateutil.rrule.MONTHLY`)
+
+        starting : datetime
+            the first date in the calendar
+            alias for :code:`dstart` in :code:`dateutil.rrule.rrule`
+
+        ending : datetime
+            the last date in the calendar
+            alias for :code:`until` in :code:`dateutil.rrule.rrule`
+
+        rrule : str, :code:`dateutil.rrule.rrule`
+            recurrence rule. If given a :code:`str`, this will be evaluated as a
+            :code:`dateutil.rrule.rrulestr` with the :code:`dstart`
+
+        dtype : None, type
+            the datetime type (e.g. pd.Timestamp)
+
+        **kwargs : dict
+            additional arguments to pass to :code:`dateutil.rrule.rrule`
+        """
+        if rrule is not None:
+            if isinstance(rrule, str):
+                rrule = dateutil.rrule.rrulestr(rrule, dtstart=starting)
+            return cls([d if dtype is None else dtype(d) for d in rrule])
+
+        freqs = {
+            "Y": dateutil.rrule.YEARLY,
+            "M": dateutil.rrule.MONTHLY,
+            "W": dateutil.rrule.WEEKLY,
+            "D": dateutil.rrule.DAILY,
+            "H": dateutil.rrule.HOURLY,
+            "MIN": dateutil.rrule.MINUTELY,
+            "S": dateutil.rrule.SECONDLY,
+        }
+
+        return cls.create(
+            rrule=dateutil.rrule.rrule(
+                freqs.get(freq, freq),
+                **{"dtstart": starting, "until": ending, **kwargs},
+            )
+        )
+
+    @classmethod
+    def generate(cls, starting: datetime.date, ending: datetime.date):
         """
         Creates a new calendar with all the calendar days between the starting
         and ending dates, with both bounds included
@@ -163,8 +228,8 @@ class Calendar:
             >>> import doubledate as dtwo
 
             >>> calendar = dtwo.Calendar.generate(
-            ...     datetime.date(2021,1,1),
-            ...     datetime.date(2021,12,31)
+            ...     starting=datetime.date(2021,1,1),
+            ...     ending=datetime.date(2021,12,31)
             ... )
             >>> len(calendar)
             365
@@ -176,6 +241,11 @@ class Calendar:
             datetime.date(2021,12,31)
 
         """
+        warnings.warn(
+            "Calendar.generate is marked for deprecation and may be removed in future versions. Use Calendar.create instead",
+            DeprecationWarning,
+        )
+
         if not all(isinstance(d, datetime.date) for d in (starting, ending)):
             raise TypeError("Expected starting and ending dates to be datetime objects")
 

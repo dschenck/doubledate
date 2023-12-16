@@ -507,3 +507,10 @@ def test_join():
 
     assert datetime.date(2019, 8, 17) in join
     assert datetime.date(2019, 8, 20) not in join
+
+
+def test_create():
+    cdr = dtwo.Calendar.create(
+        freq="D", starting=datetime.date(2020, 1, 1), ending=datetime.date(2023, 12, 31)
+    )
+    assert len(cdr) == 4 * 365 + 1
