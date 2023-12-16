@@ -953,7 +953,18 @@ class Calendar:
                 calendars[grouper(date)].append(date)
             return Collection([Calendar(dates) for dates in calendars.values()])
 
-        raise ValueError(f"Expected string or function, received '{grouper}'")
+        if isinstance(grouper, collections.abc.Iterable):
+            if len(grouper) != len(self):
+                raise ValueError(
+                    f"Expected grouper length ({len(grouper)}) to be equal to the length of the calling calendar ({len(self)})"
+                )
+
+            calendars = collections.defaultdict(lambda: [])
+            for key, date in zip(grouper, self):
+                calendars[key].append(date)
+            return Collection([Calendar(dates) for dates in calendars.values()])
+
+        raise ValueError(f"Expected string, iterable or function, received '{grouper}'")
 
     def resample(self, grouper):
         """
