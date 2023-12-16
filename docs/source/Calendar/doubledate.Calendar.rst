@@ -29,6 +29,7 @@ Calendar
    doubledate.Calendar.index.rst
    doubledate.Calendar.intersection.rst
    doubledate.Calendar.inverse.rst
+   doubledate.Calendar.join.rst
    doubledate.Calendar.last.rst
    doubledate.Calendar.lb.rst
    doubledate.Calendar.offset.rst
