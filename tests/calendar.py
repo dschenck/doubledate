@@ -465,3 +465,45 @@ def test_resample_calendar_by_weekday(calendar):
 
     dates = calendar.resample("W-TUE").first()
     assert dates[-1] == datetime.date(2019, 11, 13)  # Wednesday
+
+
+def test_join():
+    cdr1 = dtwo.Calendar(
+        [
+            datetime.date(2019, 7, 13),
+            datetime.date(2019, 7, 29),
+            datetime.date(2019, 8, 15),
+            datetime.date(2019, 8, 16),
+            datetime.date(2019, 8, 19),
+            datetime.date(2019, 8, 20),
+        ]
+    )
+
+    cdr2 = dtwo.Calendar(
+        [
+            datetime.date(2019, 7, 14),
+            datetime.date(2019, 7, 29),
+            datetime.date(2019, 8, 15),
+            datetime.date(2019, 8, 16),
+            datetime.date(2019, 8, 17),
+            datetime.date(2019, 8, 21),
+            datetime.date(2019, 8, 22),
+            datetime.date(2019, 8, 23),
+        ]
+    )
+
+    join = cdr1.join(cdr2)
+
+    assert datetime.date(2019, 7, 13) in join
+    assert datetime.date(2019, 7, 14) not in join
+
+    assert datetime.date(2019, 8, 17) not in join
+    assert datetime.date(2019, 8, 23) in join
+
+    join = cdr1.join(cdr2, on=datetime.date(2019, 8, 1))
+
+    assert datetime.date(2019, 7, 13) in join
+    assert datetime.date(2019, 7, 14) not in join
+
+    assert datetime.date(2019, 8, 17) in join
+    assert datetime.date(2019, 8, 20) not in join

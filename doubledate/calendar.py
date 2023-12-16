@@ -138,7 +138,6 @@ class Calendar:
         return hash((date for date in self))
 
     @classmethod
-    def generate(cls, starting: datetime.date, ending: datetime.date):
         """
         Creates a new calendar with all the calendar days between the starting
         and ending dates, with both bounds included
@@ -464,6 +463,31 @@ class Calendar:
         Calendar
         """
         return Calendar(self.__dates__.intersection(*others))
+
+    def join(self, other, *, on=None):
+        """
+        Returns a calendar containing all dates in self to (and
+        including the given :code:`on` date) and dates in other (from
+        and including the :code:`on` date).
+
+        In :code:`on` is not provided, defaults to the last date
+        in self.
+
+        Parameters
+        ----------
+        other : iterable
+            Other calendar
+
+        on : datetime.date
+            date from which to join the two calendars together
+
+        Returns
+        -------
+        Calendar
+        """
+        if on is None:
+            return self.union(Calendar(other)[self.end :])
+        return self[:on].union(Calendar(other)[on:])
 
     def filter(
         self,
