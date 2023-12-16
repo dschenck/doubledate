@@ -1578,19 +1578,13 @@ class Collection:
 
     def __getitem__(self, value) -> Calendar:
         """
-        Slices or indexes each calendar, combining the result
+        Get calendar by index
 
         Returns
         -------
         Calendar
-
-        Note
-        ----
-        Indices and slices thereof are assumed 0-based
         """
-        return self.apply(
-            lambda calendar: calendar[value], onerror=constants.RAISE
-        ).combine()
+        return self.calendars[value]
 
     def index(self, value) -> int:
         """
