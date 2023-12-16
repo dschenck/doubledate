@@ -1,3 +1,5 @@
+__version__ = "0.0.12"
+
 from datetime import MAXYEAR, MINYEAR
 from datetime import date, datetime, time, timedelta, timezone, tzinfo
 
@@ -37,4 +39,3 @@ from .utils import (
     next,
     datemap,
 )
-
