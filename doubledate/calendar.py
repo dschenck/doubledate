@@ -140,7 +140,7 @@ class Calendar:
 
     @classmethod
     def create(
-        cls, freq=None, *, starting=None, ending=None, rrule=None, dtype=None, **kwargs
+        cls, freq="D", *, starting=None, ending=None, rrule=None, dtype=None, **kwargs
     ):
         """
         Create a new calendar, wrapping :code:`dateutil.rrule`

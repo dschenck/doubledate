@@ -14,8 +14,51 @@ Installation
 Quickstart 
 -------------------------------------
 
-Using doubledate is also easy
+Using doubledate is also easy.
 ::
+
+    >>> import datetime
+    >>> import doubledate as dtwo
+    
+    # load from database, file...
+    >>> holidays = [
+    ...     datetime.date(2024, 1, 2),  # New Years Day
+    ...     datetime.date(2024, 1,15),  # Martin Luther King, Jr. Day
+    ...     datetime.date(2024, 2,19),  # Washington's Birthday
+    ...     datetime.date(2024, 3,29),  # Good Friday
+    ...     datetime.date(2024, 5,27),  # Memorial Day
+    ...     datetime.date(2024, 6,19),  # Juneteenth National Independence Day
+    ...     datetime.date(2024, 7, 4),  # Independence Day
+    ...     datetime.date(2024, 9, 2),  # Labor day
+    ...     datetime.date(2024,11,28),  # Thanksgiving Day
+    ...     datetime.date(2024,12,25)   # Christmas day
+    ... ]
+
+    # create a Calendar
+    # here, every weekday (Mon-Fri), excluding holidys
+    >>> calendar = dtwo.Calendar.create(
+    ...     "B", 
+    ...     starting=dtwo.date(2023, 1, 1), 
+    ...     ending=dtwo.date(2023, 12, 31)
+    ... ).difference(holidays)
+
+    # first business day each month
+    >>> calendar.resample("M").first()
+
+    # last business day each week 
+    >>> calendar.resample("M").nth(-1)
+
+    # first or last business day dependending on month
+    >>> calendar.resample("M").apply(
+    ...    lambda month: month[0] if month.start.month < 7 else month[-1]
+    ... ).combine()
+
+    # most recent date as of given date
+    >>> calendar.asof(datetime.date(2024, 9, 4), side="left")
+    datetime.date(2024, 8, 30)
+
+The library also comes with an additional suite of utility functions
+:: 
 
     >>> import datetime
     >>> import doubledate as dtwo
