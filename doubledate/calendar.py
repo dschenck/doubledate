@@ -12,7 +12,7 @@ import doubledate.constants as constants
 
 class BD:
     """
-    Business day
+    Business day.
 
     Parameters
     ----------
@@ -43,8 +43,7 @@ class BD:
 
     def resolve(self, calendar, onerror: str = "skip"):
         """
-        Returns a new Calendar containing only the n'th business day
-        each frequency.
+        Returns a new Calendar containing only the n'th business day each frequency.
 
         Allowed values for the onerror parameter:
             - 'skip' to skip periods where the n'th business day is not defined
@@ -93,7 +92,7 @@ class BD:
 
 class Calendar:
     """
-    Immutable, sorted set of dates
+    Immutable, sorted set of dates.
 
     Parameters
     ----------
@@ -135,7 +134,7 @@ class Calendar:
 
     def __hash__(self):
         """
-        Returns the hash of the Calendar
+        Returns the hash of the Calendar.
         """
         return hash((date for date in self))
 
@@ -272,8 +271,8 @@ class Calendar:
     @classmethod
     def generate(cls, starting: datetime.date, ending: datetime.date):
         """
-        Creates a new calendar with all the calendar days between the starting
-        and ending dates, with both bounds included
+        Creates a new calendar with all the calendar days between the starting and
+        ending dates, with both bounds included.
 
         Parameters
         ----------
@@ -307,7 +306,6 @@ class Calendar:
 
             >>> calendar[-1]
             datetime.date(2021,12,31)
-
         """
         warnings.warn(
             "Calendar.generate is marked for deprecation and may be removed in future versions. Use Calendar.create instead",
@@ -327,7 +325,7 @@ class Calendar:
     @property
     def last(self) -> datetime.date:
         """
-        Returns the last date in the calendar
+        Returns the last date in the calendar.
 
         Returns
         -------
@@ -351,7 +349,7 @@ class Calendar:
     @property
     def end(self) -> datetime.date:
         """
-        Returns the last date in the calendar
+        Returns the last date in the calendar.
 
         Returns
         -------
@@ -375,7 +373,7 @@ class Calendar:
     @property
     def first(self) -> datetime.date:
         """
-        Returns the first date in the calendar
+        Returns the first date in the calendar.
 
         Returns
         -------
@@ -399,7 +397,7 @@ class Calendar:
     @property
     def start(self) -> datetime.date:
         """
-        Returns the first date in the calendar
+        Returns the first date in the calendar.
 
         Returns
         -------
@@ -423,7 +421,7 @@ class Calendar:
     @property
     def dates(self) -> list:
         """
-        Returns the dates as a list
+        Returns the dates as a list.
 
         Returns
         -------
@@ -434,7 +432,7 @@ class Calendar:
 
     def __len__(self) -> int:
         """
-        Returns the length of the calendar
+        Returns the length of the calendar.
 
         Returns
         -------
@@ -445,7 +443,7 @@ class Calendar:
 
     def __contains__(self, date) -> bool:
         """
-        Returns True if the date is in the calendar
+        Returns True if the date is in the calendar.
 
         Returns
         -------
@@ -456,7 +454,7 @@ class Calendar:
 
     def index(self, date) -> int:
         """
-        Returns the index (0-based position) of the date
+        Returns the index (0-based position) of the date.
 
         Parameters
         ----------
@@ -479,13 +477,13 @@ class Calendar:
 
     def __iter__(self):
         """
-        Returns the iterator of the dates
+        Returns the iterator of the dates.
         """
         return iter(self.__dates__)
 
     def __getitem__(self, value):
         """
-        Retrieves a date by index or slices a calendar
+        Retrieves a date by index or slices a calendar.
 
         If `value` is a slice, the start and stop values can be
         either integers or datetime.date objects.
@@ -514,7 +512,7 @@ class Calendar:
 
     def __add__(self, other):
         """
-        Alias for union
+        Alias for union.
 
         Parameter
         ---------
@@ -531,8 +529,7 @@ class Calendar:
 
     def __eq__(self, other):
         """
-        Returns True if all dates are in other, and all dates
-        of other are in self
+        Returns True if all dates are in other, and all dates of other are in self.
 
         Parameters
         ----------
@@ -556,7 +553,7 @@ class Calendar:
 
     def union(self, *others):
         """
-        Combines two calendars by combining dates in self and other
+        Combines two calendars by combining dates in self and other.
 
         Parameters
         ----------
@@ -571,8 +568,7 @@ class Calendar:
 
     def difference(self, *others):
         """
-        Returns a calendar containing dates in self and
-        not in others
+        Returns a calendar containing dates in self and not in others.
 
         Parameters
         ----------
@@ -588,8 +584,7 @@ class Calendar:
 
     def intersection(self, *others):
         """
-        Returns a calendar containing dates from self
-        which are also in all the others
+        Returns a calendar containing dates from self which are also in all the others.
 
         Parameters
         ----------
@@ -604,9 +599,9 @@ class Calendar:
 
     def join(self, other, *, on=None) -> "Calendar":
         """
-        Returns a new :code:`Calendar` containing dates in *self* (to and
-        including the given :code:`on` date) and dates in other (from
-        and including the :code:`on` date).
+        Returns a new :code:`Calendar` containing dates in *self* (to and including the
+        given :code:`on` date) and dates in other (from and including the :code:`on`
+        date).
 
         If :code:`on` is not provided, defaults to the last date
         in *self*.
@@ -672,8 +667,7 @@ class Calendar:
         weekday: str = None,
     ):
         """
-        Filters and returns a new calendar from this calendar based
-        on a criteria.
+        Filters and returns a new calendar from this calendar based on a criteria.
 
         Allowed criteria are:
         - either a filtering function (lambda)
@@ -808,7 +802,6 @@ class Calendar:
         >>> calendar = dtwo.Calendar(holidays).inverse(
         ...    datetime.date(2022,1,1), datetime.date(2022, 12, 31)
         ... ).weekdays()
-
         """
         if starting is None:
             starting = self[0]
@@ -824,8 +817,7 @@ class Calendar:
 
     def dayof(self, frequency: str, *, base: int = 1):
         """
-        Returns a :code:`datemap` mapping dates to their index
-        in the given frequency.
+        Returns a :code:`datemap` mapping dates to their index in the given frequency.
 
         The frequency can be one of:
             - :code:`W` for day of week (assumes week starts on Monday)
@@ -881,7 +873,7 @@ class Calendar:
     def daysfrom(self, frequency: str):
         """
         Returns a :code:`datemap` mapping dates to the number of dates since the start
-        of the given frequency
+        of the given frequency.
 
         Parameters
         ----------
@@ -902,8 +894,8 @@ class Calendar:
 
     def daysto(self, frequency: str):
         """
-        Returns a :code:`datemap` mapping dates to the number of dates to the end
-        of the given frequency
+        Returns a :code:`datemap` mapping dates to the number of dates to the end of the
+        given frequency.
 
         Returns
         -------
@@ -919,7 +911,7 @@ class Calendar:
         self, this: datetime.date, that: datetime.date, bounds: str = "left"
     ) -> int:
         """
-        Returns the number of open days between two dates
+        Returns the number of open days between two dates.
 
         Parameters
         ----------
@@ -958,7 +950,7 @@ class Calendar:
 
     def offset(self, date: datetime.date, days: int) -> datetime.date:
         """
-        Returns the date in the calendar offset by n days
+        Returns the date in the calendar offset by n days.
 
         Parameters
         ----------
@@ -1021,7 +1013,6 @@ class Calendar:
         >>> calendar = Calendar(dates)
         >>> calendar.groupby(lambda date: (date.year, date.month, date.day < 15))
         <doubledate.Collection at 0x7fd0fa52c2e0>
-
         """
         if isinstance(grouper, str):
             if grouper == "W":
@@ -1081,9 +1072,8 @@ class Calendar:
         ending: datetime.date = None,
     ):
         """
-        Splits the calendar at the given business day,
-        assuming that the passed index is the first (or last)
-        date of each period.
+        Splits the calendar at the given business day, assuming that the passed index is
+        the first (or last) date of each period.
 
         Parameters
         ----------
@@ -1120,7 +1110,6 @@ class Calendar:
         --------
         Calendar.groupby
             Split the calendar on a criteria
-
         """
         if sum(0 if arg is None else 1 for arg in [on, starting, ending]) != 1:
             raise ValueError("Expected one of on, starting or ending")
@@ -1217,8 +1206,8 @@ class Calendar:
         self, date: datetime.date, side: str = "left", default=constants.RAISE
     ) -> datetime.date:
         """
-        Returns the date if the date is in the calendar, or
-        the last (first) date before (after) that
+        Returns the date if the date is in the calendar, or the last (first) date before
+        (after) that.
 
         Parameters
         ----------
@@ -1274,7 +1263,6 @@ class Calendar:
             last date strictly before
         Calendar.fa
             first date strictly after
-
         """
         if isinstance(date, collections.abc.Iterable):
             return [self.asof(d, side=side, default=default) for d in date]
@@ -1287,9 +1275,10 @@ class Calendar:
             return self.fa(date, default=default)
         raise ValueError(f"side should be one of 'left' or 'right', {side} given")
 
-    def snap(self, other, fallback="drop"):
+    def snap(self, other, fallback="drop") -> "Calendar":
         """
         Combines this calendar with other, such as:
+
             - Dates in both calendars are kept
             - Dates in this calendar but not in other are either dropped or
               replaced with either the first previous or following date in other
@@ -1323,9 +1312,9 @@ class Calendar:
 
     def apply(self, func):
         """
-        Passes all the dates in the calendar to the function
-        If all mapped values are datetime.date objects, function returns a new calendar
-        Else it returns a new list
+        Passes all the dates in the calendar to the function If all mapped values are
+        datetime.date objects, function returns a new calendar Else it returns a new
+        list.
 
         Parameters
         ----------
@@ -1346,7 +1335,7 @@ class Calendar:
 
     def som(self, date: datetime.date) -> datetime.date:
         """
-        Return the first open day of the month given the date
+        Return the first open day of the month given the date.
 
         Parameters
         ----------
@@ -1365,7 +1354,7 @@ class Calendar:
 
     def eom(self, date: datetime.date) -> datetime.date:
         """
-        Return the last open day of the month given the date
+        Return the last open day of the month given the date.
 
         Parameters
         ----------
@@ -1384,7 +1373,7 @@ class Calendar:
 
     def soq(self, date: datetime.date) -> datetime.date:
         """
-        Returns the first open day of the quarter given the date
+        Returns the first open day of the quarter given the date.
 
         Parameters
         ----------
@@ -1406,7 +1395,7 @@ class Calendar:
 
     def eoq(self, date: datetime.date) -> datetime.date:
         """
-        Returns the last open date of the quarter
+        Returns the last open date of the quarter.
 
         Parameters
         ----------
@@ -1428,7 +1417,7 @@ class Calendar:
 
     def sot(self, date: datetime.date) -> datetime.date:
         """
-        Returns the first open day of the trimester given the date
+        Returns the first open day of the trimester given the date.
 
         Parameters
         ----------
@@ -1450,7 +1439,7 @@ class Calendar:
 
     def eot(self, date: datetime.date) -> datetime.date:
         """
-        Returns the last open date of the trimester
+        Returns the last open date of the trimester.
 
         Parameters
         ----------
@@ -1472,7 +1461,7 @@ class Calendar:
 
     def sos(self, date: datetime.date) -> datetime.date:
         """
-        Returns the first open day of the semester given the date
+        Returns the first open day of the semester given the date.
 
         Parameters
         ----------
@@ -1494,7 +1483,7 @@ class Calendar:
 
     def eos(self, date: datetime.date) -> datetime.date:
         """
-        Returns the last open date of the semester
+        Returns the last open date of the semester.
 
         Parameters
         ----------
@@ -1516,7 +1505,7 @@ class Calendar:
 
     def soy(self, date: datetime.date) -> datetime.date:
         """
-        Return the first open day of the year given the date
+        Return the first open day of the year given the date.
 
         Parameters
         ----------
@@ -1535,7 +1524,7 @@ class Calendar:
 
     def eoy(self, date: datetime.date) -> datetime.date:
         """
-        Returns the last open date of the year
+        Returns the last open date of the year.
 
         Parameters
         ----------
@@ -1554,7 +1543,7 @@ class Calendar:
 
     def pipe(self, callable):
         """
-        Returns the result from the callable on self
+        Returns the result from the callable on self.
 
         Parameters
         ----------
@@ -1598,7 +1587,6 @@ class Collection:
 
         >>> calendar.resample("M").nth(10, base=1) #get the 10th business day each month
         <doubledate.Calendar>
-
     """
 
     def __init__(self, calendars):
@@ -1614,7 +1602,7 @@ class Collection:
 
     def first(self, onerror=constants.RAISE) -> Calendar:
         """
-        Returns a calendar with the first date each period in the collection
+        Returns a calendar with the first date each period in the collection.
 
         Allowed values for the onerror parameter:
             - 'skip' to skip empty calendars
@@ -1633,7 +1621,7 @@ class Collection:
 
     def last(self, onerror=constants.RAISE) -> Calendar:
         """
-        Returns a calendar with the last date each period in the collection
+        Returns a calendar with the last date each period in the collection.
 
         Allowed values for the onerror parameter:
             - 'skip' to skip empty calendars
@@ -1652,7 +1640,7 @@ class Collection:
 
     def nth(self, index, *, base=0, onerror=constants.RAISE) -> Calendar:
         """
-        Returns a calendar with the nth date each period from the collection
+        Returns a calendar with the nth date each period from the collection.
 
         Allowed values for the onerror parameter:
             - 'skip' to skip periods where the n'th business day is not defined
@@ -1690,7 +1678,7 @@ class Collection:
 
     def __getitem__(self, value) -> Calendar:
         """
-        Get calendar by index
+        Get calendar by index.
 
         Returns
         -------
@@ -1700,8 +1688,8 @@ class Collection:
 
     def index(self, value) -> int:
         """
-        Returns the 0-based index of the calendar,
-        or 0-based index of the calendar containing the date
+        Returns the 0-based index of the calendar, or 0-based index of the calendar
+        containing the date.
 
         Returns
         -------
@@ -1722,7 +1710,7 @@ class Collection:
 
     def __contains__(self, value) -> bool:
         """
-        Returns True if one of the calendars contains the given date
+        Returns True if one of the calendars contains the given date.
 
         Returns
         -------
@@ -1741,9 +1729,9 @@ class Collection:
             f"Expected value to be datetime.date or Calendar, received {type(value).__name__}"
         )
 
-    def apply(self, func, onerror=constants.RAISE):
+    def apply(self, func, onerror=constants.RAISE) -> "Collection":
         """
-        Applies a function to each calendar
+        Applies a function to each calendar.
 
         Returns
         -------
@@ -1786,10 +1774,9 @@ class Collection:
 
         return Collection(dates)
 
-    def combine(self):
+    def combine(self) -> Calendar:
         """
-        Combines the calendars of the collection back into a
-        single Calendar object
+        Combines the calendars of the collection back into a single Calendar object.
 
         Returns
         -------
@@ -1797,9 +1784,9 @@ class Collection:
         """
         return Calendar([]).union(*self.calendars)
 
-    def filter(self, func):
+    def filter(self, func) -> "Collection":
         """
-        Filters out calendars from the collection
+        Filters out calendars from the collection.
 
         Parameters
         ----------
@@ -1816,7 +1803,7 @@ class Collection:
 
     def __len__(self):
         """
-        Returns the number of calendars
+        Returns the number of calendars.
 
         Returns
         -------
@@ -1826,6 +1813,6 @@ class Collection:
 
     def __iter__(self):
         """
-        Iterate over each calendar in the collection
+        Iterate over each calendar in the collection.
         """
         return iter(self.calendars)
