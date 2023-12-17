@@ -9,6 +9,7 @@ Calendar
 
    doubledate.Calendar.apply.rst
    doubledate.Calendar.asof.rst
+   doubledate.Calendar.create.rst
    doubledate.Calendar.dates.rst
    doubledate.Calendar.dayof.rst
    doubledate.Calendar.daysbetween.rst

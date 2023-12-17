@@ -141,7 +141,7 @@ class Calendar:
 
     @classmethod
     def create(
-        cls, *, freq=None, starting=None, ending=None, rrule=None, dtype=None, **kwargs
+        cls, freq=None, *, starting=None, ending=None, rrule=None, dtype=None, **kwargs
     ):
         """
         Create a new calendar, wrapping :code:`dateutil.rrule`
@@ -149,42 +149,77 @@ class Calendar:
         Parameters
         ----------
         freq : str, int
-            the calendar frequency; one of:
+            The calendar frequency; one of:
 
-                - 'Y'   for yearly
-                - 'M'   for monthly
-                - 'W'   for weekly
-                - 'D'   for daily
-                - 'H'   for hourly
-                - 'MIN' for minutely
-                - 'S'   for secondly
+            - :Code:`Y`   for yearly
+            - :Code:`M`   for monthly
+            - :Code:`W`   for weekly (or any dayised variant, e.g. :code:`W-MON`)
+            - :Code:`D`   for daily
+            - :Code:`B`   for daily except for Saturday and Sunday
+            - :Code:`H`   for hourly
+            - :Code:`MIN` for minutely
+            - :Code:`S`   for secondly
 
-                or any :code:`dateutil.rrule` constant (e.g. :code:`dateutil.rrule.MONTHLY`)
+            or any :code:`dateutil.rrule` constant (e.g. :code:`dateutil.rrule.MONTHLY`)
 
         starting : datetime
-            the first date in the calendar
-            alias for :code:`dstart` in :code:`dateutil.rrule.rrule`
+            The starting date in the calendar.
+            Alias for :code:`dstart` in :code:`dateutil.rrule.rrule`.
 
         ending : datetime
-            the last date in the calendar
-            alias for :code:`until` in :code:`dateutil.rrule.rrule`
+            The last date in the calendar.
+            Alias for :code:`until` in :code:`dateutil.rrule.rrule`.
 
-        rrule : str, :code:`dateutil.rrule.rrule`
-            recurrence rule. If given a :code:`str`, this will be evaluated as a
+        rrule : str, dateutil.rrule.rrule
+            A recurrence rule.
+            If given a :code:`str`, this will be evaluated as a
             :code:`dateutil.rrule.rrulestr` with the :code:`dstart`
 
         dtype : None, type
-            the datetime type (e.g. pd.Timestamp)
+            The datetime type (e.g. :code:`pd.Timestamp`).
+            If None is provided, defaults to :code:`datetime.datetime`, which
+            is the default of the :dateutil.rrule` library.
 
         **kwargs : dict
             additional arguments to pass to :code:`dateutil.rrule.rrule`
+
+        Examples
+        --------
+        ::
+
+            >>> import doubledate as dtwo
+
+            # every day in 2023
+            >>> dtwo.Calendar.create(
+            ...     "D",
+            ...     starting=dtwo.date(2023, 1, 1),
+            ...     until=dtwo.date(2023, 12, 31)
+            ... )
+            <doubledate.calendar.Calendar at 0x17045b0f430>
+
+            # the first day each month in 2018-2023
+            >>> dtwo.Calendar.create(
+            ...     "M",
+            ...     starting=dtwo.date(2018, 1, 1),
+            ...     until=dtwo.date(2023, 12, 31)
+            ... )
+            <doubledate.calendar.Calendar at 0x17045b0f430>
+
+            # the first Monday each month in 2018-2023
+            >>> dtwo.Calendar.create(
+            ...     "M",
+            ...     starting=dtwo.date(2018, 1, 1),
+            ...     until=dtwo.date(2023, 12, 31),
+            ...     byweekday=dtwo.MO
+            ... )
+            <doubledate.calendar.Calendar at 0x17045b0f430>
         """
         if rrule is not None:
             if isinstance(rrule, str):
                 rrule = dateutil.rrule.rrulestr(rrule, dtstart=starting)
             return cls([d if dtype is None else dtype(d) for d in rrule])
 
-        freqs = {
+        frequencies = {
             "Y": dateutil.rrule.YEARLY,
             "M": dateutil.rrule.MONTHLY,
             "W": dateutil.rrule.WEEKLY,
@@ -194,9 +229,42 @@ class Calendar:
             "S": dateutil.rrule.SECONDLY,
         }
 
+        weekdays = {
+            "MON": dateutil.rrule.MO,
+            "MO": dateutil.rrule.MO,
+            0: dateutil.rrule.MO,
+            "TUE": dateutil.rrule.TU,
+            "TU": dateutil.rrule.TU,
+            1: dateutil.rrule.TU,
+            "WED": dateutil.rrule.WE,
+            "WE": dateutil.rrule.WE,
+            2: dateutil.rrule.WE,
+            "THU": dateutil.rrule.TH,
+            "TH": dateutil.rrule.TH,
+            3: dateutil.rrule.TH,
+            "FRI": dateutil.rrule.FR,
+            "FR": dateutil.rrule.FR,
+            4: dateutil.rrule.FR,
+            "SAT": dateutil.rrule.SA,
+            "SA": dateutil.rrule.SA,
+            5: dateutil.rrule.SA,
+            "SUN": dateutil.rrule.SU,
+            "SU": dateutil.rrule.SU,
+            6: dateutil.rrule.SU,
+        }
+
+        if freq == "B":
+            freq, kwargs["byweekday"] = "D", dateutil.rrule.weekdays[:-2]
+
+        if freq in ["W-MON", "W-TUE", "W-WED", "W-THU", "W-FRI", "W-SAT", "W-SUN"]:
+            freq, kwargs["byweekday"] = "D", freq[-3:]
+
+        if "byweekday" in kwargs:
+            kwargs["byweekday"] = [weekdays.get(d, d) for d in kwargs["byweekday"]]
+
         return cls.create(
             rrule=dateutil.rrule.rrule(
-                freqs.get(freq, freq),
+                frequencies.get(freq, freq),
                 **{"dtstart": starting, "until": ending, **kwargs},
             )
         )
@@ -534,14 +602,14 @@ class Calendar:
         """
         return Calendar(self.__dates__.intersection(*others))
 
-    def join(self, other, *, on=None):
+    def join(self, other, *, on=None) -> "Calendar":
         """
-        Returns a calendar containing all dates in self to (and
+        Returns a new :code:`Calendar` containing dates in *self* (to and
         including the given :code:`on` date) and dates in other (from
         and including the :code:`on` date).
 
-        In :code:`on` is not provided, defaults to the last date
-        in self.
+        If :code:`on` is not provided, defaults to the last date
+        in *self*.
 
         Parameters
         ----------
@@ -554,6 +622,39 @@ class Calendar:
         Returns
         -------
         Calendar
+
+        Examples
+        -------
+        ::
+
+            >>> import doubledate as dtwo
+
+            >>> this = dtwo.Calendar(
+            ...     [
+            ...         dtwo.date(2023,1,1),
+            ...         dtwo.date(2023,2,1),
+            ...         dtwo.date(2023,3,1),
+            ...     ]
+            ... )
+
+            >>> that = dtwo.Calendar(
+            ...     [
+            ...         dtwo.date(2023,1,15),
+            ...         dtwo.date(2023,2,15),
+            ...         dtwo.date(2023,3,15),
+            ...     ]
+            ... )
+
+            >>> this.join(that)
+            <doubledate.calendar.Calendar at 0x17045b0e830>
+
+            >>> this.join(that).dates
+            [datetime.date(2023, 1, 1), datetime.date(2023, 2, 1),
+             datetime.date(2023, 3, 1), datetime.date(2023, 3, 15)]
+
+            >>> this.join(that, on=dtwo.date(2023,2,15)).dates
+            [datetime.date(2023, 1, 1), datetime.date(2023, 2, 1),
+             datetime.date(2023, 2, 15), datetime.date(2023, 3, 15)]
         """
         if on is None:
             return self.union(Calendar(other)[self.end :])
