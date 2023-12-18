@@ -16,8 +16,9 @@ def test_yesterday():
 
 
 def test_last_weekday_default():
-    assert dtwo.today() >= dtwo.last("MON")
-    assert dtwo.today() - datetime.timedelta(days=7) < dtwo.last("MON")
+    # last returns a date stricty before today; can never be today
+    assert dtwo.today() > dtwo.last("MON")
+    assert dtwo.today() - datetime.timedelta(days=7) <= dtwo.last("MON")
 
 
 @pytest.mark.parametrize(
