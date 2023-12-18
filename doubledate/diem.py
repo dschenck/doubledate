@@ -62,7 +62,7 @@ class diem:
 
     def resolve(self, year, *, fold=None, dtype=datetime.date) -> datetime.date:
         """
-        Convert diem to actual datetime.date
+        Convert diem to actual datetime.date.
 
         Parameters
         ----------
@@ -122,7 +122,7 @@ class diem:
 
     def __str__(self) -> str:
         """
-        Represent a diem in ISO 8601 format
+        Represent a diem in ISO 8601 format.
         """
         return f"--{self.month}-{self.day}"
 
@@ -134,7 +134,7 @@ class diem:
 
     def __eq__(self, other) -> bool:
         """
-        Return self == other
+        Return self == other.
         """
         if not isinstance(other, diem):
             return False
@@ -142,7 +142,7 @@ class diem:
 
     def __ne__(self, other) -> bool:
         """
-        Return self != other
+        Return self != other.
         """
         if not isinstance(other, diem):
             return True
@@ -150,7 +150,7 @@ class diem:
 
     def __lt__(self, other) -> bool:
         """
-        Return self < other
+        Return self < other.
         """
         if not isinstance(other, diem):
             raise TypeError(
@@ -160,7 +160,7 @@ class diem:
 
     def __le__(self, other) -> bool:
         """
-        Return self <= other
+        Return self <= other.
         """
         if not isinstance(other, diem):
             raise TypeError(
@@ -170,7 +170,7 @@ class diem:
 
     def __gt__(self, other) -> bool:
         """
-        Return self > other
+        Return self > other.
         """
         if not isinstance(other, diem):
             raise TypeError(
@@ -180,7 +180,7 @@ class diem:
 
     def __ge__(self, other) -> bool:
         """
-        Return self >= other
+        Return self >= other.
         """
         if not isinstance(other, diem):
             raise TypeError(
@@ -191,7 +191,7 @@ class diem:
     @staticmethod
     def parse(value):
         """
-        Parse an input (str, datetime) as a diem
+        Parse an input (str, datetime) as a diem.
 
         Parameters
         ----------
@@ -255,7 +255,7 @@ class diem:
 
     def lb(self, date: datetime.date) -> datetime.date:
         """
-        Resolve the diem to the most recent date strictly before the given date
+        Resolve the diem to the most recent date strictly before the given date.
 
         Parameters
         ---------
@@ -279,7 +279,7 @@ class diem:
 
     def fa(self, date: datetime.date) -> datetime.date:
         """
-        Resolve the diem to the first date strictly after the given date
+        Resolve the diem to the first date strictly after the given date.
 
         Parameters
         ---------
@@ -308,7 +308,7 @@ class diem:
 
     def asof(self, date: datetime.date, side: str = "left") -> datetime.date:
         """
-        Resolve the diem to the most recent date on or before (after) the given date
+        Resolve the diem to the most recent date on or before (after) the given date.
 
         Parameters
         ----------
@@ -333,8 +333,7 @@ class diem:
 
     def replace(self, *, month=None, day=None, fold=None):
         """
-        Return a copy of the diem, partially replacing some
-        of the attributes
+        Return a copy of the diem, partially replacing some of the attributes.
 
         Parameters
         ----------
