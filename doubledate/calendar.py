@@ -966,12 +966,12 @@ class Calendar:
         """
         if isinstance(date, collections.abc.Iterable):
             return [self.offset(date=d, days=days) for d in date]
-        if not date in self:
+        if date not in self:
             raise ValueError(f"{date} is not in the calendar")
         if self.index(date) + days < 0:
-            raise IndexError(f"Out of bounds")
+            raise IndexError("Out of bounds")
         if self.index(date) + days >= len(self):
-            raise IndexError(f"Out of bounds")
+            raise IndexError("Out of bounds")
         return self[self.index(date) + days]
 
     def groupby(self, grouper):
@@ -1129,7 +1129,7 @@ class Calendar:
         for date in self:
             try:
                 calendars[splitdays.asof(date, side)].append(date)
-            except:
+            except Exception:
                 pass
 
         return Collection([Calendar(calendar) for calendar in calendars.values()])

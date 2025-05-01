@@ -105,14 +105,12 @@ def test_groupby():
     assert cdr.groupby("M").first() == dtwo.Calendar([dates[0]])
     assert cdr.groupby("Y").last() == dtwo.Calendar([dates[-1]])
 
-    assert (
-        cdr.groupby("W").apply(lambda c: c[0:1]).combine()
-        == dtwo.Calendar(dates[0:1] + dates[2:3]),
+    assert cdr.groupby("W").apply(lambda c: c[0:1]).combine() == dtwo.Calendar(
+        dates[0:1] + dates[2:3]
     )
 
-    assert (
-        cdr.groupby("W").apply(lambda c: c[0]).combine()
-        == dtwo.Calendar(dates[0:1] + dates[2:3]),
+    assert cdr.groupby("W").apply(lambda c: c[0]).combine() == dtwo.Calendar(
+        dates[0:1] + dates[2:3]
     )
 
 
@@ -128,7 +126,7 @@ def test_fa():
     assert cdr.fa(datetime.date(2019, 8, 16)) == datetime.date(2019, 8, 19)
     assert cdr.fa(datetime.date(2019, 8, 17)) == datetime.date(2019, 8, 19)
     assert cdr.fa(datetime.date(2019, 8, 1)) == datetime.date(2019, 8, 15)
-    assert cdr.fa(datetime.date(2019, 9, 1), None) == None
+    assert cdr.fa(datetime.date(2019, 9, 1), None) is None
 
 
 def test_lb():
@@ -143,7 +141,7 @@ def test_lb():
     assert cdr.lb(datetime.date(2019, 8, 16)) == datetime.date(2019, 8, 15)
     assert cdr.lb(datetime.date(2019, 8, 17)) == datetime.date(2019, 8, 16)
     assert cdr.lb(datetime.date(2019, 8, 30)) == datetime.date(2019, 8, 20)
-    assert cdr.lb(datetime.date(2019, 8, 1), None) == None
+    assert cdr.lb(datetime.date(2019, 8, 1), None) is None
 
 
 def test_contains():
@@ -159,7 +157,7 @@ def test_contains():
 
     assert dates[-1] in cdr
 
-    assert not (datetime.date(2019, 8, 17) in cdr)
+    assert datetime.date(2019, 8, 17) not in cdr
 
 
 def test_dayof():
@@ -237,17 +235,23 @@ def test_snap():
 
     snapped = cdr.snap(ref, fallback="next")
 
-    assert (
-        list(snapped)
-        == [refdates[0], refdates[2], refdates[3], refdates[4], refdates[5]],
-    )
+    assert list(snapped) == [
+        refdates[0],
+        refdates[2],
+        refdates[3],
+        refdates[4],
+        refdates[5],
+    ]
 
     snapped = cdr.snap(ref, fallback="previous")
 
-    assert (
-        list(snapped)
-        == [refdates[0], refdates[1], refdates[2], refdates[4], refdates[5]],
-    )
+    assert list(snapped) == [
+        refdates[0],
+        refdates[1],
+        refdates[2],
+        refdates[4],
+        refdates[5],
+    ]
 
 
 def test_asof(calendar):
@@ -271,49 +275,39 @@ def test_asof(calendar):
 def test_daysfrom(calendar):
     assert calendar.daysfrom("YS")[datetime.date(2018, 1, 10)] == 6
 
-    assert (
-        calendar.daysfrom("WS")[datetime.date(2019, 10, 31)]
-        == len(calendar[datetime.date(2019, 10, 28) : datetime.date(2019, 10, 30)]),
+    assert calendar.daysfrom("WS")[datetime.date(2019, 10, 31)] == len(
+        calendar[datetime.date(2019, 10, 28) : datetime.date(2019, 10, 30)]
     )
-    assert (
-        calendar.daysfrom("WS")[datetime.date(2019, 10, 31)]
-        == len(calendar[datetime.date(2019, 10, 28) : datetime.date(2019, 10, 30)]),
+    assert calendar.daysfrom("WS")[datetime.date(2019, 10, 31)] == len(
+        calendar[datetime.date(2019, 10, 28) : datetime.date(2019, 10, 30)]
     )
 
-    assert (
-        calendar.daysfrom("MS")[datetime.date(2019, 10, 31)]
-        == len(calendar[datetime.date(2019, 10, 1) : datetime.date(2019, 10, 30)]),
+    assert calendar.daysfrom("MS")[datetime.date(2019, 10, 31)] == len(
+        calendar[datetime.date(2019, 10, 1) : datetime.date(2019, 10, 30)]
     )
-    assert (
-        calendar.daysfrom("MS")[datetime.date(2019, 10, 31)]
-        == len(calendar[datetime.date(2019, 10, 1) : datetime.date(2019, 10, 30)]),
+    assert calendar.daysfrom("MS")[datetime.date(2019, 10, 31)] == len(
+        calendar[datetime.date(2019, 10, 1) : datetime.date(2019, 10, 30)]
     )
 
-    assert (
-        calendar.daysfrom("QS")[datetime.date(2019, 10, 31)]
-        == len(calendar[datetime.date(2019, 10, 1) : datetime.date(2019, 10, 30)]),
+    assert calendar.daysfrom("QS")[datetime.date(2019, 10, 31)] == len(
+        calendar[datetime.date(2019, 10, 1) : datetime.date(2019, 10, 30)]
     )
-    assert (
-        calendar.daysfrom("QS")[datetime.date(2019, 10, 31)]
-        == len(calendar[datetime.date(2019, 10, 1) : datetime.date(2019, 10, 30)]),
+    assert calendar.daysfrom("QS")[datetime.date(2019, 10, 31)] == len(
+        calendar[datetime.date(2019, 10, 1) : datetime.date(2019, 10, 30)]
     )
 
-    assert (
-        calendar.daysfrom("HS")[datetime.date(2019, 10, 31)]
-        == len(calendar[datetime.date(2019, 7, 1) : datetime.date(2019, 10, 30)]),
+    assert calendar.daysfrom("HS")[datetime.date(2019, 10, 31)] == len(
+        calendar[datetime.date(2019, 7, 1) : datetime.date(2019, 10, 30)]
     )
-    assert (
-        calendar.daysfrom("HS")[datetime.date(2019, 10, 31)]
-        == len(calendar[datetime.date(2019, 7, 1) : datetime.date(2019, 10, 30)]),
+    assert calendar.daysfrom("HS")[datetime.date(2019, 10, 31)] == len(
+        calendar[datetime.date(2019, 7, 1) : datetime.date(2019, 10, 30)]
     )
 
-    assert (
-        calendar.daysfrom("YS")[datetime.date(2019, 10, 31)]
-        == len(calendar[datetime.date(2019, 1, 1) : datetime.date(2019, 10, 30)]),
+    assert calendar.daysfrom("YS")[datetime.date(2019, 10, 31)] == len(
+        calendar[datetime.date(2019, 1, 1) : datetime.date(2019, 10, 30)]
     )
-    assert (
-        calendar.daysfrom("YS")[datetime.date(2019, 10, 31)]
-        == len(calendar[datetime.date(2019, 1, 1) : datetime.date(2019, 10, 30)]),
+    assert calendar.daysfrom("YS")[datetime.date(2019, 10, 31)] == len(
+        calendar[datetime.date(2019, 1, 1) : datetime.date(2019, 10, 30)]
     )
 
 
@@ -324,31 +318,25 @@ def test_daysto(calendar):
     assert calendar.daysto("ME")[datetime.date(2018, 1, 8)] == 16
     assert calendar.daysto("ME")[datetime.date(2018, 1, 8)] == 16
 
-    assert (
-        calendar.daysto("QE")[datetime.date(2018, 5, 25)]
-        == len(calendar[datetime.date(2018, 5, 26) : datetime.date(2018, 6, 30)]),
+    assert calendar.daysto("QE")[datetime.date(2018, 5, 25)] == len(
+        calendar[datetime.date(2018, 5, 26) : datetime.date(2018, 6, 30)]
     )
-    assert (
-        calendar.daysto("QE")[datetime.date(2018, 5, 25)]
-        == len(calendar[datetime.date(2018, 5, 26) : datetime.date(2018, 6, 30)]),
+    assert calendar.daysto("QE")[datetime.date(2018, 5, 25)] == len(
+        calendar[datetime.date(2018, 5, 26) : datetime.date(2018, 6, 30)]
     )
 
-    assert (
-        calendar.daysto("HE")[datetime.date(2018, 5, 25)]
-        == len(calendar[datetime.date(2018, 5, 26) : datetime.date(2018, 6, 30)]),
+    assert calendar.daysto("HE")[datetime.date(2018, 5, 25)] == len(
+        calendar[datetime.date(2018, 5, 26) : datetime.date(2018, 6, 30)]
     )
-    assert (
-        calendar.daysto("HE")[datetime.date(2018, 5, 25)]
-        == len(calendar[datetime.date(2018, 5, 26) : datetime.date(2018, 6, 30)]),
+    assert calendar.daysto("HE")[datetime.date(2018, 5, 25)] == len(
+        calendar[datetime.date(2018, 5, 26) : datetime.date(2018, 6, 30)]
     )
 
-    assert (
-        calendar.daysto("YE")[datetime.date(2018, 5, 25)]
-        == len(calendar[datetime.date(2018, 5, 26) : datetime.date(2018, 12, 31)]),
+    assert calendar.daysto("YE")[datetime.date(2018, 5, 25)] == len(
+        calendar[datetime.date(2018, 5, 26) : datetime.date(2018, 12, 31)]
     )
-    assert (
-        calendar.daysto("YE")[datetime.date(2018, 5, 25)]
-        == len(calendar[datetime.date(2018, 5, 26) : datetime.date(2018, 12, 31)]),
+    assert calendar.daysto("YE")[datetime.date(2018, 5, 25)] == len(
+        calendar[datetime.date(2018, 5, 26) : datetime.date(2018, 12, 31)]
     )
 
 
@@ -444,7 +432,7 @@ def test_equals():
     assert calendar == [datetime.date(2022, 1, 17), datetime.date(2022, 2, 14)]
     assert calendar == {datetime.date(2022, 1, 17), datetime.date(2022, 2, 14)}
     assert calendar != [datetime.date(2022, 1, 18), datetime.date(2022, 2, 14)]
-    assert calendar != False
+    assert calendar is not False
     assert calendar != "a string"
     assert calendar != 1
 

@@ -6,6 +6,7 @@ from doubledate import diem
 
 def test_instanciation():
     ann = diem(3, 31)
+    assert isinstance(ann, diem)
 
     with pytest.raises(TypeError):
         diem("a", 2020)

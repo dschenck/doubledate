@@ -43,7 +43,7 @@ class diem:
             raise TypeError("Expected month to be an integer")
 
         if month < 1 or month > 12:
-            raise ValueError(f"month must be in 1..12")
+            raise ValueError("month must be in 1..12")
 
         self.month = month
 
@@ -106,7 +106,7 @@ class diem:
             if not isinstance(year, int):
                 raise TypeError(f"Expected year to be an integer, received {year}")
 
-            if not fold in ("back", "forward", None):
+            if fold not in ("back", "forward", None):
                 raise ValueError(
                     f"Expected fold to be one of 'back', 'forward' or None, received {fold}"
                 )
@@ -226,23 +226,23 @@ class diem:
             )
 
         if isinstance(value, str):
-            if re.search("(?:--)\d{1,2}-\d{1,2}", value):
-                month, day = re.search("(?:--)(\d{1,2})-(\d{1,2})", value).groups()
+            if re.search(r"(?:--)\d{1,2}-\d{1,2}", value):
+                month, day = re.search(r"(?:--)(\d{1,2})-(\d{1,2})", value).groups()
                 return diem(int(month), int(day))
 
             if re.search(
-                "(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-?(\d{1,2})",
+                r"(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-?(\d{1,2})",
                 value,
                 re.IGNORECASE,
             ):
                 match = re.search(
-                    "(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-?(\d{1,2})",
+                    r"(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-?(\d{1,2})",
                     value,
                     re.IGNORECASE,
                 ).groups()
 
                 month, day = (
-                    "JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC".split("|").index(
+                    r"JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC".split("|").index(
                         match[0].upper()
                     )
                     + 1,
