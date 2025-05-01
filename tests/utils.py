@@ -412,7 +412,7 @@ def test_daysto(interval, input_date, expected_result):
         ("Y", 1, datetime.date(2019, 11, 15), 222),
     ],
 )
-def test_dayof(calendar, frequency, base, date, target):
+def test_dayof2(calendar, frequency, base, date, target):
     assert dtwo.dayof(frequency, calendar=calendar, base=base)[date] == target
 
 
@@ -442,5 +442,5 @@ def test_daysfrom(calendar, frequency, date, target):
         ("YE", datetime.date(2019, 11, 15), 0),
     ],
 )
-def test_daysto(calendar, frequency, date, target):
+def test_daysto2(calendar, frequency, date, target):
     assert dtwo.daysto(frequency, calendar=calendar)[date] == target

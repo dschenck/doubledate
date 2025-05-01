@@ -1,6 +1,4 @@
-import pytest
 import datetime
-import doubledate as dtwo
 
 
 def test_index(calendar):

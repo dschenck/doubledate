@@ -911,7 +911,7 @@ def offset(
     if months is not None:
         try:
             return som(date, months).replace(day=date.day)
-        except:
+        except Exception:
             # if it fails, it must be that date is 29 February
             if isinstance(handle, numbers.Integral):
                 return eom(date, months) + datetime.timedelta(handle)
@@ -922,7 +922,7 @@ def offset(
     if years is not None:
         try:
             return date.replace(year=date.year + years)
-        except:
+        except Exception:
             # 29 February + 1 year...  adjust with the handle
             if isinstance(handle, numbers.Integral):
                 return date.replace(
