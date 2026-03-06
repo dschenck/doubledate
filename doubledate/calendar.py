@@ -136,7 +136,9 @@ class Calendar:
         """
         Returns the hash of the Calendar.
         """
-        return hash((date for date in self))
+        # convert to tuple so that the value depends on the dates, not an
+        # ephemeral generator object
+        return hash(tuple(self))
 
     @classmethod
     def create(
@@ -503,11 +505,13 @@ class Calendar:
             if the index is out of range
         """
         if isinstance(value, slice):
-            if isinstance(value.start, datetime.date):
-                value = slice(self.__dates__.bisect_left(value.start), value.stop)
-            if isinstance(value.stop, datetime.date):
-                value = slice(value.start, self.__dates__.bisect_right(value.stop))
-            return Calendar(self.__dates__.__getitem__(value))
+            # maintain step component when translating date boundaries
+            start, stop, step = value.start, value.stop, value.step
+            if isinstance(start, datetime.date):
+                start = self.__dates__.bisect_left(start)
+            if isinstance(stop, datetime.date):
+                stop = self.__dates__.bisect_right(stop)
+            return Calendar(self.__dates__.__getitem__(slice(start, stop, step)))
         return self.__dates__.__getitem__(value)
 
     def __add__(self, other):

@@ -894,7 +894,9 @@ def offset(
     datetime.dte(2020, 3, 2) #handle returns the size of the gap
     """
     if sum(arg is not None for arg in [days, weekdays, weeks, months, years, to]) != 1:
-        raise ValueError("you must pass one argument of days, weekdays or weeks only")
+        raise ValueError(
+            "you must pass exactly one of days, weekdays, weeks, months, years or to"
+        )
     if days is not None:
         return date + datetime.timedelta(days=days)
     if weekdays is not None:
