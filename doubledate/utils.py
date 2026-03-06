@@ -1087,7 +1087,9 @@ def dayof(frequency: str, dates=None, *, calendar=None, base=1):
         if isinstance(dates, (datetime.date, datetime.datetime)):
             return (dates - floor(dates, frequency)).days + base
         for i, date in enumerate(sorted(dates)):
-            if i == 0 or date > end:
+            if i == 0:
+                start, end = floor(date, frequency), ceil(date, frequency)
+            elif date > end:
                 start, end = floor(date, frequency), ceil(date, frequency)
             mapping[date] = (date - start).days + base
         return datemap(mapping)[dates]
@@ -1220,7 +1222,12 @@ def daysto(frequency: str, dates=None, *, calendar=None):
         if isinstance(dates, (datetime.date, datetime.datetime)):
             return (ceil(dates, FREQUENCIES[frequency]) - dates).days
         for i, date in enumerate(sorted(dates, reverse=True)):
-            if i == 0 or date < start:
+            if i == 0:
+                start, end = (
+                    floor(date, FREQUENCIES[frequency]),
+                    ceil(date, FREQUENCIES[frequency]),
+                )
+            elif date < start:
                 start, end = (
                     floor(date, FREQUENCIES[frequency]),
                     ceil(date, FREQUENCIES[frequency]),

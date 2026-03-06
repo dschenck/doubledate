@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doubledate"
+version = "0.0.14"
+authors = [{name = "David Schenck", email = "david.schenck@outlook.com"}]
+description = "doubledate, yet another datetime library, exposes a set of 20+ utility functions as well as an immutable `Calendar` object representing a sorted-set of dates."
+readme = { file = "README.md", "content-type" = "text/markdown" }
+urls = { "Homepage" = "https://doubledate.readthedocs.io/en/latest" }
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
