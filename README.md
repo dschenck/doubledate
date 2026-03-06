@@ -1,4 +1,4 @@
-[![pythons](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://pypi.org/project/doubledate)
+[![pythons](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://pypi.org/project/doubledate)
 [![build](https://github.com/dschenck/doubledate/actions/workflows/testing-and-linting.yml/badge.svg?branch=main)](https://github.com/dschenck/doubledate/actions/workflows/testing-and-linting.yml)
 [![PyPI version](https://badge.fury.io/py/doubledate.svg)](https://badge.fury.io/py/doubledate)
 [![Documentation Status](https://readthedocs.org/projects/doubledate/badge/?version=latest)](https://doubledate.readthedocs.io/en/latest/?badge=latest)
