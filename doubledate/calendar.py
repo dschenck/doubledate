@@ -136,7 +136,9 @@ class Calendar:
         """
         Returns the hash of the Calendar.
         """
-        return hash((date for date in self))
+        # convert to tuple so that the value depends on the dates, not an
+        # ephemeral generator object
+        return hash(tuple(self))
 
     @classmethod
     def create(
