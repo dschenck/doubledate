@@ -121,17 +121,22 @@ class Calendar:
         >>> dtwo.Calendar(holidays)
         <doubledate.Calendar at 0x7fd0fa4cfa60>
 
-    Raises
-    ------
-    TypeError
-        if dates is not an iterable of datetime objects
+    Note
+    ----
+    For performance, the dates are not type-checked: passing objects other than
+    :code:`datetime.date` (or subclasses) is unsupported and may fail later, or
+    produce unexpected results. Mixing :code:`datetime.date` and
+    :code:`datetime.datetime` objects raises a :code:`TypeError`, as they cannot
+    be compared.
     """
 
+    #: maximum number of date-bounded slices cached per calendar (see __getitem__)
+    SLICE_CACHE_SIZE = 256
+
     def __init__(self, dates):
-        if not all([isinstance(item, datetime.date) for item in dates]):
-            raise TypeError("Calendar expected an iterable of date objects")
-        self.__dates__ = sortedcontainers.SortedSet([date for date in dates])
+        self.__dates__ = sortedcontainers.SortedSet(dates)
         self.__datemaps__ = {}
+        self.__slices__ = collections.OrderedDict()
 
     def __hash__(self):
         """
@@ -493,6 +498,13 @@ class Calendar:
         If `value` is a slice, the start and stop values can be
         either integers or datetime.date objects.
 
+        Note
+        ----
+        As the Calendar is immutable, slices with two date bounds (e.g.
+        :code:`calendar[date1:date2]`) are cached: repeating the same slice
+        returns the same Calendar object without recomputing it. The cache keeps
+        the :code:`Calendar.SLICE_CACHE_SIZE` most recently used slices.
+
         Returns
         -------
         datetime.date
@@ -508,6 +520,21 @@ class Calendar:
             if the index is out of range
         """
         if isinstance(value, slice):
+            if (
+                isinstance(value.start, datetime.date)
+                and isinstance(value.stop, datetime.date)
+                and value.step is None
+            ):
+                key = (value.start, value.stop)
+                try:
+                    self.__slices__.move_to_end(key)
+                    return self.__slices__[key]
+                except KeyError:
+                    sliced = Calendar(self.__dates__.irange(value.start, value.stop))
+                    self.__slices__[key] = sliced
+                    if len(self.__slices__) > self.SLICE_CACHE_SIZE:
+                        self.__slices__.popitem(last=False)
+                    return sliced
             # maintain step component when translating date boundaries
             start, stop, step = value.start, value.stop, value.step
             if isinstance(start, datetime.date):

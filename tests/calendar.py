@@ -600,3 +600,39 @@ def test_snap_aliases():
     ]
     assert cdr.snap(ref, fallback="last") == cdr.snap(ref, fallback="previous")
     assert cdr.snap(ref, fallback="following") == cdr.snap(ref, fallback="next")
+
+
+def test_slice_cache(calendar):
+    start, stop = datetime.date(2016, 1, 1), datetime.date(2016, 12, 31)
+
+    # cached: same object returned for the same pair of dates
+    sliced = calendar[start:stop]
+    assert calendar[start:stop] is sliced
+
+    # same result as the uncached (index-based) slice
+    expected = calendar.dates[
+        calendar.__dates__.bisect_left(start) : calendar.__dates__.bisect_right(stop)
+    ]
+    assert sliced.dates == expected
+    assert calendar[start:stop] == calendar[start:None][:stop]
+
+    # inverted bounds still yield an empty calendar
+    assert len(calendar[stop:start]) == 0
+
+    # date-bounded slices keep their step
+    assert calendar[start:stop:2].dates == sliced.dates[::2]
+
+    # stepped slices and half-open slices are not cached
+    assert calendar[start:stop:2] is not calendar[start:stop:2]
+    assert calendar[start:] is not calendar[start:]
+
+
+def test_slice_cache_is_bounded(calendar, monkeypatch):
+    monkeypatch.setattr(dtwo.Calendar, "SLICE_CACHE_SIZE", 2)
+    a = calendar[datetime.date(2015, 1, 1) : datetime.date(2015, 6, 30)]
+    calendar[datetime.date(2016, 1, 1) : datetime.date(2016, 6, 30)]
+    calendar[datetime.date(2017, 1, 1) : datetime.date(2017, 6, 30)]
+
+    assert len(calendar.__slices__) == 2
+    # the least recently used slice was evicted and is recomputed
+    assert calendar[datetime.date(2015, 1, 1) : datetime.date(2015, 6, 30)] is not a
