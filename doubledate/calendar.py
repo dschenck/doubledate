@@ -52,6 +52,7 @@ class BD:
             - 'last' to fallback to the last date in the period when the n'th
               business day is not defined
             - 'raise' to raise an error if the n'th business day is not defined
+            - a callable, which receives the period's calendar and returns a date
 
         Parameters
         ----------
@@ -136,9 +137,7 @@ class Calendar:
         """
         Returns the hash of the Calendar.
         """
-        # convert to tuple so that the value depends on the dates, not an
-        # ephemeral generator object
-        return hash(tuple(self))
+        return hash(tuple(self.__dates__))
 
     @classmethod
     def create(
@@ -152,20 +151,20 @@ class Calendar:
         freq : str, int
             The calendar frequency; one of:
 
-            - :Code:`Y`   for yearly
-            - :Code:`M`   for monthly
-            - :Code:`W`   for weekly (or any dayised variant, e.g. :code:`W-MON`)
-            - :Code:`D`   for daily
-            - :Code:`B`   for daily except for Saturday and Sunday
-            - :Code:`H`   for hourly
-            - :Code:`MIN` for minutely
-            - :Code:`S`   for secondly
+            - :code:`Y`   for yearly
+            - :code:`M`   for monthly
+            - :code:`W`   for weekly (or any weekday variant, e.g. :code:`W-MON`)
+            - :code:`D`   for daily
+            - :code:`B`   for daily except for Saturday and Sunday
+            - :code:`H`   for hourly
+            - :code:`MIN` for minutely
+            - :code:`S`   for secondly
 
             or any :code:`dateutil.rrule` constant (e.g. :code:`dateutil.rrule.MONTHLY`)
 
         starting : datetime
             The starting date in the calendar.
-            Alias for :code:`dstart` in :code:`dateutil.rrule.rrule`.
+            Alias for :code:`dtstart` in :code:`dateutil.rrule.rrule`.
 
         ending : datetime
             The last date in the calendar.
@@ -174,12 +173,12 @@ class Calendar:
         rrule : str, dateutil.rrule.rrule
             A recurrence rule.
             If given a :code:`str`, this will be evaluated as a
-            :code:`dateutil.rrule.rrulestr` with the :code:`dstart`
+            :code:`dateutil.rrule.rrulestr` with the :code:`dtstart`
 
         dtype : None, type
             The datetime type (e.g. :code:`pd.Timestamp`).
             If None is provided, defaults to :code:`datetime.datetime`, which
-            is the default of the :dateutil.rrule` library.
+            is the default of the :code:`dateutil.rrule` library.
 
         **kwargs : dict
             additional arguments to pass to :code:`dateutil.rrule.rrule`
@@ -194,7 +193,7 @@ class Calendar:
             >>> dtwo.Calendar.create(
             ...     "D",
             ...     starting=dtwo.date(2023, 1, 1),
-            ...     until=dtwo.date(2023, 12, 31)
+            ...     ending=dtwo.date(2023, 12, 31)
             ... )
             <doubledate.calendar.Calendar at 0x17045b0f430>
 
@@ -202,7 +201,7 @@ class Calendar:
             >>> dtwo.Calendar.create(
             ...     "M",
             ...     starting=dtwo.date(2018, 1, 1),
-            ...     until=dtwo.date(2023, 12, 31)
+            ...     ending=dtwo.date(2023, 12, 31)
             ... )
             <doubledate.calendar.Calendar at 0x17045b0f430>
 
@@ -210,7 +209,7 @@ class Calendar:
             >>> dtwo.Calendar.create(
             ...     "M",
             ...     starting=dtwo.date(2018, 1, 1),
-            ...     until=dtwo.date(2023, 12, 31),
+            ...     ending=dtwo.date(2023, 12, 31),
             ...     byweekday=dtwo.MO
             ... )
             <doubledate.calendar.Calendar at 0x17045b0f430>
@@ -258,16 +257,20 @@ class Calendar:
             freq, kwargs["byweekday"] = "D", dateutil.rrule.weekdays[:-2]
 
         if freq in ["W-MON", "W-TUE", "W-WED", "W-THU", "W-FRI", "W-SAT", "W-SUN"]:
-            freq, kwargs["byweekday"] = "D", freq[-3:]
+            freq, kwargs["byweekday"] = "D", [freq[-3:]]
 
-        if "byweekday" in kwargs:
-            kwargs["byweekday"] = [weekdays.get(d, d) for d in kwargs["byweekday"]]
+        if kwargs.get("byweekday") is not None:
+            byweekday = kwargs["byweekday"]
+            if isinstance(byweekday, (str, int, dateutil.rrule.weekday)):
+                byweekday = [byweekday]
+            kwargs["byweekday"] = [weekdays.get(d, d) for d in byweekday]
 
         return cls.create(
             rrule=dateutil.rrule.rrule(
                 frequencies.get(freq, freq),
                 **{"dtstart": starting, "until": ending, **kwargs},
-            )
+            ),
+            dtype=dtype,
         )
 
     @classmethod
@@ -336,7 +339,7 @@ class Calendar:
 
         Raises
         ------
-        KeyError
+        IndexError
             if the calendar is empty
 
         See also
@@ -360,7 +363,7 @@ class Calendar:
 
         Raises
         ------
-        KeyError
+        IndexError
             if the calendar is empty
 
         See also
@@ -384,7 +387,7 @@ class Calendar:
 
         Raises
         ------
-        KeyError
+        IndexError
             if the calendar is empty
 
         See also
@@ -408,7 +411,7 @@ class Calendar:
 
         Raises
         ------
-        KeyError
+        IndexError
             if the calendar is empty
 
         See also
@@ -439,7 +442,7 @@ class Calendar:
         Returns
         -------
         int
-            Number of days in teh calendar
+            Number of days in the calendar
         """
         return len(self.__dates__)
 
@@ -501,7 +504,7 @@ class Calendar:
         ------
         TypeError
             if value is neither an integer nor a slice
-        KeyError
+        IndexError
             if the index is out of range
         """
         if isinstance(value, slice):
@@ -518,8 +521,8 @@ class Calendar:
         """
         Alias for union.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         other : iterable
             An iterable of datetime.date objects
 
@@ -542,7 +545,7 @@ class Calendar:
 
         Returns
         -------
-        Calendar
+        bool
         """
         try:
             for date in self:
@@ -623,7 +626,7 @@ class Calendar:
         Calendar
 
         Examples
-        -------
+        --------
         ::
 
             >>> import doubledate as dtwo
@@ -712,7 +715,7 @@ class Calendar:
         if func is not None:
             if not callable(func):
                 raise ValueError(
-                    "Filter accepts either a function, one or several named arguments"
+                    "Filter accepts either a function, or one or several named arguments"
                 )
             return Calendar([date for date in self if func(date)])
         if all(
@@ -828,7 +831,7 @@ class Calendar:
             - :code:`W-MON` for day of week (assumes week starts on Monday)
             - :code:`W-TUE` for day of week (assumes week starts on Tuesday)
             - :code:`W-WED` for day of week (assumes week starts on Wednesday)
-            - :code:`W-THU` for day of week (assumes week starts on Thursay)
+            - :code:`W-THU` for day of week (assumes week starts on Thursday)
             - :code:`W-FRI` for day of week (assumes week starts on Friday)
             - :code:`W-SAT` for day of week (assumes week starts on Saturday)
             - :code:`W-SUN` for day of week (assumes week starts on Sunday)
@@ -859,7 +862,7 @@ class Calendar:
         ----
         As the Calendar is immutable, the `datemap`
         is cached for efficiency. Repeatedly calling :code:`calendar.dayof("M")`
-        should be of complexity 1 after the first call.
+        should be of complexity O(1) after the first call.
 
 
         Example
@@ -881,10 +884,8 @@ class Calendar:
 
         Parameters
         ----------
-        frequency : str,
+        frequency : str
             the frequency at which to reset the counter
-        base : int
-            the index of the first day each frequency
 
         Returns
         -------
@@ -900,6 +901,11 @@ class Calendar:
         """
         Returns a :code:`datemap` mapping dates to the number of dates to the end of the
         given frequency.
+
+        Parameters
+        ----------
+        frequency : str
+            the frequency at which to reset the counter
 
         Returns
         -------
@@ -922,7 +928,7 @@ class Calendar:
         this : datetime.date
             the left-bound of the calendar
         that : datetime.date
-            the right-bound of the calenar
+            the right-bound of the calendar
         bounds : str, optional
             whether to include this or that in the count
             one of 'both', 'left' (default) or 'right' or None
@@ -949,7 +955,7 @@ class Calendar:
                 self.filter(lambda date: min(this, that) < date < max(this, that))
             )
         raise ValueError(
-            f"bounds should be one of 'both', 'left' or 'right', {bounds} given"
+            f"bounds should be one of 'both', 'left', 'right' or None, {bounds} given"
         )
 
     def offset(self, date: datetime.date, days: int) -> datetime.date:
@@ -965,7 +971,7 @@ class Calendar:
 
         Returns
         -------
-        offsetted : datetime.date
+        datetime.date
             the date in the calendar days-away from the given date
         """
         if isinstance(date, collections.abc.Iterable):
@@ -991,8 +997,9 @@ class Calendar:
             - :code:`W-MON`: to :code:`W-SUN` group week ending on a particular weekday
             - :code:`M`: group by month each year
             - :code:`Q`: group by quarter each year
+            - :code:`T`: group by trimester each year
             - :code:`H`: group by semester each year
-            - :code:`Y`: group by year each year
+            - :code:`Y`: group by year
 
         Parameters
         ----------
@@ -1020,7 +1027,7 @@ class Calendar:
         """
         if isinstance(grouper, str):
             if grouper == "W":
-                return self.groupby(lambda date: (date.year, date.isocalendar()[1]))
+                return self.groupby(lambda date: tuple(date.isocalendar()[:2]))
             elif grouper in [
                 "W-MON",
                 "W-TUE",
@@ -1035,12 +1042,14 @@ class Calendar:
                 return self.groupby(lambda date: (date.year, date.month))
             elif grouper == "Q":
                 return self.groupby(lambda date: (date.year, utils.quarter(date)))
+            elif grouper == "T":
+                return self.groupby(lambda date: (date.year, utils.trimester(date)))
             elif grouper == "H":
                 return self.groupby(lambda date: (date.year, date.month > 6))
             elif grouper == "Y":
                 return self.groupby(lambda date: date.year)
             raise ValueError(
-                f"Expected one of 'W', 'W-MON', 'W-TUE', ..., 'M', 'Q', 'H' or 'Y'; '{grouper}' given"
+                f"Expected one of 'W', 'W-MON', 'W-TUE', ..., 'M', 'Q', 'T', 'H' or 'Y'; '{grouper}' given"
             )
 
         if callable(grouper):
@@ -1102,18 +1111,18 @@ class Calendar:
 
         >>> from doubledate import BD
         >>> calendar = Calendar(dates)
-        >>> calendar.split(BD(10, "M"))
+        >>> calendar.split(BD(10, "M", base=1))
         <doubledate.Collection at 0x7fd0fa52c2e0>
 
         Split the calendar on the penultimate day each quarter
 
-        >>> calendar.split(BD(-2, "Y"))
+        >>> calendar.split(BD(-2, "Q"))
         <doubledate.Collection at 0x7fd0fa52c2e0>
 
         See also
         --------
         Calendar.groupby
-            Split the calendar on a criteria
+            Split the calendar on a criterion
         """
         if sum(0 if arg is None else 1 for arg in [on, starting, ending]) != 1:
             raise ValueError("Expected one of on, starting or ending")
@@ -1133,7 +1142,7 @@ class Calendar:
         for date in self:
             try:
                 calendars[splitdays.asof(date, side)].append(date)
-            except Exception:
+            except KeyError:
                 pass
 
         return Collection([Calendar(calendar) for calendar in calendars.values()])
@@ -1148,7 +1157,7 @@ class Calendar:
             the date from which to compute the first date strictly after in the calendar
         default : optional
             the default value if the given date is on or after the last date in the calendar
-            if no default value is given, it will raise an KeyError
+            if no default value is given, it will raise a KeyError
 
         Returns
         -------
@@ -1163,10 +1172,10 @@ class Calendar:
         if isinstance(date, collections.abc.Iterable):
             return [self.fa(d, default=default) for d in date]
 
-        if len(self) == 0 or date > self[-1]:
+        if len(self) == 0 or date >= self[-1]:
             if default == constants.RAISE:
                 raise KeyError(
-                    f"Out-of-range error: {date} is after last date in the calendar"
+                    f"Out-of-range error: {date} is on or after the last date in the calendar"
                 )
             return default
         return self[self.__dates__.bisect_right(date)]
@@ -1180,8 +1189,8 @@ class Calendar:
         date : datetime.date
             the lookup date
 
-        default: optional
-            default value if the given date is strictly before the first date in the calendar
+        default : optional
+            default value if the given date is on or before the first date in the calendar
 
         Returns
         -------
@@ -1198,10 +1207,10 @@ class Calendar:
         if isinstance(date, collections.abc.Iterable):
             return [self.lb(d, default=default) for d in date]
 
-        if len(self) == 0 or date < self[0]:
+        if len(self) == 0 or date <= self[0]:
             if default == constants.RAISE:
                 raise KeyError(
-                    f"Out-of-range error: {date} is before the first date in the calendar"
+                    f"Out-of-range error: {date} is on or before the first date in the calendar"
                 )
             return default
         return self[self.__dates__.bisect_left(date) - 1]
@@ -1219,7 +1228,7 @@ class Calendar:
             the lookup date
         side : 'left', 'right'
             direction to search if date is not in calendar
-        default: optional
+        default : optional
             default value if the given date is strictly before (after)
             the first (last) date in the calendar
 
@@ -1256,7 +1265,7 @@ class Calendar:
             datetime.date(2020, 4, 28)
 
             >>> calendar.asof(datetime.date(2020, 1, 1))
-            KeyError("Out-of-range error: 2020-01-01 is before first date in the calendar")
+            KeyError("Out-of-range error: 2020-01-01 is on or before the first date in the calendar")
 
             >>> calendar.asof(datetime.date(2020, 1, 1), default=None)
             None
@@ -1293,13 +1302,22 @@ class Calendar:
             other calendar
 
         fallback : str
-            one of 'drop', 'previous' (a.k.a. ffill), 'next' (a.k.a. bfill)
+            one of 'drop', 'previous' (a.k.a. 'ffill' or 'last'),
+            'next' (a.k.a. 'bfill' or 'following')
 
         Returns
         -------
         Calendar
         """
-        if fallback not in ["drop", "previous", "ffill", "next", "bfill"]:
+        if fallback not in [
+            "drop",
+            "last",
+            "previous",
+            "ffill",
+            "next",
+            "bfill",
+            "following",
+        ]:
             raise ValueError("fallback should be one of 'drop', 'previous' or 'next'")
         filtered, other = [], Calendar(other)
         for date in self:
@@ -1316,9 +1334,9 @@ class Calendar:
 
     def apply(self, func):
         """
-        Passes all the dates in the calendar to the function If all mapped values are
-        datetime.date objects, function returns a new calendar Else it returns a new
-        list.
+        Passes all the dates in the calendar to the function. If all mapped values are
+        datetime.date objects, the function returns a new calendar; else it returns a
+        new list.
 
         Parameters
         ----------
@@ -1339,7 +1357,7 @@ class Calendar:
 
     def som(self, date: datetime.date) -> datetime.date:
         """
-        Return the first open day of the month given the date.
+        Returns the first open day of the month given the date.
 
         Parameters
         ----------
@@ -1509,7 +1527,7 @@ class Calendar:
 
     def soy(self, date: datetime.date) -> datetime.date:
         """
-        Return the first open day of the year given the date.
+        Returns the first open day of the year given the date.
 
         Parameters
         ----------
@@ -1563,7 +1581,7 @@ class Collection:
     Collection of calendars.
 
     Collections are normally generated from splitting a Calendar in several periods
-    via resampling or grouping
+    via resampling or grouping.
 
     Example
     -------
@@ -1649,9 +1667,9 @@ class Collection:
         Allowed values for the onerror parameter:
             - 'skip' to skip periods where the n'th business day is not defined
             - 'first' to fallback to the first date in the period when the n'th
-               business day is not defined
+              business day is not defined
             - 'last' to fallback to the last date in the period when the n'th
-               business day is not defined
+              business day is not defined
             - 'raise' to raise an error if the n'th business day is not defined
 
         Parameters
@@ -1761,7 +1779,7 @@ class Collection:
                     dates.append(onerror(calendar))
                 else:
                     raise ValueError(
-                        "Expected onerror to be one of 'raise', 'first', 'last' or callable"
+                        "Expected onerror to be one of 'raise', 'skip', 'first', 'last' or a callable"
                     )
 
         for i, value in enumerate(dates):

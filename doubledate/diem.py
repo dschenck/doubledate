@@ -21,7 +21,7 @@ DAYCOUNTBYMONTH = {
 
 class diem:
     """
-    Abstract date without year (e.g. 17 June)
+    Abstract date without year (e.g. 17 June).
 
     Parameters
     ----------
@@ -83,9 +83,9 @@ class diem:
         If given, the `fold` argument overrides the fold attribute of the diem
 
         Examples
-        ----
+        --------
         >>> diem(2, 29).resolve(2020)
-        datetime.date(2020,2,29)
+        datetime.date(2020, 2, 29)
 
         >>> diem(2, 29).resolve(2021) # default fold is 'back'
         datetime.date(2021, 2, 28)
@@ -122,9 +122,9 @@ class diem:
 
     def __str__(self) -> str:
         """
-        Represent a diem in ISO 8601 format.
+        Represent a diem in ISO 8601 format (--MM-DD).
         """
-        return f"--{self.month}-{self.day}"
+        return f"--{self.month:02d}-{self.day:02d}"
 
     def __repr__(self) -> str:
         """
@@ -147,6 +147,12 @@ class diem:
         if not isinstance(other, diem):
             return True
         return (self.month, self.day, self.fold) != (other.month, other.day, other.fold)
+
+    def __hash__(self) -> int:
+        """
+        Return hash(self).
+        """
+        return hash((self.month, self.day, self.fold))
 
     def __lt__(self, other) -> bool:
         """
@@ -203,53 +209,41 @@ class diem:
         diem
             parsed input
 
-        Example
-        -------
+        Examples
+        --------
         >>> diem.parse("Jan")
-        doubledate.diem(1, 31)
+        doubledate.diem(1, 31, fold="back")
 
         >>> diem.parse("Feb")
-        doubledate.diem(2, 29)
+        doubledate.diem(2, 29, fold="back")
 
         >>> diem.parse("Jun-17")
-        doubledate.diem(6, 17)
+        doubledate.diem(6, 17, fold="back")
 
         >>> diem.parse(datetime.datetime(2020,4,28))
-        doubledate.diem(4, 28)
+        doubledate.diem(4, 28, fold="back")
         """
-        if isinstance(value, (datetime.date, datetime.datetime)):
+        if isinstance(value, datetime.date):
             return diem(value.month, value.day)
 
-        if value in constants.MONTHS:
-            return diem(
-                constants.MONTHS[value], DAYCOUNTBYMONTH[constants.MONTHS[value]]
-            )
-
         if isinstance(value, str):
-            if re.search(r"(?:--)\d{1,2}-\d{1,2}", value):
-                month, day = re.search(r"(?:--)(\d{1,2})-(\d{1,2})", value).groups()
+            if value.upper() in constants.MONTHS:
+                month = constants.MONTHS[value.upper()]
+                return diem(month, DAYCOUNTBYMONTH[month])
+
+            match = re.search(r"--(\d{1,2})-(\d{1,2})", value)
+            if match:
+                month, day = match.groups()
                 return diem(int(month), int(day))
 
-            if re.search(
+            match = re.search(
                 r"(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-?(\d{1,2})",
                 value,
                 re.IGNORECASE,
-            ):
-                match = re.search(
-                    r"(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-?(\d{1,2})",
-                    value,
-                    re.IGNORECASE,
-                ).groups()
-
-                month, day = (
-                    r"JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC".split("|").index(
-                        match[0].upper()
-                    )
-                    + 1,
-                    int(match[1]),
-                )
-
-                return diem(month, day)
+            )
+            if match:
+                month, day = match.groups()
+                return diem(constants.MONTHS[month.upper()], int(day))
 
         raise ValueError(f"Could not parse '{value}' ({type(value).__name__})")
 
@@ -258,7 +252,7 @@ class diem:
         Resolve the diem to the most recent date strictly before the given date.
 
         Parameters
-        ---------
+        ----------
         date : datetime.date
 
         Returns
@@ -282,7 +276,7 @@ class diem:
         Resolve the diem to the first date strictly after the given date.
 
         Parameters
-        ---------
+        ----------
         date : datetime.date
 
         Returns
@@ -300,7 +294,7 @@ class diem:
         Note
         ----
         If the diem is `29 Feb`, the `diem.fa` will resolve based
-        on the fold attribute (e.g. back to 28 Feb or forward to 29 Feb)
+        on the fold attribute (e.g. back to 28 Feb or forward to 1 Mar)
         """
         if (self.month, self.day) > (date.month, date.day):
             return self.resolve(date.year, dtype=type(date))
@@ -312,7 +306,7 @@ class diem:
 
         Parameters
         ----------
-        date: datetime.date
+        date : datetime.date
             the date from which to compute the target date
         side : 'left', 'right'
             whether to resolve to the most recent (left) or the first date after (right)

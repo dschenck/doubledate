@@ -4,7 +4,7 @@ import datetime
 from doubledate import diem
 
 
-def test_instanciation():
+def test_instantiation():
     ann = diem(3, 31)
     assert isinstance(ann, diem)
 
@@ -34,7 +34,8 @@ def test_out_of_range():
 
 def test_string_representation():
     day = diem(3, 31)
-    assert str(day) == "--3-31"
+    assert str(day) == "--03-31"
+    assert str(diem(12, 1)) == "--12-01"
 
 
 def test_representation():
@@ -118,7 +119,7 @@ def test_parsing():
     day = diem.parse("--03-04")
     assert day.month == 3 and day.day == 4
 
-    day == diem.parse("--3-4")
+    day = diem.parse("--3-4")
     assert day.month == 3 and day.day == 4
 
     day = diem.parse("Jan-31")
@@ -191,3 +192,14 @@ def test_asof():
 def test_replace():
     d = diem(3, 31).replace(month=4, day=30)
     assert d == diem(4, 30)
+
+
+def test_parsing_case_insensitive():
+    assert diem.parse("Jan") == diem(1, 31)
+    assert diem.parse("feb") == diem(2, 29)
+    assert diem.parse("jun-17") == diem(6, 17)
+
+
+def test_hash():
+    assert hash(diem(3, 31)) == hash(diem(3, 31))
+    assert len({diem(3, 31), diem(3, 31), diem(4, 1)}) == 2
