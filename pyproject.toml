@@ -39,8 +39,10 @@ classifiers = [
 [tool.setuptools.package-data]
 doubledate = ["py.typed"]
 
-[project.optional-dependencies]
+# development tools (PEP 735); installed by default by `uv sync`,
+# or with `pip install --group dev` (pip >= 25.1)
+[dependency-groups]
 dev = [
-    "ruff==0.15.5",
-    "pytest"
+    "pytest",
+    "ruff==0.15.5",  # keep in sync with .github/workflows/testing-and-linting.yml
 ]

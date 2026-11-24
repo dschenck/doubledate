@@ -13,3 +13,19 @@ doubledate, yet another datetime library, exposes a set of 20+ utility functions
 ## Documentation
 
 Documentation is hosted on [read the docs](https://doubledate.readthedocs.io/en/latest/)
+
+## Development
+
+With [uv](https://docs.astral.sh/uv/), `uv sync` creates a `.venv` with doubledate (editable) and the development tools pinned in `uv.lock`:
+
+```console
+$ uv sync
+$ uv run pytest
+$ uv run ruff check && uv run ruff format --check
+```
+
+With pip (25.1 or later), install the `dev` dependency group instead:
+
+```console
+$ python -m pip install -e . --group dev
+```
