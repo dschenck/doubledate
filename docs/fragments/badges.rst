@@ -1,4 +1,4 @@
-.. image:: https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue
+.. image:: https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13%20%7C%203.14%20%7C%203.15-blue
    :target: https://pypi.org/project/doubledate
 
 .. image:: https://github.com/dschenck/doubledate/actions/workflows/testing-and-linting.yml/badge.svg?branch=main

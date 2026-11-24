@@ -1,4 +1,4 @@
-[![pythons](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://pypi.org/project/doubledate)
+[![pythons](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13%20%7C%203.14%20%7C%203.15-blue)](https://pypi.org/project/doubledate)
 [![build](https://github.com/dschenck/doubledate/actions/workflows/testing-and-linting.yml/badge.svg?branch=main)](https://github.com/dschenck/doubledate/actions/workflows/testing-and-linting.yml)
 [![PyPI version](https://badge.fury.io/py/doubledate.svg)](https://badge.fury.io/py/doubledate)
 [![Documentation Status](https://readthedocs.org/projects/doubledate/badge/?version=latest)](https://doubledate.readthedocs.io/en/latest/?badge=latest)
@@ -13,3 +13,19 @@ doubledate, yet another datetime library, exposes a set of 20+ utility functions
 ## Documentation
 
 Documentation is hosted on [read the docs](https://doubledate.readthedocs.io/en/latest/)
+
+## Development
+
+With [uv](https://docs.astral.sh/uv/), `uv sync` creates a `.venv` with doubledate (editable) and the development tools pinned in `uv.lock`:
+
+```console
+$ uv sync
+$ uv run pytest
+$ uv run ruff check && uv run ruff format --check
+```
+
+With pip (25.1 or later), install the `dev` dependency group instead:
+
+```console
+$ python -m pip install -e . --group dev
+```

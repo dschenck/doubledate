@@ -21,6 +21,7 @@ Using doubledate is also easy: simply wrap a list of dates in a :code:`doubledat
     
     >>> dates = [...] # list of dates
     >>> calendar = dtwo.Calendar(dates)
+    >>> calendar
     <doubledate.calendar.Calendar at 0x17...>
 
 More realistically:
@@ -32,7 +33,7 @@ More realistically:
 
     # load from database, file...
     >>> holidays = [
-    ...     datetime.date(2024,  1,  2),  # New Years Day
+    ...     datetime.date(2024,  1,  1),  # New Year's Day
     ...     datetime.date(2024,  1, 15),  # Martin Luther King, Jr. Day
     ...     datetime.date(2024,  2, 19),  # Washington's Birthday
     ...     datetime.date(2024,  3, 29),  # Good Friday
@@ -45,33 +46,36 @@ More realistically:
     ... ]
 
     # create a Calendar
-    # here, every weekday (Mon-Fri), excluding holidys
+    # here, every weekday (Mon-Fri), excluding holidays
+    # (dtype converts dateutil's datetimes to dates, to match the holidays)
     >>> calendar = dtwo.Calendar.create(
-    ...     "B", 
-    ...     starting=dtwo.date(2024, 1, 1), 
-    ...     ending=dtwo.date(2024, 12, 31)
+    ...     "B",
+    ...     starting=dtwo.date(2024, 1, 1),
+    ...     ending=dtwo.date(2024, 12, 31),
+    ...     dtype=lambda d: d.date()
     ... ).difference(holidays)
 
     # first business day each month
     >>> calendar.resample("M").first()
     <doubledate.calendar.Calendar at 0x17...>
 
-    # last business day each week ending on Wednesday 
+    # last business day each week ending on Wednesday
     >>> calendar.resample("W-WED").nth(-1)
     <doubledate.calendar.Calendar at 0x17...>
 
-    # first or last business day dependending on month
+    # first or last business day depending on month
     >>> calendar.resample("M").apply(
     ...    lambda month: month[0] if month.start.month < 7 else month[-1]
     ... ).combine()
     <doubledate.calendar.Calendar at 0x17...>
 
-    # most recent date as of given date
-    >>> calendar.asof(datetime.date(2024, 9, 4), side="left")
+    # most recent date as of given date (2 Sep 2024 is Labor Day)
+    >>> calendar.asof(datetime.date(2024, 9, 2), side="left")
     datetime.date(2024, 8, 30)
 
-The library also comes with an additional suite of utility functions
-:: 
+The library also comes with an additional suite of utility functions:
+
+::
 
     >>> import datetime
     >>> import doubledate as dtwo

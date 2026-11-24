@@ -16,7 +16,7 @@ def test_yesterday():
 
 
 def test_last_weekday_default():
-    # last returns a date stricty before today; can never be today
+    # last returns a date strictly before today; can never be today
     assert dtwo.today() > dtwo.last("MON")
     assert dtwo.today() - datetime.timedelta(days=7) <= dtwo.last("MON")
 
@@ -80,8 +80,8 @@ def test_end_of_week(date, offset, weekday, eow):
 
 
 def test_end_of_week_defaults():
-    assert dtwo.eow(datetime.date(2020, 1, 4)), datetime.date(2020, 1, 5)
-    assert dtwo.eow(datetime.date(2020, 1, 4), 0), datetime.date(2020, 1, 5)
+    assert dtwo.eow(datetime.date(2020, 1, 4)) == datetime.date(2020, 1, 5)
+    assert dtwo.eow(datetime.date(2020, 1, 4), 0) == datetime.date(2020, 1, 5)
 
 
 @pytest.mark.parametrize(
@@ -102,7 +102,7 @@ def test_start_of_week(date, offset, weekday, sow):
 
 def test_start_of_week_defaults():
     assert dtwo.sow(datetime.date(2020, 1, 4)) == datetime.date(2019, 12, 30)
-    assert dtwo.sow(datetime.date(2020, 1, 4), 0), datetime.date(2019, 12, 30)
+    assert dtwo.sow(datetime.date(2020, 1, 4), 0) == datetime.date(2019, 12, 30)
 
 
 @pytest.mark.parametrize(
@@ -279,7 +279,7 @@ def test_eoy(input_date, offset, expected_date):
         ("Y", datetime.date(2020, 2, 29), 0, 59),
     ],
 )
-def test_dayof(interval, input_date, expected_result, base):
+def test_dayof_single_date(interval, input_date, expected_result, base):
     result = dtwo.dayof(interval, input_date, base=base)
     assert result == expected_result
 
@@ -382,7 +382,7 @@ def test_offset_years_with_handler(years, handle, expected_date):
         ("YS", datetime.date(2020, 2, 29), 59),
     ],
 )
-def test_daysfrom_and_daysto(interval, input_date, expected_result):
+def test_daysfrom_single_date(interval, input_date, expected_result):
     result_from = dtwo.daysfrom(interval, input_date)
     assert result_from == expected_result
 
@@ -395,7 +395,7 @@ def test_daysfrom_and_daysto(interval, input_date, expected_result):
         ("YE", datetime.date(2020, 2, 29), 306),
     ],
 )
-def test_daysto(interval, input_date, expected_result):
+def test_daysto_single_date(interval, input_date, expected_result):
     result_to = dtwo.daysto(interval, input_date)
     assert result_to == expected_result
 
@@ -444,3 +444,25 @@ def test_daysfrom(calendar, frequency, date, target):
 )
 def test_daysto2(calendar, frequency, date, target):
     assert dtwo.daysto(frequency, calendar=calendar)[date] == target
+
+
+def test_offset_months_out_of_range():
+    assert dtwo.offset(datetime.date(2021, 1, 31), months=1) == datetime.date(
+        2021, 2, 28
+    )
+    assert dtwo.offset(
+        datetime.date(2021, 1, 31), months=1, handle=lambda eom, gap: gap
+    ) == datetime.date(2021, 3, 3)
+
+
+def test_offset_requires_one_argument():
+    with pytest.raises(ValueError):
+        dtwo.offset(datetime.date(2020, 1, 10))
+    with pytest.raises(ValueError):
+        dtwo.offset(datetime.date(2020, 1, 10), days=1, months=1)
+
+
+def test_last_accepts_integer_weekday():
+    assert dtwo.last(dtwo.MON, asof=datetime.date(2021, 12, 5)) == datetime.date(
+        2021, 11, 29
+    )

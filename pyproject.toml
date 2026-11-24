@@ -21,23 +21,28 @@ dependencies = [
     "python-dateutil",
     "sortedcontainers",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = { file = "LICENSE" }
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Typing :: Typed",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 
-[project.optional-dependencies]
+[tool.setuptools.package-data]
+doubledate = ["py.typed"]
+
+# development tools (PEP 735); installed by default by `uv sync`,
+# or with `pip install --group dev` (pip >= 25.1)
+[dependency-groups]
 dev = [
-    "ruff",
-    "pytest"
+    "pytest",
+    "ruff==0.15.5",  # keep in sync with .github/workflows/testing-and-linting.yml
 ]

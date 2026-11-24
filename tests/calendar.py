@@ -258,7 +258,7 @@ def test_asof(calendar):
     # a normal, open Monday
     assert calendar.asof(datetime.date(2019, 10, 21)) == datetime.date(2019, 10, 21)
 
-    # saturday 21/10/2019
+    # saturday 19/10/2019
     assert calendar.asof(datetime.date(2019, 10, 19)) == datetime.date(2019, 10, 18)
 
     # sunday 20/10/2019
@@ -502,3 +502,146 @@ def test_create():
         freq="D", starting=datetime.date(2020, 1, 1), ending=datetime.date(2023, 12, 31)
     )
     assert len(cdr) == 4 * 365 + 1
+
+
+def test_lb_fa_at_bounds():
+    cdr = dtwo.Calendar(
+        [
+            datetime.date(2019, 8, 15),
+            datetime.date(2019, 8, 16),
+            datetime.date(2019, 8, 19),
+        ]
+    )
+
+    # nothing strictly before the first date / strictly after the last date
+    with pytest.raises(KeyError):
+        cdr.lb(datetime.date(2019, 8, 15))
+    with pytest.raises(KeyError):
+        cdr.fa(datetime.date(2019, 8, 19))
+
+    assert cdr.lb(datetime.date(2019, 8, 15), default=None) is None
+    assert cdr.fa(datetime.date(2019, 8, 19), default=None) is None
+    assert cdr.asof(datetime.date(2019, 8, 20), side="right", default=None) is None
+
+
+def test_hash():
+    dates = [datetime.date(2022, 1, 17), datetime.date(2022, 2, 14)]
+    assert hash(dtwo.Calendar(dates)) == hash(dtwo.Calendar(list(reversed(dates))))
+    assert len({dtwo.Calendar(dates), dtwo.Calendar(dates)}) == 1
+
+
+def test_groupby_week_across_year_end():
+    cdr = dtwo.Calendar(
+        [datetime.date(2024, 1, 1) + datetime.timedelta(i) for i in range(370)]
+    )
+    # 2024-12-30 and 2024-12-31 belong to ISO week 1 of 2025
+    week = [group for group in cdr.groupby("W") if datetime.date(2024, 12, 31) in group]
+    assert week[0].dates == [
+        datetime.date(2024, 12, 30) + datetime.timedelta(i) for i in range(6)
+    ]
+    assert all(len(group) <= 7 for group in cdr.groupby("W"))
+
+
+def test_groupby_trimester(calendar):
+    assert (
+        len(
+            calendar[datetime.date(2018, 1, 1) : datetime.date(2018, 12, 31)].groupby(
+                "T"
+            )
+        )
+        == 3
+    )
+
+
+def test_create_weekday_frequencies():
+    cdr = dtwo.Calendar.create(
+        "W-MON",
+        starting=datetime.datetime(2023, 1, 1),
+        ending=datetime.datetime(2023, 1, 31),
+    )
+    assert len(cdr) == 5
+    assert all(d.weekday() == 0 for d in cdr)
+
+    # scalar byweekday: first Monday each month
+    cdr = dtwo.Calendar.create(
+        "M",
+        starting=datetime.datetime(2023, 1, 1),
+        ending=datetime.datetime(2023, 12, 31),
+        byweekday=dtwo.MON,
+        bysetpos=1,
+    )
+    assert len(cdr) == 12
+    assert cdr[0] == datetime.datetime(2023, 1, 2)
+
+    cdr = dtwo.Calendar.create(
+        "B",
+        starting=datetime.datetime(2023, 1, 1),
+        ending=datetime.datetime(2023, 1, 31),
+    )
+    assert len(cdr) == 22
+
+
+def test_create_dtype():
+    cdr = dtwo.Calendar.create(
+        "D",
+        starting=datetime.datetime(2023, 1, 1),
+        ending=datetime.datetime(2023, 1, 3),
+        dtype=lambda d: d.date(),
+    )
+    assert cdr.dates == [datetime.date(2023, 1, d) for d in (1, 2, 3)]
+
+
+def test_snap_aliases():
+    cdr = dtwo.Calendar([datetime.date(2019, 8, 15), datetime.date(2019, 8, 17)])
+    ref = [
+        datetime.date(2019, 8, 15),
+        datetime.date(2019, 8, 16),
+        datetime.date(2019, 8, 18),
+    ]
+    assert cdr.snap(ref, fallback="last") == cdr.snap(ref, fallback="previous")
+    assert cdr.snap(ref, fallback="following") == cdr.snap(ref, fallback="next")
+
+
+def test_slice_cache(calendar):
+    start, stop = datetime.date(2016, 1, 1), datetime.date(2016, 12, 31)
+
+    # cached: same object returned for the same pair of dates
+    sliced = calendar[start:stop]
+    assert calendar[start:stop] is sliced
+
+    # same result as the uncached (index-based) slice
+    expected = calendar.dates[
+        calendar.__dates__.bisect_left(start) : calendar.__dates__.bisect_right(stop)
+    ]
+    assert sliced.dates == expected
+    assert calendar[start:stop] == calendar[start:None][:stop]
+
+    # inverted bounds still yield an empty calendar
+    assert len(calendar[stop:start]) == 0
+
+    # date-bounded slices keep their step
+    assert calendar[start:stop:2].dates == sliced.dates[::2]
+
+    # stepped slices and half-open slices are not cached
+    assert calendar[start:stop:2] is not calendar[start:stop:2]
+    assert calendar[start:] is not calendar[start:]
+
+
+def test_slice_cache_is_bounded(calendar, monkeypatch):
+    monkeypatch.setattr(dtwo.Calendar, "SLICE_CACHE_SIZE", 2)
+    a = calendar[datetime.date(2015, 1, 1) : datetime.date(2015, 6, 30)]
+    calendar[datetime.date(2016, 1, 1) : datetime.date(2016, 6, 30)]
+    calendar[datetime.date(2017, 1, 1) : datetime.date(2017, 6, 30)]
+
+    assert len(calendar.__slices__) == 2
+    # the least recently used slice was evicted and is recomputed
+    assert calendar[datetime.date(2015, 1, 1) : datetime.date(2015, 6, 30)] is not a
+
+
+def test_create_rejects_unknown_frequency():
+    with pytest.raises(ValueError):
+        dtwo.Calendar.create(
+            "BOGUS",
+            starting=datetime.datetime(2023, 1, 1),
+            ending=datetime.datetime(2023, 1, 31),
+        )
