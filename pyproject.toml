@@ -41,6 +41,6 @@ doubledate = ["py.typed"]
 
 [project.optional-dependencies]
 dev = [
-    "ruff",
+    "ruff==0.15.5",
     "pytest"
 ]
