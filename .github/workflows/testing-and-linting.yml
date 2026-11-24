@@ -30,7 +30,7 @@ jobs:
           python -m pip install flake8 pytest coverage ruff==0.15.5
           python -m ruff check 
           python -m ruff format --check
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python -m pip install -e .
       - name: Test with pytest
         run: |
           coverage run -m pytest tests/*
