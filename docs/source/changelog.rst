@@ -2,7 +2,7 @@ Changelog
 ========================
 The source code is hosted and maintained on `github <https://github.com/dschenck/doubledate/>`_.
 
-Version 0.1.0 (unreleased)
+Version 0.1.0 (24 November 2026)
 ----------------------------------
 Breaking changes
 
