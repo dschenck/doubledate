@@ -1,12 +1,21 @@
 import calendar
 import datetime
 import dateutil.parser
-import numbers
+from typing import Any, Generic, TypeAlias, TypeVar, cast, overload
+from collections.abc import Callable, Iterable, Iterator, Mapping
 
 import doubledate.constants as constants
 
+#: any date type (e.g. ``datetime.date``, ``datetime.datetime``); functions
+#: annotated with ``D`` return the same type as the date they are given
+D = TypeVar("D", bound=datetime.date)
+V = TypeVar("V")
 
-def today():
+#: a weekday, either as a string (e.g. ``"MON"``) or an integer (Monday is 0)
+Weekday: TypeAlias = str | int
+
+
+def today() -> datetime.date:
     """
     Returns today's date as a :code:`datetime.date` object.
 
@@ -24,7 +33,7 @@ def today():
     return datetime.date.today()
 
 
-def tomorrow():
+def tomorrow() -> datetime.date:
     """
     Returns tomorrow's date as a :code:`datetime.date` object.
 
@@ -40,7 +49,7 @@ def tomorrow():
     return datetime.date.today() + datetime.timedelta(days=1)
 
 
-def yesterday():
+def yesterday() -> datetime.date:
     """
     Returns yesterday's date as a :code:`datetime.date` object.
 
@@ -56,7 +65,7 @@ def yesterday():
     return datetime.date.today() - datetime.timedelta(days=1)
 
 
-def now():
+def now() -> datetime.datetime:
     """
     Returns :code:`datetime.datetime.now()`
 
@@ -72,7 +81,7 @@ def now():
     return datetime.datetime.now()
 
 
-def semester(date, *, base=1):
+def semester(date: datetime.date, *, base: int = 1) -> int:
     """
     Returns the semester of the given date.
 
@@ -106,7 +115,7 @@ def semester(date, *, base=1):
     return (date.month - 1) // 6 + base
 
 
-def trimester(date, *, base=1):
+def trimester(date: datetime.date, *, base: int = 1) -> int:
     """
     Returns the trimester of the given date.
 
@@ -143,7 +152,7 @@ def trimester(date, *, base=1):
     return (date.month - 1) // 4 + base
 
 
-def quarter(date, *, base=1):
+def quarter(date: datetime.date, *, base: int = 1) -> int:
     """
     Returns the quarter of the given date.
 
@@ -177,7 +186,7 @@ def quarter(date, *, base=1):
     return (date.month - 1) // 3 + base
 
 
-def sow(date: datetime.date, offset: int = 0, weekday: str = "MON") -> datetime.date:
+def sow(date: D, offset: int = 0, weekday: Weekday = "MON") -> D:
     """
     Returns the start of the week, i.e. the first date on or before the given date whose
     weekday is equal to the weekday argument, and offset by a given number of weeks.
@@ -228,7 +237,7 @@ def sow(date: datetime.date, offset: int = 0, weekday: str = "MON") -> datetime.
     return date + datetime.timedelta(offset * 7 - ((date.weekday() - weekday) % 7))
 
 
-def next(weekday: str, *, asof=None) -> datetime.date:
+def next(weekday: Weekday, *, asof: datetime.date | None = None) -> datetime.date:
     """
     Returns the first weekday strictly after the :code:`asof` date (or today) for which
     the weekday is equal to the passed :code:`weekday` argument.
@@ -267,7 +276,7 @@ def next(weekday: str, *, asof=None) -> datetime.date:
     return sow(asof or today(), offset=1, weekday=weekday)
 
 
-def eow(date: datetime.date, offset: int = 0, weekday: str = "SUN") -> datetime.date:
+def eow(date: D, offset: int = 0, weekday: Weekday = "SUN") -> D:
     """
     Returns the end of the week, i.e. the first date on or after the given date whose
     weekday is equal to the :code:`weekday` argument, and offset by a given number
@@ -316,7 +325,7 @@ def eow(date: datetime.date, offset: int = 0, weekday: str = "SUN") -> datetime.
     return date + datetime.timedelta((weekday - date.weekday()) % 7 + offset * 7)
 
 
-def last(weekday: str, *, asof=None) -> datetime.date:
+def last(weekday: Weekday, *, asof: datetime.date | None = None) -> datetime.date:
     """
     Returns the most recent date strictly before today (or the :code:`asof` date) for
     which the weekday is equal to the passed :code:`weekday` argument.
@@ -356,7 +365,7 @@ def last(weekday: str, *, asof=None) -> datetime.date:
     return sow(asof, weekday=weekday)
 
 
-def som(date: datetime.date, offset: int = 0) -> datetime.date:
+def som(date: D, offset: int = 0) -> D:
     """
     Returns the start of the month for the given :code:`date`, then optionally offsets
     it by :code:`offset` months.
@@ -397,7 +406,7 @@ def som(date: datetime.date, offset: int = 0) -> datetime.date:
     )
 
 
-def eom(date: datetime.date, offset: int = 0) -> datetime.date:
+def eom(date: D, offset: int = 0) -> D:
     """
     Returns the last date of month for the given date, then optionally offsets it by
     :code:`offset` months.
@@ -442,7 +451,7 @@ def eom(date: datetime.date, offset: int = 0) -> datetime.date:
     return eom(som(date, offset))
 
 
-def soq(date: datetime.date, offset: int = 0) -> datetime.date:
+def soq(date: D, offset: int = 0) -> D:
     """
     Returns the first date of the quarter, i.e. one of 1 January, 1 April, 1 July or 1
     October, then optionally offsets it by :code:`offset` quarters.
@@ -471,7 +480,7 @@ def soq(date: datetime.date, offset: int = 0) -> datetime.date:
     return (eoq(date, offset) - datetime.timedelta(2 * 31 + 1)).replace(day=1)
 
 
-def eoq(date: datetime.date, offset: int = 0) -> datetime.date:
+def eoq(date: D, offset: int = 0) -> D:
     """
     Returns the end of the quarter, i.e. one of 31 March, 30 June, 30 September or 31
     December, then optionally offsets it by :code:`offset` quarters.
@@ -506,7 +515,7 @@ def eoq(date: datetime.date, offset: int = 0) -> datetime.date:
     )
 
 
-def eot(date: datetime.date, offset: int = 0) -> datetime.date:
+def eot(date: D, offset: int = 0) -> D:
     """
     Returns the end of the calendar trimester, i.e. one of 30 April, 31 August or 31
     December, then optionally offsets it by :code:`offset` trimesters.
@@ -541,7 +550,7 @@ def eot(date: datetime.date, offset: int = 0) -> datetime.date:
     )
 
 
-def sot(date: datetime.date, offset: int = 0) -> datetime.date:
+def sot(date: D, offset: int = 0) -> D:
     """
     Returns the first date of the calendar trimester, i.e. one of 1 January, 1 May or 1
     September, then optionally offsets it by :code:`offset` trimesters.
@@ -561,7 +570,7 @@ def sot(date: datetime.date, offset: int = 0) -> datetime.date:
     return (eot(date, offset) - datetime.timedelta(3 * 31 + 1)).replace(day=1)
 
 
-def eos(date: datetime.date, offset: int = 0) -> datetime.date:
+def eos(date: D, offset: int = 0) -> D:
     """
     Returns the end of the calendar semester, i.e. one of 30 June or 31 December, then
     optionally offsets it by :code:`offset` semesters.
@@ -587,7 +596,7 @@ def eos(date: datetime.date, offset: int = 0) -> datetime.date:
     )
 
 
-def sos(date: datetime.date, offset: int = 0) -> datetime.date:
+def sos(date: D, offset: int = 0) -> D:
     """
     Returns the first date of the calendar semester, i.e. one of 1 January or 1 July,
     then optionally offsets it by :code:`offset` semesters.
@@ -607,7 +616,7 @@ def sos(date: datetime.date, offset: int = 0) -> datetime.date:
     return (eos(date, offset) - datetime.timedelta(5 * 31 + 1)).replace(day=1)
 
 
-def soy(date: datetime.date, offset: int = 0) -> datetime.date:
+def soy(date: D, offset: int = 0) -> D:
     """
     Returns the start of the year, i.e. the 1st January of the date's year, then
     optionally offset by :code:`offset` years.
@@ -627,7 +636,7 @@ def soy(date: datetime.date, offset: int = 0) -> datetime.date:
     return type(date)(date.year + offset, 1, 1)
 
 
-def eoy(date: datetime.date, offset: int = 0) -> datetime.date:
+def eoy(date: D, offset: int = 0) -> D:
     """
     Returns the end of the year, i.e. the 31 December of the date's year, then
     optionally offset by :code:`offset` years.
@@ -647,7 +656,7 @@ def eoy(date: datetime.date, offset: int = 0) -> datetime.date:
     return type(date)(date.year + offset, 12, 31)
 
 
-def floor(date: datetime.date, frequency: str) -> datetime.date:
+def floor(date: D, frequency: str) -> D:
     """
     Returns the first date of the frequency (e.g. quarter) for the date passed as first
     argument.
@@ -685,7 +694,7 @@ def floor(date: datetime.date, frequency: str) -> datetime.date:
     raise ValueError(f"Unrecognized frequency {frequency}")
 
 
-def ceil(date: datetime.date, frequency: str) -> datetime.date:
+def ceil(date: D, frequency: str) -> D:
     """
     Returns the end of the frequency (e.g. quarter) for the date passed as first
     argument.
@@ -723,7 +732,7 @@ def ceil(date: datetime.date, frequency: str) -> datetime.date:
     raise ValueError(f"Unrecognized frequency {frequency}")
 
 
-def isleap(year) -> bool:
+def isleap(year: int | datetime.date) -> bool:
     """
     Returns whether the given year (or date's year) is a leap-year.
 
@@ -746,7 +755,24 @@ def isleap(year) -> bool:
     return calendar.isleap(year)
 
 
-def parse(date, dayfirst=True, yearfirst=True, fuzzy=True):
+@overload
+def parse(
+    date: D, dayfirst: bool = ..., yearfirst: bool = ..., fuzzy: bool = ...
+) -> D: ...
+
+
+@overload
+def parse(
+    date: str, dayfirst: bool = ..., yearfirst: bool = ..., fuzzy: bool = ...
+) -> datetime.date: ...
+
+
+def parse(
+    date: str | datetime.date,
+    dayfirst: bool = True,
+    yearfirst: bool = True,
+    fuzzy: bool = True,
+) -> datetime.date:
     """
     Parses a string into a datetime.date object.
 
@@ -771,15 +797,15 @@ def parse(date, dayfirst=True, yearfirst=True, fuzzy=True):
 
 
 def offset(
-    date: datetime.date,
-    days: int = None,
-    weekdays: int = None,
-    weeks: int = None,
-    months: int = None,
-    years: int = None,
-    to: str = None,
-    handle=0,
-):
+    date: D,
+    days: int | None = None,
+    weekdays: int | None = None,
+    weeks: int | None = None,
+    months: int | None = None,
+    years: int | None = None,
+    to: str | None = None,
+    handle: int | Callable[[D, int], int] = 0,
+) -> D:
     """
     Returns the date offset either by a number of frequencies or else to the nearest
     frequency. Only one of the :code:`days`, :code:`weekdays`, :code:`weeks`,
@@ -933,7 +959,7 @@ def offset(
             return som(date, months).replace(day=date.day)
         except ValueError:
             # the target day does not exist in the target month (e.g. 31 Jan + 1m)
-            if isinstance(handle, numbers.Integral):
+            if not callable(handle):
                 return eom(date, months) + datetime.timedelta(handle)
             monthend = eom(date, months)
             return monthend + datetime.timedelta(
@@ -944,7 +970,7 @@ def offset(
             return date.replace(year=date.year + years)
         except ValueError:
             # 29 February + 1 year...  adjust with the handle
-            if isinstance(handle, numbers.Integral):
+            if not callable(handle):
                 return date.replace(
                     year=date.year + years, day=date.day - 1
                 ) + datetime.timedelta(handle)
@@ -972,9 +998,12 @@ def offset(
         raise ValueError(
             f"to should be one of MON,...,SUN or one of EOM,EOQ,EOS,EOY; received {to}"
         )
+    raise ValueError(  # unreachable: exactly one argument was checked above
+        "you must pass exactly one of days, weekdays, weeks, months, years or to"
+    )
 
 
-class datemap:
+class datemap(Generic[V]):
     """
     Read-only sorted dictionary mapping dates to values.
 
@@ -1000,20 +1029,28 @@ class datemap:
         2
     """
 
-    def __init__(self, mapping):
+    def __init__(self, mapping: Mapping[datetime.date, V]) -> None:
         self._mapping = {date: mapping[date] for date in sorted(mapping)}
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._mapping)
 
-    def __contains__(self, value):
+    def __contains__(self, value: object) -> bool:
         return value in self._mapping
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[V]:
         return iter(self._mapping.values())
 
-    def __getitem__(self, value):
-        if isinstance(value, (datetime.date, datetime.datetime)):
+    @overload
+    def __getitem__(self, value: datetime.date) -> V: ...
+
+    @overload
+    def __getitem__(self, value: Iterable[datetime.date]) -> list[V]: ...
+
+    def __getitem__(
+        self, value: datetime.date | Iterable[datetime.date]
+    ) -> V | list[V]:
+        if isinstance(value, datetime.date):
             try:
                 return self._mapping[value]
             except KeyError:
@@ -1021,7 +1058,43 @@ class datemap:
         return [self[v] for v in value]
 
 
-def dayof(frequency: str, dates=None, *, calendar=None, base=1):
+@overload
+def dayof(
+    frequency: str,
+    dates: datetime.date,
+    *,
+    calendar: Iterable[datetime.date] | None = ...,
+    base: int = ...,
+) -> int: ...
+
+
+@overload
+def dayof(
+    frequency: str,
+    dates: Iterable[datetime.date],
+    *,
+    calendar: Iterable[datetime.date] | None = ...,
+    base: int = ...,
+) -> list[int]: ...
+
+
+@overload
+def dayof(
+    frequency: str,
+    dates: None = ...,
+    *,
+    calendar: Iterable[datetime.date],
+    base: int = ...,
+) -> datemap[int]: ...
+
+
+def dayof(
+    frequency: str,
+    dates: None | datetime.date | Iterable[datetime.date] = None,
+    *,
+    calendar: Iterable[datetime.date] | None = None,
+    base: int = 1,
+) -> int | list[int] | datemap[int]:
     """
     Returns an efficient iterator that yields the position of each date in a given
     frequency.
@@ -1102,21 +1175,24 @@ def dayof(frequency: str, dates=None, *, calendar=None, base=1):
             f"received {frequency}"
         )
 
-    mapping = {}
+    mapping: dict[datetime.date, int] = {}
+    start: datetime.date  # set together with end
+    end: datetime.date | None = None  # end of the current period, if any
+    counter: int
 
     if calendar is None:
+        if dates is None:
+            raise ValueError("expected either dates or a calendar")
         if isinstance(dates, (datetime.date, datetime.datetime)):
             return (dates - floor(dates, frequency)).days + base
-        for i, date in enumerate(sorted(dates)):
-            if i == 0:
-                start, end = floor(date, frequency), ceil(date, frequency)
-            elif date > end:
+        for date in sorted(dates):
+            if end is None or date > end:
                 start, end = floor(date, frequency), ceil(date, frequency)
             mapping[date] = (date - start).days + base
         return datemap(mapping)[dates]
 
-    for i, date in enumerate(sorted(calendar)):
-        if i == 0 or date > end:
+    for date in sorted(calendar):
+        if end is None or date > end:
             end, counter = ceil(date, frequency), base
         else:
             counter += 1
@@ -1128,7 +1204,39 @@ def dayof(frequency: str, dates=None, *, calendar=None, base=1):
     return datemap(mapping)
 
 
-def daysfrom(frequency: str, dates=None, *, calendar=None):
+@overload
+def daysfrom(
+    frequency: str,
+    dates: datetime.date,
+    *,
+    calendar: Iterable[datetime.date] | None = ...,
+) -> int: ...
+
+
+@overload
+def daysfrom(
+    frequency: str,
+    dates: Iterable[datetime.date],
+    *,
+    calendar: Iterable[datetime.date] | None = ...,
+) -> list[int]: ...
+
+
+@overload
+def daysfrom(
+    frequency: str,
+    dates: None = ...,
+    *,
+    calendar: Iterable[datetime.date],
+) -> datemap[int]: ...
+
+
+def daysfrom(
+    frequency: str,
+    dates: None | datetime.date | Iterable[datetime.date] = None,
+    *,
+    calendar: Iterable[datetime.date] | None = None,
+) -> int | list[int] | datemap[int]:
     """
     Returns an efficient iterator that yields the number of days since the start of a
     given frequency.
@@ -1181,10 +1289,42 @@ def daysfrom(frequency: str, dates=None, *, calendar=None):
             f"expected frequency to be one of {','.join(FREQUENCIES)}, "
             f"received {frequency}"
         )
-    return dayof(FREQUENCIES[frequency], dates, calendar=calendar, base=0)
+    return dayof(FREQUENCIES[frequency], cast(Any, dates), calendar=calendar, base=0)
 
 
-def daysto(frequency: str, dates=None, *, calendar=None):
+@overload
+def daysto(
+    frequency: str,
+    dates: datetime.date,
+    *,
+    calendar: Iterable[datetime.date] | None = ...,
+) -> int: ...
+
+
+@overload
+def daysto(
+    frequency: str,
+    dates: Iterable[datetime.date],
+    *,
+    calendar: Iterable[datetime.date] | None = ...,
+) -> list[int]: ...
+
+
+@overload
+def daysto(
+    frequency: str,
+    dates: None = ...,
+    *,
+    calendar: Iterable[datetime.date],
+) -> datemap[int]: ...
+
+
+def daysto(
+    frequency: str,
+    dates: None | datetime.date | Iterable[datetime.date] = None,
+    *,
+    calendar: Iterable[datetime.date] | None = None,
+) -> int | list[int] | datemap[int]:
     """
     Returns an efficient iterator that yields the number of days to the end of a given
     frequency.
@@ -1233,18 +1373,18 @@ def daysto(frequency: str, dates=None, *, calendar=None):
             f"received {frequency}"
         )
 
-    mapping = {}
+    mapping: dict[datetime.date, int] = {}
+    start: datetime.date | None = None  # start of the current period, if any
+    end: datetime.date  # set together with start
+    counter: int
 
     if calendar is None:
+        if dates is None:
+            raise ValueError("expected either dates or a calendar")
         if isinstance(dates, (datetime.date, datetime.datetime)):
             return (ceil(dates, FREQUENCIES[frequency]) - dates).days
-        for i, date in enumerate(sorted(dates, reverse=True)):
-            if i == 0:
-                start, end = (
-                    floor(date, FREQUENCIES[frequency]),
-                    ceil(date, FREQUENCIES[frequency]),
-                )
-            elif date < start:
+        for date in sorted(dates, reverse=True):
+            if start is None or date < start:
                 start, end = (
                     floor(date, FREQUENCIES[frequency]),
                     ceil(date, FREQUENCIES[frequency]),
@@ -1252,8 +1392,8 @@ def daysto(frequency: str, dates=None, *, calendar=None):
             mapping[date] = (end - date).days
         return datemap(mapping)[dates]
 
-    for i, date in enumerate(sorted(calendar, reverse=True)):
-        if i == 0 or date < start:
+    for date in sorted(calendar, reverse=True):
+        if start is None or date < start:
             start, counter = floor(date, FREQUENCIES[frequency]), 0
         else:
             counter += 1
@@ -1265,7 +1405,7 @@ def daysto(frequency: str, dates=None, *, calendar=None):
     return datemap(mapping)
 
 
-def weekdayof(frequency: str, date=None, *, base=1):
+def weekdayof(frequency: str, date: datetime.date, *, base: int = 1) -> int:
     """
     Returns the occurrence of the date's weekday within the frequency (e.g. 3 for
     the third Monday of the month).

@@ -636,3 +636,12 @@ def test_slice_cache_is_bounded(calendar, monkeypatch):
     assert len(calendar.__slices__) == 2
     # the least recently used slice was evicted and is recomputed
     assert calendar[datetime.date(2015, 1, 1) : datetime.date(2015, 6, 30)] is not a
+
+
+def test_create_rejects_unknown_frequency():
+    with pytest.raises(ValueError):
+        dtwo.Calendar.create(
+            "BOGUS",
+            starting=datetime.datetime(2023, 1, 1),
+            ending=datetime.datetime(2023, 1, 31),
+        )

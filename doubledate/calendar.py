@@ -5,9 +5,17 @@ import datetime
 import numbers
 import dateutil.rrule
 import warnings
+from typing import Any, Self, TypeAlias, TypeVar, cast, overload
+from collections.abc import Callable, Hashable, Iterable, Iterator
 
 import doubledate.utils as utils
 import doubledate.constants as constants
+
+T = TypeVar("T")
+
+#: error-handling policy: one of 'raise', 'skip', 'drop', 'first', 'last', or a
+#: callable receiving the period's calendar and returning a date
+OnError: TypeAlias = str | Callable[["Calendar"], Any]
 
 
 class BD:
@@ -24,24 +32,24 @@ class BD:
         whether to consider the index 1-based or 0-based
     """
 
-    def __init__(self, index: int, frequency: str = "M", *, base: int = 0):
+    def __init__(self, index: int, frequency: str = "M", *, base: int = 0) -> None:
         if not isinstance(index, numbers.Integral):
             raise TypeError(
                 f"Expected index to be an integer, received {type(index).__name__}"
             )
-        self.index = index
+        self.index: int = index
 
         if frequency not in ["D", "W", "M", "Q", "H", "Y"]:
             raise ValueError(
                 f"Expected frequency to be one of 'D','W','M','Q','H' or 'Y', received '{frequency}'"
             )
-        self.frequency = frequency
+        self.frequency: str = frequency
 
         if base not in (0, 1):
             raise ValueError(f"Expected base to be one of 0 or 1, received {base}")
-        self.base = base
+        self.base: int = base
 
-    def resolve(self, calendar, onerror: str = "skip"):
+    def resolve(self, calendar: "Calendar", onerror: OnError = "skip") -> "Calendar":
         """
         Returns a new Calendar containing only the n'th business day each frequency.
 
@@ -133,12 +141,14 @@ class Calendar:
     #: maximum number of date-bounded slices cached per calendar (see __getitem__)
     SLICE_CACHE_SIZE = 256
 
-    def __init__(self, dates):
+    def __init__(self, dates: Iterable[datetime.date]) -> None:
         self.__dates__ = sortedcontainers.SortedSet(dates)
-        self.__datemaps__ = {}
-        self.__slices__ = collections.OrderedDict()
+        self.__datemaps__: dict[tuple[Any, ...], utils.datemap[int]] = {}
+        self.__slices__: collections.OrderedDict[
+            tuple[datetime.date, datetime.date], Calendar
+        ] = collections.OrderedDict()
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """
         Returns the hash of the Calendar.
         """
@@ -146,8 +156,15 @@ class Calendar:
 
     @classmethod
     def create(
-        cls, freq="D", *, starting=None, ending=None, rrule=None, dtype=None, **kwargs
-    ):
+        cls,
+        freq: str | int = "D",
+        *,
+        starting: datetime.date | None = None,
+        ending: datetime.date | None = None,
+        rrule: None | str | dateutil.rrule.rrule | dateutil.rrule.rruleset = None,
+        dtype: Callable[[datetime.datetime], datetime.date] | None = None,
+        **kwargs: Any,
+    ) -> Self:
         """
         Create a new calendar, wrapping :code:`dateutil.rrule`
 
@@ -270,16 +287,25 @@ class Calendar:
                 byweekday = [byweekday]
             kwargs["byweekday"] = [weekdays.get(d, d) for d in byweekday]
 
+        if isinstance(freq, str):
+            if freq not in frequencies:
+                raise ValueError(
+                    f"Expected freq to be one of {', '.join(frequencies)}, 'B', "
+                    f"'W-MON', ..., 'W-SUN' or a dateutil.rrule frequency; "
+                    f"received '{freq}'"
+                )
+            freq = frequencies[freq]
+
         return cls.create(
             rrule=dateutil.rrule.rrule(
-                frequencies.get(freq, freq),
+                cast(Any, freq),
                 **{"dtstart": starting, "until": ending, **kwargs},
             ),
             dtype=dtype,
         )
 
     @classmethod
-    def generate(cls, starting: datetime.date, ending: datetime.date):
+    def generate(cls, starting: datetime.date, ending: datetime.date) -> Self:
         """
         Creates a new calendar with all the calendar days between the starting and
         ending dates, with both bounds included.
@@ -429,7 +455,7 @@ class Calendar:
         return self.first
 
     @property
-    def dates(self) -> list:
+    def dates(self) -> list[datetime.date]:
         """
         Returns the dates as a list.
 
@@ -451,7 +477,7 @@ class Calendar:
         """
         return len(self.__dates__)
 
-    def __contains__(self, date) -> bool:
+    def __contains__(self, date: object) -> bool:
         """
         Returns True if the date is in the calendar.
 
@@ -462,7 +488,13 @@ class Calendar:
         """
         return date in self.__dates__
 
-    def index(self, date) -> int:
+    @overload
+    def index(self, date: datetime.date) -> int: ...
+
+    @overload
+    def index(self, date: Iterable[datetime.date]) -> list[int]: ...
+
+    def index(self, date: datetime.date | Iterable[datetime.date]) -> int | list[int]:
         """
         Returns the index (0-based position) of the date.
 
@@ -485,13 +517,19 @@ class Calendar:
             return [self.index(d) for d in date]
         return self.__dates__.index(date)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[datetime.date]:
         """
         Returns the iterator of the dates.
         """
         return iter(self.__dates__)
 
-    def __getitem__(self, value):
+    @overload
+    def __getitem__(self, value: int) -> datetime.date: ...
+
+    @overload
+    def __getitem__(self, value: slice) -> "Calendar": ...
+
+    def __getitem__(self, value: int | slice) -> "datetime.date | Calendar":
         """
         Retrieves a date by index or slices a calendar.
 
@@ -544,7 +582,7 @@ class Calendar:
             return Calendar(self.__dates__.__getitem__(slice(start, stop, step)))
         return self.__dates__.__getitem__(value)
 
-    def __add__(self, other):
+    def __add__(self, other: datetime.date | Iterable[datetime.date]) -> "Calendar":
         """
         Alias for union.
 
@@ -561,7 +599,7 @@ class Calendar:
             return self.union([other])
         return self.union(other)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """
         Returns True if all dates are in other, and all dates of other are in self.
 
@@ -574,6 +612,8 @@ class Calendar:
         -------
         bool
         """
+        if not isinstance(other, collections.abc.Iterable):
+            return False
         try:
             for date in self:
                 if date not in other:
@@ -585,7 +625,7 @@ class Calendar:
         except Exception:
             return False
 
-    def union(self, *others):
+    def union(self, *others: Iterable[datetime.date]) -> "Calendar":
         """
         Combines two calendars by combining dates in self and other.
 
@@ -600,7 +640,7 @@ class Calendar:
         """
         return Calendar(self.__dates__.union(*others))
 
-    def difference(self, *others):
+    def difference(self, *others: Iterable[datetime.date]) -> "Calendar":
         """
         Returns a calendar containing dates in self and not in others.
 
@@ -616,7 +656,7 @@ class Calendar:
         """
         return Calendar(self.__dates__.difference(*others))
 
-    def intersection(self, *others):
+    def intersection(self, *others: Iterable[datetime.date]) -> "Calendar":
         """
         Returns a calendar containing dates from self which are also in all the others.
 
@@ -631,7 +671,9 @@ class Calendar:
         """
         return Calendar(self.__dates__.intersection(*others))
 
-    def join(self, other, *, on=None) -> "Calendar":
+    def join(
+        self, other: Iterable[datetime.date], *, on: datetime.date | None = None
+    ) -> "Calendar":
         """
         Returns a new :code:`Calendar` containing dates in *self* (to and including the
         given :code:`on` date) and dates in other (from and including the :code:`on`
@@ -691,15 +733,15 @@ class Calendar:
 
     def filter(
         self,
-        func=None,
+        func: Callable[[datetime.date], Any] | None = None,
         *,
-        year: int = None,
-        semester: int = None,
-        quarter: int = None,
-        month: int = None,
-        week: int = None,
-        weekday: str = None,
-    ):
+        year: int | None = None,
+        semester: int | None = None,
+        quarter: int | None = None,
+        month: int | None = None,
+        week: int | None = None,
+        weekday: int | None = None,
+    ) -> "Calendar":
         """
         Filters and returns a new calendar from this calendar based on a criteria.
 
@@ -766,7 +808,7 @@ class Calendar:
             dates = list(filter(lambda date: date.weekday() == weekday, dates))
         return Calendar(dates)
 
-    def weekdays(self):
+    def weekdays(self) -> "Calendar":
         """
         Filters out all the weekends (Saturdays and Sundays)
 
@@ -784,7 +826,7 @@ class Calendar:
         """
         return self.filter(lambda date: date.weekday() not in [5, 6])
 
-    def weekends(self):
+    def weekends(self) -> "Calendar":
         """
         Filters out all the weekdays (Mon, ..., Fri)
 
@@ -802,7 +844,11 @@ class Calendar:
         """
         return self.filter(lambda date: date.weekday() in [5, 6])
 
-    def inverse(self, starting: datetime.date = None, ending: datetime.date = None):
+    def inverse(
+        self,
+        starting: datetime.date | None = None,
+        ending: datetime.date | None = None,
+    ) -> "Calendar":
         """
         Returns a calendar with all dates between :code:`starting` and :code:`ending`,
         excluding any days in this calendar.
@@ -849,7 +895,7 @@ class Calendar:
                 dates.append(starting + datetime.timedelta(i))
         return Calendar(dates)
 
-    def dayof(self, frequency: str, *, base: int = 1):
+    def dayof(self, frequency: str, *, base: int = 1) -> utils.datemap[int]:
         """
         Returns a :code:`datemap` mapping dates to their index in the given frequency.
 
@@ -904,7 +950,7 @@ class Calendar:
             )
         return self.__datemaps__[("dayof", frequency, base)]
 
-    def daysfrom(self, frequency: str):
+    def daysfrom(self, frequency: str) -> utils.datemap[int]:
         """
         Returns a :code:`datemap` mapping dates to the number of dates since the start
         of the given frequency.
@@ -924,7 +970,7 @@ class Calendar:
             )
         return self.__datemaps__[("daysfrom", frequency)]
 
-    def daysto(self, frequency: str):
+    def daysto(self, frequency: str) -> utils.datemap[int]:
         """
         Returns a :code:`datemap` mapping dates to the number of dates to the end of the
         given frequency.
@@ -945,7 +991,7 @@ class Calendar:
         return self.__datemaps__[("daysto", frequency)]
 
     def daysbetween(
-        self, this: datetime.date, that: datetime.date, bounds: str = "left"
+        self, this: datetime.date, that: datetime.date, bounds: str | None = "left"
     ) -> int:
         """
         Returns the number of open days between two dates.
@@ -985,7 +1031,17 @@ class Calendar:
             f"bounds should be one of 'both', 'left', 'right' or None, {bounds} given"
         )
 
-    def offset(self, date: datetime.date, days: int) -> datetime.date:
+    @overload
+    def offset(self, date: datetime.date, days: int) -> datetime.date: ...
+
+    @overload
+    def offset(
+        self, date: Iterable[datetime.date], days: int
+    ) -> list[datetime.date]: ...
+
+    def offset(
+        self, date: datetime.date | Iterable[datetime.date], days: int
+    ) -> datetime.date | list[datetime.date]:
         """
         Returns the date in the calendar offset by n days.
 
@@ -1011,7 +1067,10 @@ class Calendar:
             raise IndexError("Out of bounds")
         return self[self.index(date) + days]
 
-    def groupby(self, grouper):
+    def groupby(
+        self,
+        grouper: str | Callable[[datetime.date], Hashable] | Iterable[Hashable],
+    ) -> "Collection":
         """
         Group dates by the grouper parameter.
 
@@ -1064,7 +1123,8 @@ class Calendar:
                 "W-SAT",
                 "W-SUN",
             ]:
-                return self.groupby(lambda date: utils.eow(date, weekday=grouper[-3:]))
+                weekday = grouper[-3:]
+                return self.groupby(lambda date: utils.eow(date, weekday=weekday))
             elif grouper == "M":
                 return self.groupby(lambda date: (date.year, date.month))
             elif grouper == "Q":
@@ -1086,6 +1146,7 @@ class Calendar:
             return Collection([Calendar(dates) for dates in calendars.values()])
 
         if isinstance(grouper, collections.abc.Iterable):
+            grouper = list(grouper)
             if len(grouper) != len(self):
                 raise ValueError(
                     f"Expected grouper length ({len(grouper)}) to be equal to the length of the calling calendar ({len(self)})"
@@ -1098,7 +1159,10 @@ class Calendar:
 
         raise ValueError(f"Expected string, iterable or function, received '{grouper}'")
 
-    def resample(self, grouper):
+    def resample(
+        self,
+        grouper: str | Callable[[datetime.date], Hashable] | Iterable[Hashable],
+    ) -> "Collection":
         """
         Alias for :class:`doubledate.Calendar.groupby`
         """
@@ -1106,11 +1170,11 @@ class Calendar:
 
     def split(
         self,
-        on=None,
+        on: BD | None = None,
         side: str = "left",
-        starting: datetime.date = None,
-        ending: datetime.date = None,
-    ):
+        starting: BD | None = None,
+        ending: BD | None = None,
+    ) -> "Collection":
         """
         Splits the calendar at the given business day, assuming that the passed index is
         the first (or last) date of each period.
@@ -1174,7 +1238,25 @@ class Calendar:
 
         return Collection([Calendar(calendar) for calendar in calendars.values()])
 
-    def fa(self, date: datetime.date, default=constants.RAISE) -> datetime.date:
+    @overload
+    def fa(self, date: datetime.date) -> datetime.date: ...
+
+    @overload
+    def fa(self, date: datetime.date, default: T) -> datetime.date | T: ...
+
+    @overload
+    def fa(self, date: Iterable[datetime.date]) -> list[datetime.date]: ...
+
+    @overload
+    def fa(
+        self, date: Iterable[datetime.date], default: T
+    ) -> list[datetime.date | T]: ...
+
+    def fa(
+        self,
+        date: datetime.date | Iterable[datetime.date],
+        default: Any = constants.RAISE,
+    ) -> Any:
         """
         Returns the first date strictly after ("first-after", or "fa")
 
@@ -1207,7 +1289,25 @@ class Calendar:
             return default
         return self[self.__dates__.bisect_right(date)]
 
-    def lb(self, date: datetime.date, default=constants.RAISE) -> datetime.date:
+    @overload
+    def lb(self, date: datetime.date) -> datetime.date: ...
+
+    @overload
+    def lb(self, date: datetime.date, default: T) -> datetime.date | T: ...
+
+    @overload
+    def lb(self, date: Iterable[datetime.date]) -> list[datetime.date]: ...
+
+    @overload
+    def lb(
+        self, date: Iterable[datetime.date], default: T
+    ) -> list[datetime.date | T]: ...
+
+    def lb(
+        self,
+        date: datetime.date | Iterable[datetime.date],
+        default: Any = constants.RAISE,
+    ) -> Any:
         """
         Returns the most recent date strictly before ("last-before", or "lb")
 
@@ -1242,9 +1342,38 @@ class Calendar:
             return default
         return self[self.__dates__.bisect_left(date) - 1]
 
+    @overload
+    def asof(self, date: datetime.date, side: str = ...) -> datetime.date: ...
+
+    @overload
+    def asof(self, date: datetime.date, side: str, default: T) -> datetime.date | T: ...
+
+    @overload
     def asof(
-        self, date: datetime.date, side: str = "left", default=constants.RAISE
-    ) -> datetime.date:
+        self, date: datetime.date, side: str = ..., *, default: T
+    ) -> datetime.date | T: ...
+
+    @overload
+    def asof(
+        self, date: Iterable[datetime.date], side: str = ...
+    ) -> list[datetime.date]: ...
+
+    @overload
+    def asof(
+        self, date: Iterable[datetime.date], side: str, default: T
+    ) -> list[datetime.date | T]: ...
+
+    @overload
+    def asof(
+        self, date: Iterable[datetime.date], side: str = ..., *, default: T
+    ) -> list[datetime.date | T]: ...
+
+    def asof(
+        self,
+        date: datetime.date | Iterable[datetime.date],
+        side: str = "left",
+        default: Any = constants.RAISE,
+    ) -> Any:
         """
         Returns the date if the date is in the calendar, or the last (first) date before
         (after) that.
@@ -1315,7 +1444,9 @@ class Calendar:
             return self.fa(date, default=default)
         raise ValueError(f"side should be one of 'left' or 'right', {side} given")
 
-    def snap(self, other, fallback="drop") -> "Calendar":
+    def snap(
+        self, other: Iterable[datetime.date], fallback: str = "drop"
+    ) -> "Calendar":
         """
         Combines this calendar with other, such as:
 
@@ -1359,7 +1490,13 @@ class Calendar:
                     filtered.append(other.fa(date))
         return Calendar(filtered)
 
-    def apply(self, func):
+    @overload
+    def apply(self, func: Callable[[datetime.date], datetime.date]) -> "Calendar": ...
+
+    @overload
+    def apply(self, func: Callable[[datetime.date], T]) -> "Calendar | list[T]": ...
+
+    def apply(self, func: Callable[[datetime.date], Any]) -> "Calendar | list[Any]":
         """
         Passes all the dates in the calendar to the function. If all mapped values are
         datetime.date objects, the function returns a new calendar; else it returns a
@@ -1590,7 +1727,7 @@ class Calendar:
             return self[i - 1]
         return self[i]
 
-    def pipe(self, callable):
+    def pipe(self, callable: Callable[["Calendar"], T]) -> T:
         """
         Returns the result from the callable on self.
 
@@ -1638,18 +1775,19 @@ class Collection:
         <doubledate.Calendar>
     """
 
-    def __init__(self, calendars):
+    def __init__(self, calendars: Iterable[Calendar]) -> None:
         """
         Parameters
         ----------
         calendars : iterable
             list of Calendar instances
         """
+        calendars = list(calendars)
         if not all([isinstance(calendar, Calendar) for calendar in calendars]):
             raise TypeError("Expected a list of calendar objects")
-        self.calendars = list(calendars)
+        self.calendars: list[Calendar] = calendars
 
-    def first(self, onerror=constants.RAISE) -> Calendar:
+    def first(self, onerror: OnError = constants.RAISE) -> Calendar:
         """
         Returns a calendar with the first date each period in the collection.
 
@@ -1668,7 +1806,7 @@ class Collection:
         """
         return self.apply(lambda period: period[0], onerror=onerror).combine()
 
-    def last(self, onerror=constants.RAISE) -> Calendar:
+    def last(self, onerror: OnError = constants.RAISE) -> Calendar:
         """
         Returns a calendar with the last date each period in the collection.
 
@@ -1687,7 +1825,13 @@ class Collection:
         """
         return self.apply(lambda period: period[-1], onerror=onerror).combine()
 
-    def nth(self, index, *, base=0, onerror=constants.RAISE) -> Calendar:
+    def nth(
+        self,
+        index: int | slice,
+        *,
+        base: int = 0,
+        onerror: OnError = constants.RAISE,
+    ) -> Calendar:
         """
         Returns a calendar with the nth date each period from the collection.
 
@@ -1725,7 +1869,13 @@ class Collection:
             lambda period: period[index - base], onerror=onerror
         ).combine()
 
-    def __getitem__(self, value) -> Calendar:
+    @overload
+    def __getitem__(self, value: int) -> Calendar: ...
+
+    @overload
+    def __getitem__(self, value: slice) -> list[Calendar]: ...
+
+    def __getitem__(self, value: int | slice) -> Calendar | list[Calendar]:
         """
         Get calendar by index.
 
@@ -1735,7 +1885,7 @@ class Collection:
         """
         return self.calendars[value]
 
-    def index(self, value) -> int:
+    def index(self, value: datetime.date | Calendar) -> int:
         """
         Returns the 0-based index of the calendar, or 0-based index of the calendar
         containing the date.
@@ -1757,7 +1907,7 @@ class Collection:
             f"Expected value to be datetime.date or Calendar, received {type(value).__name__}"
         )
 
-    def __contains__(self, value) -> bool:
+    def __contains__(self, value: object) -> bool:
         """
         Returns True if one of the calendars contains the given date.
 
@@ -1778,7 +1928,9 @@ class Collection:
             f"Expected value to be datetime.date or Calendar, received {type(value).__name__}"
         )
 
-    def apply(self, func, onerror=constants.RAISE) -> "Collection":
+    def apply(
+        self, func: Callable[[Calendar], Any], onerror: OnError = constants.RAISE
+    ) -> "Collection":
         """
         Applies a function to each calendar.
 
@@ -1833,7 +1985,7 @@ class Collection:
         """
         return Calendar([]).union(*self.calendars)
 
-    def filter(self, func) -> "Collection":
+    def filter(self, func: Callable[[Calendar], Any]) -> "Collection":
         """
         Filters out calendars from the collection.
 
@@ -1850,7 +2002,7 @@ class Collection:
             raise ValueError("Expected func to be a callable function")
         return Collection([cal for cal in self.calendars if func(cal)])
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         Returns the number of calendars.
 
@@ -1860,7 +2012,7 @@ class Collection:
         """
         return len(self.calendars)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Calendar]:
         """
         Iterate over each calendar in the collection.
         """
