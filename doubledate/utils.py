@@ -24,7 +24,7 @@ def today() -> datetime.date:
     datetime.date
         today's date
 
-    See also
+    See Also
     --------
     tomorrow : compute tomorrow's date
     yesterday : compute yesterday's date
@@ -42,7 +42,7 @@ def tomorrow() -> datetime.date:
     datetime.date
         tomorrow's date
 
-    See also
+    See Also
     --------
     today, yesterday, now
     """
@@ -58,7 +58,7 @@ def yesterday() -> datetime.date:
     datetime.date
         yesterday's date
 
-    See also
+    See Also
     --------
     today, tomorrow, now
     """
@@ -74,7 +74,7 @@ def now() -> datetime.datetime:
     datetime.datetime
         current datetime
 
-    See also
+    See Also
     --------
     today, tomorrow, yesterday
     """
@@ -108,7 +108,7 @@ def semester(date: datetime.date, *, base: int = 1) -> int:
     >>> semester(datetime.date(2020, 1, 10), base=0)
     0
 
-    See also
+    See Also
     --------
     trimester, quarter
     """
@@ -145,7 +145,7 @@ def trimester(date: datetime.date, *, base: int = 1) -> int:
     >>> trimester(datetime.date(2020, 9, 10))
     3
 
-    See also
+    See Also
     --------
     semester, quarter
     """
@@ -179,7 +179,7 @@ def quarter(date: datetime.date, *, base: int = 1) -> int:
     >>> quarter(datetime.date(2020, 1, 10), base=0)
     0
 
-    See also
+    See Also
     --------
     semester, trimester
     """
@@ -224,7 +224,7 @@ def sow(date: D, offset: int = 0, weekday: Weekday = "MON") -> D:
     >>> sow(today, weekday="THU")
     datetime.date(2020, 1, 9) #last Thursday
 
-    See also
+    See Also
     --------
     eow : compute end of week
     som : compute start of month
@@ -268,7 +268,7 @@ def next(weekday: Weekday, *, asof: datetime.date | None = None) -> datetime.dat
     >>> next("MON", asof=datetime.date(2020,1,15))
     datetime.date(2020, 1, 20)
 
-    See also
+    See Also
     --------
     sow : compute start of week
     last : compute last weekday (e.g. Monday)
@@ -316,7 +316,7 @@ def eow(date: D, offset: int = 0, weekday: Weekday = "SUN") -> D:
     >>> eow(today, weekday="THU", offset=-1)
     datetime.date(2020, 1, 9) #most recent Thursday strictly before today
 
-    See also
+    See Also
     --------
     sow : compute start of week
     """
@@ -395,7 +395,7 @@ def som(date: D, offset: int = 0) -> D:
     >>> som(today, -1)
     datetime.date(2019, 12, 1) #start of the previous month
 
-    See also
+    See Also
     --------
     eom : compute the end of the month
     """
@@ -424,8 +424,8 @@ def eom(date: D, offset: int = 0) -> D:
     :code:`datetime.date`
         The end of the month
 
-    Note
-    ----
+    Notes
+    -----
     This function emulates Excel's EOMONTH function
 
     Examples
@@ -440,7 +440,7 @@ def eom(date: D, offset: int = 0) -> D:
     >>> eom(today, -1)
     datetime.date(2019, 12, 31) #end of previous month
 
-    See also
+    See Also
     --------
     som : compute the start of the month
     """

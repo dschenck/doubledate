@@ -36,8 +36,8 @@ class diem:
     fold : 'back', 'forward'
         how to treat 29 Feb
 
-    Note
-    ----
+    Notes
+    -----
     The fold argument determines how to resolve 29 February
     for years which are not leap years
     """
@@ -100,8 +100,8 @@ class diem:
         date
             an instance of the dtype with the (year, month, day)
 
-        Note
-        ----
+        Notes
+        -----
         If given, the `fold` argument overrides the fold attribute of the diem
 
         Examples
@@ -149,13 +149,13 @@ class diem:
 
     def __repr__(self) -> str:
         """
-        Return repr(self)
+        Returns repr(self).
         """
         return f'doubledate.diem({self.month}, {self.day}, fold="{self.fold}")'
 
     def __eq__(self, other: object) -> bool:
         """
-        Return self == other.
+        Returns self == other.
         """
         if not isinstance(other, diem):
             return False
@@ -163,7 +163,7 @@ class diem:
 
     def __ne__(self, other: object) -> bool:
         """
-        Return self != other.
+        Returns self != other.
         """
         if not isinstance(other, diem):
             return True
@@ -171,13 +171,13 @@ class diem:
 
     def __hash__(self) -> int:
         """
-        Return hash(self).
+        Returns hash(self).
         """
         return hash((self.month, self.day, self.fold))
 
     def __lt__(self, other: object) -> bool:
         """
-        Return self < other.
+        Returns self < other.
         """
         if not isinstance(other, diem):
             raise TypeError(
@@ -187,7 +187,7 @@ class diem:
 
     def __le__(self, other: object) -> bool:
         """
-        Return self <= other.
+        Returns self <= other.
         """
         if not isinstance(other, diem):
             raise TypeError(
@@ -197,7 +197,7 @@ class diem:
 
     def __gt__(self, other: object) -> bool:
         """
-        Return self > other.
+        Returns self > other.
         """
         if not isinstance(other, diem):
             raise TypeError(
@@ -207,7 +207,7 @@ class diem:
 
     def __ge__(self, other: object) -> bool:
         """
-        Return self >= other.
+        Returns self >= other.
         """
         if not isinstance(other, diem):
             raise TypeError(
@@ -312,8 +312,8 @@ class diem:
         >>> diem(3, 31).fa(datetime.date(2020, 6, 1))
         datetime.date(2021, 3, 31)
 
-        Note
-        ----
+        Notes
+        -----
         If the diem is `29 Feb`, the `diem.fa` will resolve based
         on the fold attribute (e.g. back to 28 Feb or forward to 1 Mar)
         """
@@ -354,7 +354,7 @@ class diem:
         fold: str | None = None,
     ) -> "diem":
         """
-        Return a copy of the diem, partially replacing some of the attributes.
+        Returns a copy of the diem, partially replacing some of the attributes.
 
         Parameters
         ----------

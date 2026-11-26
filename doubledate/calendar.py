@@ -108,8 +108,8 @@ class Calendar:
     dates : iterable
         list of datetime objects
 
-    Example
-    -------
+    Examples
+    --------
 
     .. code-block::
 
@@ -129,8 +129,8 @@ class Calendar:
         >>> dtwo.Calendar(holidays)
         <doubledate.calendar.Calendar object at 0x7fd0fa4cfa60>
 
-    Note
-    ----
+    Notes
+    -----
     For performance, the dates are not type-checked: passing objects other than
     :code:`datetime.date` (or subclasses) is unsupported and may fail later, or
     produce unexpected results. Mixing :code:`datetime.date` and
@@ -323,8 +323,8 @@ class Calendar:
         Calendar
             the calendar
 
-        Example
-        -------
+        Examples
+        --------
 
         .. code-block::
 
@@ -374,7 +374,7 @@ class Calendar:
         IndexError
             if the calendar is empty
 
-        See also
+        See Also
         --------
         Calendar.first
             Returns the first date in the calendar
@@ -398,7 +398,7 @@ class Calendar:
         IndexError
             if the calendar is empty
 
-        See also
+        See Also
         --------
         Calendar.start
             Returns the first date in the calendar
@@ -422,7 +422,7 @@ class Calendar:
         IndexError
             if the calendar is empty
 
-        See also
+        See Also
         --------
         Calendar.start
             alias
@@ -446,7 +446,7 @@ class Calendar:
         IndexError
             if the calendar is empty
 
-        See also
+        See Also
         --------
         Calendar.first
             alias
@@ -537,8 +537,8 @@ class Calendar:
         If `value` is a slice, the start and stop values can be
         either integers or datetime.date objects.
 
-        Note
-        ----
+        Notes
+        -----
         As the Calendar is immutable, slices with two date bounds (e.g.
         :code:`calendar[date1:date2]`) are cached: repeating the same slice
         returns the same Calendar object without recomputing it. The cache keeps
@@ -772,8 +772,8 @@ class Calendar:
         -------
         Calendar
 
-        Example
-        -------
+        Examples
+        --------
         Filter dates from 3Q 2020
         >>> calendar = Calendar(dates) #assume dates is a list of dates
         >>> calendar.filter(year=2020, quarter=3)
@@ -818,7 +818,7 @@ class Calendar:
         Calendar
             Calendar excluding any weekends (Sat and Sun)
 
-        See also
+        See Also
         --------
         Calendar.weekends
             Filter out all the weekdays
@@ -836,7 +836,7 @@ class Calendar:
         Calendar
             Calendar excluding any weekdays (Mon, ..., Fri)
 
-        See also
+        See Also
         --------
         Calendar.weekdays
             Filter out all the weekends
@@ -866,8 +866,8 @@ class Calendar:
         Calendar
             Inverse of this calendar
 
-        Example
-        -------
+        Examples
+        --------
         Compute the open weekdays in 2022 from a list of holidays
 
         >>> import datetime
@@ -928,19 +928,16 @@ class Calendar:
         datemap
             The datemap
 
-        Note
-        ----
-        The default base is 1
+        Notes
+        -----
+        The default base is 1.
 
-        Note
-        ----
         As the Calendar is immutable, the `datemap`
         is cached for efficiency. Repeatedly calling :code:`calendar.dayof("M")`
         should be of complexity O(1) after the first call.
 
-
-        Example
-        -------
+        Examples
+        --------
         >>> calendar = Calendar(dates)
         >>> calendar.dayof("M")[datetime.date(2021,1,3)]
         1
@@ -1098,8 +1095,8 @@ class Calendar:
         :class:`doubledate.calendar.Collection`
             Collection of calendars
 
-        Example
-        -------
+        Examples
+        --------
         Group dates by month
 
         >>> calendar = Calendar(dates)
@@ -1207,8 +1204,8 @@ class Calendar:
             The collection of calendars each starting or ending
             on the given business day
 
-        Example
-        -------
+        Examples
+        --------
         Split the calendar on the 10th business day each month
 
         >>> from doubledate import BD
@@ -1221,7 +1218,7 @@ class Calendar:
         >>> calendar.split(BD(-2, "Q"))
         <doubledate.calendar.Collection object at 0x7fd0fa52c2e0>
 
-        See also
+        See Also
         --------
         Calendar.groupby
             Split the calendar on a criterion
@@ -1284,10 +1281,10 @@ class Calendar:
         datetime.date
             The first date strictly after the given date
 
-        See also
+        See Also
         --------
         Calendar.lb
-            Return the last date before
+            Returns the last date before
         """
         if isinstance(date, collections.abc.Iterable):
             return [self.fa(d, default=default) for d in date]
@@ -1335,7 +1332,7 @@ class Calendar:
         datetime.date
             the most recent date strictly before date
 
-        See also
+        See Also
         --------
         Calendar.fa
             Returns the first date after
@@ -1410,8 +1407,8 @@ class Calendar:
             if date is before (after) the first (last) date
             in the calendar, and no default is provided
 
-        Example
-        -------
+        Examples
+        --------
 
         .. code-block::
 
@@ -1437,7 +1434,7 @@ class Calendar:
             >>> calendar.asof(datetime.date(2020, 1, 1), default=None)
             None
 
-        See also
+        See Also
         --------
         Calendar.lb
             last date strictly before
@@ -1551,7 +1548,7 @@ class Calendar:
 
     def eom(self, date: datetime.date) -> datetime.date:
         """
-        Return the last open day of the month given the date.
+        Returns the last open day of the month given the date.
 
         Parameters
         ----------
@@ -1753,8 +1750,8 @@ class Calendar:
         object
             whatever the callable returns
 
-        Example
-        -------
+        Examples
+        --------
         >>> calendar = dtwo.Calendar([dtwo.date(2020, 1, 1), dtwo.date(2020, 1, 2)])
         >>> calendar.pipe(len)
         2
@@ -1769,8 +1766,8 @@ class Collection:
     Collections are normally generated from splitting a Calendar in several periods
     via resampling or grouping.
 
-    Example
-    -------
+    Examples
+    --------
     .. code-block::
 
         >>> import datetime
