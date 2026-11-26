@@ -1,8 +1,8 @@
 General functions
 =====================================
 
-doubledate comes with 20+ utility functions allowing to easily compute the start and end of various frequencies given a date.
-    
+doubledate comes with 20+ utility functions that make it easy to compute the start and end of various frequencies given a date.
+
 
 .. toctree::
    :maxdepth: 3

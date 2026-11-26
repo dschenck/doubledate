@@ -24,7 +24,7 @@ def today() -> datetime.date:
     datetime.date
         today's date
 
-    See also
+    See Also
     --------
     tomorrow : compute tomorrow's date
     yesterday : compute yesterday's date
@@ -42,7 +42,7 @@ def tomorrow() -> datetime.date:
     datetime.date
         tomorrow's date
 
-    See also
+    See Also
     --------
     today, yesterday, now
     """
@@ -58,7 +58,7 @@ def yesterday() -> datetime.date:
     datetime.date
         yesterday's date
 
-    See also
+    See Also
     --------
     today, tomorrow, now
     """
@@ -74,7 +74,7 @@ def now() -> datetime.datetime:
     datetime.datetime
         current datetime
 
-    See also
+    See Also
     --------
     today, tomorrow, yesterday
     """
@@ -108,7 +108,7 @@ def semester(date: datetime.date, *, base: int = 1) -> int:
     >>> semester(datetime.date(2020, 1, 10), base=0)
     0
 
-    See also
+    See Also
     --------
     trimester, quarter
     """
@@ -145,7 +145,7 @@ def trimester(date: datetime.date, *, base: int = 1) -> int:
     >>> trimester(datetime.date(2020, 9, 10))
     3
 
-    See also
+    See Also
     --------
     semester, quarter
     """
@@ -179,7 +179,7 @@ def quarter(date: datetime.date, *, base: int = 1) -> int:
     >>> quarter(datetime.date(2020, 1, 10), base=0)
     0
 
-    See also
+    See Also
     --------
     semester, trimester
     """
@@ -224,7 +224,7 @@ def sow(date: D, offset: int = 0, weekday: Weekday = "MON") -> D:
     >>> sow(today, weekday="THU")
     datetime.date(2020, 1, 9) #last Thursday
 
-    See also
+    See Also
     --------
     eow : compute end of week
     som : compute start of month
@@ -268,7 +268,7 @@ def next(weekday: Weekday, *, asof: datetime.date | None = None) -> datetime.dat
     >>> next("MON", asof=datetime.date(2020,1,15))
     datetime.date(2020, 1, 20)
 
-    See also
+    See Also
     --------
     sow : compute start of week
     last : compute last weekday (e.g. Monday)
@@ -316,7 +316,7 @@ def eow(date: D, offset: int = 0, weekday: Weekday = "SUN") -> D:
     >>> eow(today, weekday="THU", offset=-1)
     datetime.date(2020, 1, 9) #most recent Thursday strictly before today
 
-    See also
+    See Also
     --------
     sow : compute start of week
     """
@@ -395,7 +395,7 @@ def som(date: D, offset: int = 0) -> D:
     >>> som(today, -1)
     datetime.date(2019, 12, 1) #start of the previous month
 
-    See also
+    See Also
     --------
     eom : compute the end of the month
     """
@@ -424,8 +424,8 @@ def eom(date: D, offset: int = 0) -> D:
     :code:`datetime.date`
         The end of the month
 
-    Note
-    ----
+    Notes
+    -----
     This function emulates Excel's EOMONTH function
 
     Examples
@@ -440,7 +440,7 @@ def eom(date: D, offset: int = 0) -> D:
     >>> eom(today, -1)
     datetime.date(2019, 12, 31) #end of previous month
 
-    See also
+    See Also
     --------
     som : compute the start of the month
     """
@@ -1007,6 +1007,9 @@ class datemap(Generic[V]):
     """
     Read-only sorted dictionary mapping dates to values.
 
+    Unlike a :code:`dict`, iterating over a :code:`datemap` yields its values (in date
+    order), not its keys.
+
     Examples
     --------
     .. code-block::
@@ -1096,8 +1099,8 @@ def dayof(
     base: int = 1,
 ) -> int | list[int] | datemap[int]:
     """
-    Returns an efficient iterator that yields the position of each date in a given
-    frequency.
+    Returns the position of each date within a given frequency (e.g. 3 for the third
+    day of the month).
 
     Parameters
     ----------
@@ -1129,13 +1132,13 @@ def dayof(
         >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
         >>> for date, position in zip(dates, dayof("M", calendar=dates)):
         ...     print(date, position)
-        2020-01-02, 1
-        2020-01-03, 2
+        2020-01-02 1
+        2020-01-03 2
         ...
-        2020-02-29,27
-        2020-03-02,1
+        2020-02-29 27
+        2020-03-02 1
         ...
-        2020-03-30,27
+        2020-03-30 27
 
         >>> dayof("Q", calendar=dates)[datetime.date(2020,3,30)]
         82
@@ -1238,8 +1241,7 @@ def daysfrom(
     calendar: Iterable[datetime.date] | None = None,
 ) -> int | list[int] | datemap[int]:
     """
-    Returns an efficient iterator that yields the number of days since the start of a
-    given frequency.
+    Returns the number of days since the start of a given frequency.
 
     Parameters
     ----------
@@ -1274,13 +1276,13 @@ def daysfrom(
         >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
         >>> for date, position in zip(dates, daysfrom("MS", calendar=dates)):
         ...     print(date, position)
-        2020-01-02, 0
-        2020-01-03, 1
+        2020-01-02 0
+        2020-01-03 1
         ...
-        2020-02-29,26
-        2020-03-02,0
+        2020-02-29 26
+        2020-03-02 0
         ...
-        2020-03-30,26
+        2020-03-30 26
     """
     FREQUENCIES = {"YS": "Y", "HS": "H", "TS": "T", "QS": "Q", "MS": "M", "WS": "W"}
 
@@ -1326,8 +1328,7 @@ def daysto(
     calendar: Iterable[datetime.date] | None = None,
 ) -> int | list[int] | datemap[int]:
     """
-    Returns an efficient iterator that yields the number of days to the end of a given
-    frequency.
+    Returns the number of days to the end of a given frequency.
 
     Parameters
     ----------
@@ -1350,13 +1351,13 @@ def daysto(
         >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
         >>> for date, position in zip(dates, daysto("ME", calendar=dates)):
         ...     print(date, position)
-        2020-01-02, 27
-        2020-01-03, 26
+        2020-01-02 27
+        2020-01-03 26
         ...
-        2020-02-29,0
-        2020-03-02,26
+        2020-02-29 0
+        2020-03-02 26
         ...
-        2020-03-30,0
+        2020-03-30 0
 
     Notes
     -----
