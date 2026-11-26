@@ -1007,6 +1007,9 @@ class datemap(Generic[V]):
     """
     Read-only sorted dictionary mapping dates to values.
 
+    Unlike a :code:`dict`, iterating over a :code:`datemap` yields its values (in date
+    order), not its keys.
+
     Examples
     --------
     .. code-block::
@@ -1096,8 +1099,8 @@ def dayof(
     base: int = 1,
 ) -> int | list[int] | datemap[int]:
     """
-    Returns an efficient iterator that yields the position of each date in a given
-    frequency.
+    Returns the position of each date within a given frequency (e.g. 3 for the third
+    day of the month).
 
     Parameters
     ----------
@@ -1129,13 +1132,13 @@ def dayof(
         >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
         >>> for date, position in zip(dates, dayof("M", calendar=dates)):
         ...     print(date, position)
-        2020-01-02, 1
-        2020-01-03, 2
+        2020-01-02 1
+        2020-01-03 2
         ...
-        2020-02-29,27
-        2020-03-02,1
+        2020-02-29 27
+        2020-03-02 1
         ...
-        2020-03-30,27
+        2020-03-30 27
 
         >>> dayof("Q", calendar=dates)[datetime.date(2020,3,30)]
         82
@@ -1238,8 +1241,7 @@ def daysfrom(
     calendar: Iterable[datetime.date] | None = None,
 ) -> int | list[int] | datemap[int]:
     """
-    Returns an efficient iterator that yields the number of days since the start of a
-    given frequency.
+    Returns the number of days since the start of a given frequency.
 
     Parameters
     ----------
@@ -1274,13 +1276,13 @@ def daysfrom(
         >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
         >>> for date, position in zip(dates, daysfrom("MS", calendar=dates)):
         ...     print(date, position)
-        2020-01-02, 0
-        2020-01-03, 1
+        2020-01-02 0
+        2020-01-03 1
         ...
-        2020-02-29,26
-        2020-03-02,0
+        2020-02-29 26
+        2020-03-02 0
         ...
-        2020-03-30,26
+        2020-03-30 26
     """
     FREQUENCIES = {"YS": "Y", "HS": "H", "TS": "T", "QS": "Q", "MS": "M", "WS": "W"}
 
@@ -1326,8 +1328,7 @@ def daysto(
     calendar: Iterable[datetime.date] | None = None,
 ) -> int | list[int] | datemap[int]:
     """
-    Returns an efficient iterator that yields the number of days to the end of a given
-    frequency.
+    Returns the number of days to the end of a given frequency.
 
     Parameters
     ----------
@@ -1350,13 +1351,13 @@ def daysto(
         >>> dates = [datetime.date(2020,1,1) + datetime.timedelta(i) for i in range(90) if i % 12 != 0]
         >>> for date, position in zip(dates, daysto("ME", calendar=dates)):
         ...     print(date, position)
-        2020-01-02, 27
-        2020-01-03, 26
+        2020-01-02 27
+        2020-01-03 26
         ...
-        2020-02-29,0
-        2020-03-02,26
+        2020-02-29 0
+        2020-03-02 26
         ...
-        2020-03-30,0
+        2020-03-30 0
 
     Notes
     -----

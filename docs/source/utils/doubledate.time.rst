@@ -5,5 +5,5 @@ Alias for :code:`datetime.time`
 
 .. note::
 
-    This allows to import :code:`doubledate as datetime`, if you so wish.
+    This lets you write :code:`import doubledate as datetime`, if you so wish.
     

@@ -34,6 +34,7 @@ Calendar
    doubledate.Calendar.last.rst
    doubledate.Calendar.lb.rst
    doubledate.Calendar.offset.rst
+   doubledate.Calendar.pipe.rst
    doubledate.Calendar.resample.rst
    doubledate.Calendar.snap.rst
    doubledate.Calendar.som.rst

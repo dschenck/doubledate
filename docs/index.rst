@@ -6,7 +6,8 @@ doubledate
 
 Installation
 -------------------------------------
-**doubledate** is written in pure Python. Installing doubledate is simple with pip: 
+**doubledate** is written in pure Python and requires Python 3.11 or later. Installing doubledate is simple with pip:
+
 ::
 
     $ pip install doubledate
@@ -22,7 +23,7 @@ Using doubledate is also easy: simply wrap a list of dates in a :code:`doubledat
     >>> dates = [...] # list of dates
     >>> calendar = dtwo.Calendar(dates)
     >>> calendar
-    <doubledate.calendar.Calendar at 0x17...>
+    <doubledate.calendar.Calendar object at 0x17...>
 
 More realistically:
 
@@ -57,17 +58,17 @@ More realistically:
 
     # first business day each month
     >>> calendar.resample("M").first()
-    <doubledate.calendar.Calendar at 0x17...>
+    <doubledate.calendar.Calendar object at 0x17...>
 
     # last business day each week ending on Wednesday
     >>> calendar.resample("W-WED").nth(-1)
-    <doubledate.calendar.Calendar at 0x17...>
+    <doubledate.calendar.Calendar object at 0x17...>
 
     # first or last business day depending on month
     >>> calendar.resample("M").apply(
     ...    lambda month: month[0] if month.start.month < 7 else month[-1]
     ... ).combine()
-    <doubledate.calendar.Calendar at 0x17...>
+    <doubledate.calendar.Calendar object at 0x17...>
 
     # most recent date as of given date (2 Sep 2024 is Labor Day)
     >>> calendar.asof(datetime.date(2024, 9, 2), side="left")
@@ -92,10 +93,10 @@ The library also comes with an additional suite of utility functions:
     datetime.date(2020, 6, 22) #Wednesday + 3 weekdays is Monday
 
     >>> dtwo.offset(datetime.datetime(2020, 3, 31), months=-1)
-    datetime.datetime(2020, 2, 29) #2020 is a leap year
+    datetime.datetime(2020, 2, 29, 0, 0) #2020 is a leap year
 
     >>> dtwo.offset(datetime.datetime(2020, 3, 31), months=1, handle=lambda eom, gap: 1)
-    datetime.datetime(2020, 5, 1) #handle function returned 1... i.e. eom + 1 day
+    datetime.datetime(2020, 5, 1, 0, 0) #handle function returned 1... i.e. eom + 1 day
 
 
 .. toctree::
@@ -107,6 +108,7 @@ The library also comes with an additional suite of utility functions:
    source/Calendar/doubledate.Calendar
    source/diem/doubledate.diem
    source/BD/doubledate.BD
+   source/constants/doubledate.constants
    source/Collection/doubledate.Collection
    source/changelog
 

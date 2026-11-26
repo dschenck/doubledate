@@ -19,11 +19,13 @@ sys.path.insert(0, os.path.abspath("../"))
 # -- Project information -----------------------------------------------------
 
 project = "doubledate"
-copyright = "2023, David Schenck"
+copyright = "2019-2026, David Schenck"
 author = "David Schenck"
 
 # The full version, including alpha/beta/rc tags
-# release = "0.0.5"
+import doubledate  # noqa: E402
+
+release = doubledate.__version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -31,7 +33,16 @@ author = "David Schenck"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx_copybutton"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
+    "sphinx_copybutton",
+]
+
+# link standard-library types (e.g. datetime.date) to the Python documentation
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
+intersphinx_timeout = 30  # seconds; don't let a slow docs.python.org stall the build
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
